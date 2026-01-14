@@ -57,7 +57,7 @@ export async function GET(
           name: cached.name || staticStock.name,
           description: cached.description || '',
           sector: cached.sector || staticStock.sector,
-          industry: cached.industry || '',
+          industry: cached.industry || staticStock.industry || '',
           
           price: cached.price,
           change: cached.change,

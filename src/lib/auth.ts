@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 
 const ISSUER_URL = process.env.ISSUER_URL ?? "https://replit.com/oidc";
 const SESSION_COOKIE = "session_id";
+const STATE_COOKIE = "oauth_state";
 const SESSION_TTL = 7 * 24 * 60 * 60 * 1000;
 
 let oidcConfig: Awaited<ReturnType<typeof client.discovery>> | null = null;
@@ -80,24 +81,37 @@ export async function deleteSession(sessionId: string): Promise<void> {
   await db.delete(sessions).where(eq(sessions.sid, sessionId));
 }
 
-export function getLoginUrl(hostname: string): string {
-  const callbackUrl = `https://${hostname}/api/auth/callback`;
+function generateState(): string {
+  return crypto.randomUUID();
+}
+
+export function getLoginUrl(origin: string): { url: string; state: string } {
+  const state = generateState();
+  const callbackUrl = `${origin}/api/auth/callback`;
   const config = {
     client_id: process.env.REPL_ID!,
     redirect_uri: callbackUrl,
     response_type: "code",
     scope: "openid email profile",
+    state,
   };
   
-  return `${ISSUER_URL}/authorize?${new URLSearchParams(config).toString()}`;
+  return {
+    url: `${ISSUER_URL}/authorize?${new URLSearchParams(config).toString()}`,
+    state,
+  };
 }
 
-export async function handleCallback(code: string, hostname: string): Promise<{ sessionId: string; user: User }> {
-  const oidcConfig = await getOidcConfig();
-  const callbackUrl = `https://${hostname}/api/auth/callback`;
+export async function handleCallback(code: string, state: string, expectedState: string, origin: string): Promise<{ sessionId: string; user: User }> {
+  if (state !== expectedState) {
+    throw new Error("Invalid state parameter - possible CSRF attack");
+  }
   
-  const tokens = await client.authorizationCodeGrant(oidcConfig, new URL(`${callbackUrl}?code=${code}`), {
-    expectedState: undefined,
+  const oidcConfig = await getOidcConfig();
+  const callbackUrl = `${origin}/api/auth/callback`;
+  
+  const tokens = await client.authorizationCodeGrant(oidcConfig, new URL(`${callbackUrl}?code=${code}&state=${state}`), {
+    expectedState: state,
   });
   
   const claims = tokens.claims();
@@ -119,12 +133,16 @@ export async function handleCallback(code: string, hostname: string): Promise<{ 
   return { sessionId, user };
 }
 
-export async function getLogoutUrl(hostname: string): Promise<string> {
+export async function getLogoutUrl(origin: string): Promise<string> {
   const config = await getOidcConfig();
   return client.buildEndSessionUrl(config, {
     client_id: process.env.REPL_ID!,
-    post_logout_redirect_uri: `https://${hostname}`,
+    post_logout_redirect_uri: origin,
   }).href;
 }
 
-export { SESSION_COOKIE };
+export function isSecureOrigin(origin: string): boolean {
+  return origin.startsWith("https://");
+}
+
+export { SESSION_COOKIE, STATE_COOKIE };

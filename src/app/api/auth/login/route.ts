@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getLoginUrl } from "@/lib/auth";
+import { getLoginUrl, STATE_COOKIE, isSecureOrigin } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
-  const hostname = request.headers.get("host") || request.nextUrl.hostname;
-  const loginUrl = getLoginUrl(hostname);
-  return NextResponse.redirect(loginUrl);
+  const origin = request.nextUrl.origin;
+  const { url, state } = getLoginUrl(origin);
+  
+  const response = NextResponse.redirect(url);
+  response.cookies.set(STATE_COOKIE, state, {
+    httpOnly: true,
+    secure: isSecureOrigin(origin),
+    sameSite: "lax",
+    maxAge: 10 * 60,
+    path: "/",
+  });
+  
+  return response;
 }

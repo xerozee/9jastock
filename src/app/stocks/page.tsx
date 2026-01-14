@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useMemo, Suspense } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Search, Filter, ArrowUpDown } from 'lucide-react';
+import { Search, Filter, ArrowUpDown, RefreshCw, Wifi } from 'lucide-react';
 import StockTable from '@/components/StockTable';
 import { nigerianStocks, getAllSectors } from '@/lib/stockData';
+import { Stock } from '@/types/stock';
 
 type SortOption = 'name' | 'price' | 'change' | 'volume' | 'marketCap' | 'gainers' | 'losers';
 
@@ -16,13 +17,41 @@ function StocksContent() {
   const [selectedSector, setSelectedSector] = useState('all');
   const [sortBy, setSortBy] = useState<SortOption>(initialSort);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [liveStocks, setLiveStocks] = useState<Stock[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [liveCount, setLiveCount] = useState(0);
 
   const sectors = getAllSectors();
 
-  const filteredAndSortedStocks = useMemo(() => {
-    let result = [...nigerianStocks];
+  const fetchLiveStocks = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/stocks');
+      if (response.ok) {
+        const data = await response.json();
+        setLiveStocks(data.data || []);
+        setLiveCount(data.liveCount || 0);
+        setLastUpdated(new Date());
+      }
+    } catch (error) {
+      console.error('Failed to fetch live stocks:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    // Filter by search query
+  useEffect(() => {
+    fetchLiveStocks();
+    const interval = setInterval(fetchLiveStocks, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const stocks = liveStocks.length > 0 ? liveStocks : nigerianStocks;
+
+  const filteredAndSortedStocks = useMemo(() => {
+    let result = [...stocks];
+
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
@@ -32,12 +61,10 @@ function StocksContent() {
       );
     }
 
-    // Filter by sector
     if (selectedSector !== 'all') {
       result = result.filter((stock) => stock.sector === selectedSector);
     }
 
-    // Sort
     result.sort((a, b) => {
       let comparison = 0;
 
@@ -65,7 +92,6 @@ function StocksContent() {
           comparison = 0;
       }
 
-      // For gainers, sort descending by default; for losers, sort ascending
       if (sortBy === 'gainers') {
         return -comparison;
       } else if (sortBy === 'losers') {
@@ -76,7 +102,7 @@ function StocksContent() {
     });
 
     return result;
-  }, [searchQuery, selectedSector, sortBy, sortOrder]);
+  }, [stocks, searchQuery, selectedSector, sortBy, sortOrder]);
 
   const handleSort = (option: SortOption) => {
     if (sortBy === option) {
@@ -89,6 +115,31 @@ function StocksContent() {
 
   return (
     <>
+      {/* Live Data Status */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-green-600">
+              <Wifi size={18} className="animate-pulse" />
+              <span className="text-sm font-medium">{liveCount} stocks with live data</span>
+            </div>
+            {lastUpdated && (
+              <span className="text-sm text-gray-500">
+                Last update: {lastUpdated.toLocaleTimeString()}
+              </span>
+            )}
+          </div>
+          <button
+            onClick={fetchLiveStocks}
+            disabled={isLoading}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
@@ -151,12 +202,17 @@ function StocksContent() {
 
       {/* Results Count */}
       <div className="mb-4 text-sm text-gray-600">
-        Showing {filteredAndSortedStocks.length} of {nigerianStocks.length} stocks
+        Showing {filteredAndSortedStocks.length} of {stocks.length} stocks
         {selectedSector !== 'all' && ` in ${selectedSector}`}
       </div>
 
       {/* Stock Table */}
-      {filteredAndSortedStocks.length > 0 ? (
+      {isLoading && liveStocks.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+          <RefreshCw size={32} className="animate-spin text-green-600 mx-auto mb-4" />
+          <p className="text-gray-500">Loading live stock data...</p>
+        </div>
+      ) : filteredAndSortedStocks.length > 0 ? (
         <StockTable stocks={filteredAndSortedStocks} />
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
@@ -182,12 +238,13 @@ export default function StocksPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">All Stocks</h1>
         <p className="text-gray-600">
-          Browse and filter all {nigerianStocks.length} stocks listed on the Nigerian Stock Exchange (NGX)
+          Browse and filter all stocks listed on the Nigerian Stock Exchange (NGX) with live prices
         </p>
       </div>
 
       <Suspense fallback={
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+          <RefreshCw size={32} className="animate-spin text-green-600 mx-auto mb-4" />
           <p className="text-gray-500">Loading stocks...</p>
         </div>
       }>

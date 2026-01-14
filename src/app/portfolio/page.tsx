@@ -86,24 +86,26 @@ export default function PortfolioPage() {
   };
 
   const calculatePortfolioStats = () => {
-    let totalValue = 0;
     let totalChange = 0;
+    let totalVolume = 0;
     let gainers = 0;
     let losers = 0;
+    let validStocks = 0;
 
     items.forEach(item => {
       const stock = stocksData.get(item.symbol);
       if (stock) {
-        totalValue += stock.marketCap;
-        totalChange += stock.changePercent;
-        if (stock.changePercent > 0) gainers++;
-        else if (stock.changePercent < 0) losers++;
+        validStocks++;
+        totalChange += stock.changePercent || 0;
+        totalVolume += stock.volume || 0;
+        if ((stock.changePercent || 0) > 0) gainers++;
+        else if ((stock.changePercent || 0) < 0) losers++;
       }
     });
 
-    const avgChange = items.length > 0 ? totalChange / items.length : 0;
+    const avgChange = validStocks > 0 ? totalChange / validStocks : 0;
 
-    return { totalValue, avgChange, gainers, losers };
+    return { totalVolume, avgChange, gainers, losers, validStocks };
   };
 
   if (authLoading) {
@@ -169,13 +171,13 @@ export default function PortfolioPage() {
         {items.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="bg-white rounded-xl p-4 shadow-sm">
-              <p className="text-sm text-gray-500">Stocks in Portfolio</p>
+              <p className="text-sm text-gray-500">Stocks Tracked</p>
               <p className="text-2xl font-bold text-gray-800">{items.length}</p>
             </div>
             <div className="bg-white rounded-xl p-4 shadow-sm">
               <p className="text-sm text-gray-500">Avg. Daily Change</p>
               <p className={`text-2xl font-bold ${stats.avgChange >= 0 ? "text-green-600" : "text-red-600"}`}>
-                {stats.avgChange >= 0 ? "+" : ""}{stats.avgChange.toFixed(2)}%
+                {stats.avgChange >= 0 ? "+" : ""}{isNaN(stats.avgChange) ? "0.00" : stats.avgChange.toFixed(2)}%
               </p>
             </div>
             <div className="bg-white rounded-xl p-4 shadow-sm">

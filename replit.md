@@ -9,8 +9,14 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 - Market overview shows computed totals from live stock data
 - Auto-refreshes every 5 minutes
 - **User Authentication**: Replit OIDC authentication with session management
+- **Portfolio Tracking**: Authenticated users can add stocks to their personal portfolio
 
 ## Recent Changes (January 2026)
+- **Portfolio Feature**: Added personal portfolio tracking for authenticated users
+  - Add/remove stocks from portfolio via + button on stock cards and detail pages
+  - My Portfolio page with performance stats (avg change, gainers/losers count)
+  - Portfolio data stored in PostgreSQL with user foreign key
+  - Real-time stock data displayed in portfolio table
 - Added user authentication via Replit OpenID Connect
   - Login/logout via Replit accounts (supports Google, GitHub, Apple, email)
   - Session management with PostgreSQL
@@ -33,13 +39,16 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 - `src/lib/stockData.ts` - Static stock data for 129 NGX stocks
 - `src/lib/auth.ts` - Replit OIDC authentication logic
 - `src/lib/db.ts` - Drizzle ORM database connection
-- `src/lib/schema.ts` - Database schema (users, sessions)
+- `src/lib/schema.ts` - Database schema (users, sessions, portfolio_items)
 - `src/app/api/stocks/route.ts` - API endpoint returning stocks (cached + live)
 - `src/app/api/stocks/[symbol]/route.ts` - Individual stock API
 - `src/app/api/auth/*/route.ts` - Authentication API routes
+- `src/app/api/portfolio/route.ts` - Portfolio API (add/remove/list stocks)
 - `src/app/page.tsx` - Dashboard with market overview
 - `src/app/stocks/page.tsx` - All stocks listing with filters
+- `src/app/portfolio/page.tsx` - Personal portfolio page
 - `src/hooks/useAuth.ts` - React hook for authentication state
+- `src/hooks/usePortfolio.ts` - React hook for portfolio management
 
 ### Data Flow
 1. Frontend calls `/api/stocks`
@@ -56,6 +65,13 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 4. Callback route validates state, creates session in PostgreSQL
 5. Session cookie set, user redirected to home
 6. Logout clears session and redirects to Replit logout
+
+### Portfolio Flow
+1. Authenticated user clicks "+" on a stock
+2. POST to `/api/portfolio` adds stock to user's portfolio
+3. Portfolio data stored in `portfolio_items` table
+4. My Portfolio page fetches user's stocks and displays with live data
+5. Performance stats calculated from live stock data
 
 ## Configuration
 - **Port**: 5000 (required for Replit)

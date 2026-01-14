@@ -45,6 +45,9 @@ export async function GET() {
           high: liveQuote.high || stock.high,
           low: liveQuote.low || stock.low,
           previousClose: liveQuote.previousClose || stock.previousClose,
+          marketCap: liveQuote.marketCap || stock.marketCap,
+          high52Week: liveQuote.high52Week || stock.high52Week,
+          low52Week: liveQuote.low52Week || stock.low52Week,
           isLive: true,
           lastUpdated: liveQuote.timestamp,
         };

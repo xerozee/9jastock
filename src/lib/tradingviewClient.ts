@@ -202,6 +202,9 @@ export interface LiveQuote {
   high: number;
   low: number;
   previousClose: number;
+  marketCap: number;
+  high52Week: number;
+  low52Week: number;
   timestamp: number;
   isLive: boolean;
 }
@@ -250,6 +253,9 @@ export async function fetchLiveQuote(symbol: string): Promise<LiveQuote | null> 
           high: Number(data.high_price) || 0,
           low: Number(data.low_price) || 0,
           previousClose: Number(data.prev_close_price) || 0,
+          marketCap: Number(data.market_cap_basic) || 0,
+          high52Week: Number(data.price_52_week_high) || 0,
+          low52Week: Number(data.price_52_week_low) || 0,
           timestamp: Date.now(),
           isLive: true,
         };
@@ -317,6 +323,9 @@ export async function fetchLiveQuotes(symbols: string[]): Promise<Map<string, Li
             high: Number(data.high_price) || 0,
             low: Number(data.low_price) || 0,
             previousClose: Number(data.prev_close_price) || 0,
+            marketCap: Number(data.market_cap_basic) || 0,
+            high52Week: Number(data.price_52_week_high) || 0,
+            low52Week: Number(data.price_52_week_low) || 0,
             timestamp: Date.now(),
             isLive: true,
           };

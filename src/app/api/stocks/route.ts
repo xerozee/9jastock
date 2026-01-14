@@ -1,33 +1,47 @@
 import { NextResponse } from 'next/server';
 import { nigerianStocks } from '@/lib/stockData';
-import { fetchLiveQuotes, hasSession, getCachedQuote } from '@/lib/tradingviewClient';
+import { 
+  fetchNigerianStocksFromScanner, 
+  hasSession, 
+  getCachedQuote,
+  getLastScanTime,
+  getAllCachedQuotes
+} from '@/lib/tradingviewClient';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-const TOP_STOCKS = [
-  'GTCO', 'ZENITHBANK', 'ACCESSCORP', 'UBA', 'FBNH',
-  'MTNN', 'AIRTELAFRI', 'DANGCEM', 'BUACEMENT', 'SEPLAT',
-  'NESTLE', 'NB', 'GUINNESS', 'DANGSUGAR', 'FLOURMILL',
-  'PRESCO', 'OKOMUOIL', 'TRANSCORP', 'GEREGU', 'BUAFOODS'
-];
-
 const CACHE_TTL = 5 * 60 * 1000;
-let lastFetchTime = 0;
 
 export async function GET() {
   try {
     const now = Date.now();
+    const lastScan = getLastScanTime();
+    const timeSinceLastScan = now - lastScan;
+    const cachedQuotes = getAllCachedQuotes();
+
+    if (hasSession() && (cachedQuotes.size === 0 || timeSinceLastScan > CACHE_TTL)) {
+      await fetchNigerianStocksFromScanner();
+    }
+
     const stocks = nigerianStocks.map(stock => {
       const cached = getCachedQuote(stock.symbol);
       if (cached && cached.price > 0) {
         const isFresh = (now - cached.timestamp) < CACHE_TTL;
         return {
           ...stock,
+          name: cached.name || stock.name,
           price: cached.price,
           change: cached.change,
           changePercent: cached.changePercent,
           volume: cached.volume || stock.volume,
+          open: cached.open || stock.open,
+          high: cached.high || stock.high,
+          low: cached.low || stock.low,
+          previousClose: cached.previousClose || stock.previousClose,
+          marketCap: cached.marketCap || stock.marketCap,
+          high52Week: cached.high52Week || stock.high52Week,
+          low52Week: cached.low52Week || stock.low52Week,
           isLive: isFresh,
           lastUpdated: cached.timestamp,
         };
@@ -40,14 +54,6 @@ export async function GET() {
     });
 
     const liveCount = stocks.filter(s => s.isLive).length;
-    const timeSinceLastFetch = now - lastFetchTime;
-
-    if (hasSession() && timeSinceLastFetch > CACHE_TTL) {
-      lastFetchTime = now;
-      fetchLiveQuotes(TOP_STOCKS).catch(err => {
-        console.error('Background fetch error:', err);
-      });
-    }
 
     return NextResponse.json({
       success: true,
@@ -55,6 +61,7 @@ export async function GET() {
       liveCount,
       totalCount: stocks.length,
       timestamp: now,
+      lastScan: lastScan > 0 ? lastScan : null,
     });
   } catch (error) {
     console.error('Error in stocks API:', error);

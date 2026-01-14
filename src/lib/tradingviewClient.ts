@@ -1,89 +1,6 @@
-import TradingView from '@mathieuc/tradingview';
-
-export const NGX_TV_SYMBOLS: Record<string, string> = {
-  'GTCO': 'NSENG:GTCO',
-  'ZENITHBANK': 'NSENG:ZENITHBANK',
-  'ACCESSCORP': 'NSENG:ACCESSCORP',
-  'UBA': 'NSENG:UBA',
-  'FBNH': 'NSENG:FBNH',
-  'STANBIC': 'NSENG:STANBIC',
-  'FCMB': 'NSENG:FCMB',
-  'FIDELITYBK': 'NSENG:FIDELITYBK',
-  'STERLINGNG': 'NSENG:STERLINGNG',
-  'WEMABANK': 'NSENG:WEMABANK',
-  'JAIZBANK': 'NSENG:JAIZBANK',
-  'ECOBANK': 'NSENG:ECOBANK',
-  'UNIONBANK': 'NSENG:UNIONBANK',
-  'UNITYBANK': 'NSENG:UNITYBANK',
-  'NGXGROUP': 'NSENG:NGXGROUP',
-  'MTNN': 'NSENG:MTNN',
-  'AIRTELAFRI': 'NSENG:AIRTELAFRI',
-  'DANGCEM': 'NSENG:DANGCEM',
-  'BUACEMENT': 'NSENG:BUACEMENT',
-  'WAPCO': 'NSENG:WAPCO',
-  'BUAFOODS': 'NSENG:BUAFOODS',
-  'CUTIX': 'NSENG:CUTIX',
-  'BETAGLAS': 'NSENG:BETAGLAS',
-  'BERGER': 'NSENG:BERGER',
-  'SEPLAT': 'NSENG:SEPLAT',
-  'OANDO': 'NSENG:OANDO',
-  'TOTAL': 'NSENG:TOTAL',
-  'CONOIL': 'NSENG:CONOIL',
-  'ARDOVA': 'NSENG:ARDOVA',
-  'MRS': 'NSENG:MRS',
-  'ETERNA': 'NSENG:ETERNA',
-  'NESTLE': 'NSENG:NESTLE',
-  'DANGSUGAR': 'NSENG:DANGSUGAR',
-  'FLOURMILL': 'NSENG:FLOURMILL',
-  'NASCON': 'NSENG:NASCON',
-  'CADBURY': 'NSENG:CADBURY',
-  'UNILEVER': 'NSENG:UNILEVER',
-  'NB': 'NSENG:NB',
-  'GUINNESS': 'NSENG:GUINNESS',
-  'INTBREW': 'NSENG:INTBREW',
-  'CHAMPION': 'NSENG:CHAMPION',
-  'HONYFLOUR': 'NSENG:HONYFLOUR',
-  'PZ': 'NSENG:PZ',
-  'VITAFOAM': 'NSENG:VITAFOAM',
-  'AIICO': 'NSENG:AIICO',
-  'MANSARD': 'NSENG:MANSARD',
-  'NEM': 'NSENG:NEM',
-  'LASACO': 'NSENG:LASACO',
-  'LINKASSURE': 'NSENG:LINKASSURE',
-  'CORNERST': 'NSENG:CORNERST',
-  'CHIPLC': 'NSENG:CHIPLC',
-  'PRESTIGE': 'NSENG:PRESTIGE',
-  'PRESCO': 'NSENG:PRESCO',
-  'OKOMUOIL': 'NSENG:OKOMUOIL',
-  'LIVESTOCK': 'NSENG:LIVESTOCK',
-  'ELLAHLAKES': 'NSENG:ELLAHLAKES',
-  'MAYBAKER': 'NSENG:MAYBAKER',
-  'NEIMETH': 'NSENG:NEIMETH',
-  'FIDSON': 'NSENG:FIDSON',
-  'GLAXOSMITH': 'NSENG:GLAXOSMITH',
-  'PHARMDEKO': 'NSENG:PHARMDEKO',
-  'TRANSCORP': 'NSENG:TRANSCORP',
-  'UACN': 'NSENG:UACN',
-  'JOHNHOLT': 'NSENG:JOHNHOLT',
-  'JBERGER': 'NSENG:JBERGER',
-  'UPDC': 'NSENG:UPDC',
-  'NAHCO': 'NSENG:NAHCO',
-  'ABCTRANS': 'NSENG:ABCTRANS',
-  'REDSTAREX': 'NSENG:REDSTAREX',
-  'CAVERTON': 'NSENG:CAVERTON',
-  'SCOA': 'NSENG:SCOA',
-  'GEREGU': 'NSENG:GEREGU',
-  'TRANSCPOWER': 'NSENG:TRANSCPOWER',
-  'ARADEL': 'NSENG:ARADEL',
-  'ETRANZACT': 'NSENG:ETRANZACT',
-  'CHAMS': 'NSENG:CHAMS',
-  'COURTVILLE': 'NSENG:COURTVILLE',
-  'MULTIVERSE': 'NSENG:MULTIVERSE',
-  'JAPAULGOLD': 'NSENG:JAPAULGOLD',
-};
-
 export interface LiveQuote {
   symbol: string;
+  name?: string;
   price: number;
   change: number;
   changePercent: number;
@@ -99,190 +16,151 @@ export interface LiveQuote {
   isLive: boolean;
 }
 
+interface ScannerResult {
+  s: string;
+  d: (string | number | null)[];
+}
+
+interface ScannerResponse {
+  totalCount: number;
+  data: ScannerResult[];
+}
+
 const quoteCache = new Map<string, LiveQuote>();
+let lastScanTime = 0;
 
 function getSessionId(): string | null {
   return process.env.TRADINGVIEW_SESSION || null;
 }
 
-export async function fetchLiveQuote(symbol: string): Promise<LiveQuote | null> {
-  const tvSymbol = NGX_TV_SYMBOLS[symbol.toUpperCase()] || `NSENG:${symbol.toUpperCase()}`;
+export function hasSession(): boolean {
+  return !!getSessionId();
+}
+
+export function getCachedQuote(symbol: string): LiveQuote | undefined {
+  return quoteCache.get(symbol.toUpperCase());
+}
+
+export function getAllCachedQuotes(): Map<string, LiveQuote> {
+  return quoteCache;
+}
+
+export function getLastScanTime(): number {
+  return lastScanTime;
+}
+
+export async function fetchNigerianStocksFromScanner(): Promise<LiveQuote[]> {
   const sessionId = getSessionId();
+  
+  const columns = [
+    'name',
+    'close',
+    'change',
+    'change_abs',
+    'volume',
+    'open',
+    'high',
+    'low',
+    'Perf.W',
+    'Perf.1M',
+    'Perf.3M',
+    'Perf.6M',
+    'Perf.YTD',
+    'Perf.Y',
+    'market_cap_basic',
+    'price_52_week_high',
+    'price_52_week_low',
+    'Recommend.All',
+    'average_volume_10d_calc',
+    'sector'
+  ];
+
+  const payload = {
+    filter: [
+      { left: 'exchange', operation: 'equal', right: 'NSENG' }
+    ],
+    options: { lang: 'en' },
+    markets: ['nigeria'],
+    symbols: { query: { types: [] }, tickers: [] },
+    columns,
+    sort: { sortBy: 'market_cap_basic', sortOrder: 'desc' },
+    range: [0, 200]
+  };
 
   try {
-    const client = new TradingView.Client({
-      token: sessionId || undefined,
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+    };
+
+    if (sessionId) {
+      headers['Cookie'] = `sessionid=${sessionId}`;
+    }
+
+    const response = await fetch('https://scanner.tradingview.com/nigeria/scan', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
     });
 
-    return new Promise((resolve) => {
-      const timeout = setTimeout(() => {
-        try { client.end(); } catch {}
-        resolve(quoteCache.get(symbol.toUpperCase()) || null);
-      }, 10000);
+    if (!response.ok) {
+      console.error('Scanner API error:', response.status, response.statusText);
+      return [];
+    }
 
-      const chart = new client.Session.Chart();
-      chart.setMarket(tvSymbol, { timeframe: 'D' });
+    const data: ScannerResponse = await response.json();
+    const results: LiveQuote[] = [];
 
-      chart.onError((...err: unknown[]) => {
-        clearTimeout(timeout);
-        console.error(`Error fetching ${symbol}:`, err);
-        try { client.end(); } catch {}
-        resolve(quoteCache.get(symbol.toUpperCase()) || null);
-      });
+    for (const item of data.data) {
+      const fullSymbol = item.s;
+      const symbol = fullSymbol.split(':')[1] || fullSymbol;
+      const d = item.d;
 
-      chart.onSymbolLoaded(() => {
-        clearTimeout(timeout);
-        
-        const info = chart.infos || {};
-        const periods = chart.periods || [];
-        const latestPeriod = periods[0] || {};
+      const price = Number(d[1]) || 0;
+      const changePercent = Number(d[2]) || 0;
+      const changeAbs = Number(d[3]) || 0;
 
-        const quote: LiveQuote = {
-          symbol: symbol.toUpperCase(),
-          price: Number(latestPeriod.close) || 0,
-          change: Number(info.change) || 0,
-          changePercent: Number(info.change_percent) || 0,
-          volume: Number(latestPeriod.volume) || Number(info.volume) || 0,
-          open: Number(latestPeriod.open) || 0,
-          high: Number(latestPeriod.max) || Number(latestPeriod.high) || 0,
-          low: Number(latestPeriod.min) || Number(latestPeriod.low) || 0,
-          previousClose: Number(info.prev_close_price) || 0,
-          marketCap: Number(info.market_cap_basic) || 0,
-          high52Week: Number(info.price_52_week_high) || 0,
-          low52Week: Number(info.price_52_week_low) || 0,
-          timestamp: Date.now(),
-          isLive: true,
-        };
+      const quote: LiveQuote = {
+        symbol: symbol.toUpperCase(),
+        name: d[0] as string || symbol,
+        price,
+        change: changeAbs,
+        changePercent,
+        volume: Number(d[4]) || 0,
+        open: Number(d[5]) || 0,
+        high: Number(d[6]) || 0,
+        low: Number(d[7]) || 0,
+        previousClose: price - changeAbs,
+        marketCap: Number(d[14]) || 0,
+        high52Week: Number(d[15]) || 0,
+        low52Week: Number(d[16]) || 0,
+        timestamp: Date.now(),
+        isLive: true,
+      };
 
-        quoteCache.set(symbol.toUpperCase(), quote);
-        chart.delete();
-        try { client.end(); } catch {}
-        resolve(quote);
-      });
-    });
+      if (quote.price > 0) {
+        results.push(quote);
+        quoteCache.set(quote.symbol, quote);
+      }
+    }
+
+    lastScanTime = Date.now();
+    console.log(`Fetched ${results.length} Nigerian stocks from TradingView scanner`);
+    return results;
   } catch (error) {
-    console.error(`Failed to fetch quote for ${symbol}:`, error);
-    return quoteCache.get(symbol.toUpperCase()) || null;
+    console.error('Failed to fetch from TradingView scanner:', error);
+    return [];
   }
 }
 
 export async function fetchLiveQuotes(symbols: string[]): Promise<Map<string, LiveQuote>> {
   const results = new Map<string, LiveQuote>();
-  const sessionId = getSessionId();
-
-  const batchSize = 10;
-  const batches: string[][] = [];
   
-  for (let i = 0; i < symbols.length; i += batchSize) {
-    batches.push(symbols.slice(i, i + batchSize));
-  }
-
-  for (const batch of batches) {
-    try {
-      const client = new TradingView.Client({
-        token: sessionId || undefined,
-      });
-
-      const pendingCount = { value: 0 };
-      const totalInBatch = batch.length;
-
-      await new Promise<void>((batchResolve) => {
-        const batchTimeout = setTimeout(() => {
-          try { client.end(); } catch {}
-          batchResolve();
-        }, 15000);
-
-        batch.forEach(symbol => {
-          const upperSymbol = symbol.toUpperCase();
-          const tvSymbol = NGX_TV_SYMBOLS[upperSymbol] || `NSENG:${upperSymbol}`;
-
-          try {
-            const chart = new client.Session.Chart();
-            chart.setMarket(tvSymbol, { timeframe: 'D' });
-
-            const symbolTimeout = setTimeout(() => {
-              pendingCount.value++;
-              try { chart.delete(); } catch {}
-              const cached = quoteCache.get(upperSymbol);
-              if (cached) results.set(upperSymbol, cached);
-              if (pendingCount.value >= totalInBatch) {
-                clearTimeout(batchTimeout);
-                try { client.end(); } catch {}
-                batchResolve();
-              }
-            }, 8000);
-
-            chart.onError((...err: unknown[]) => {
-              clearTimeout(symbolTimeout);
-              console.error(`Error fetching ${symbol}:`, err);
-              pendingCount.value++;
-              try { chart.delete(); } catch {}
-              const cached = quoteCache.get(upperSymbol);
-              if (cached) results.set(upperSymbol, cached);
-              if (pendingCount.value >= totalInBatch) {
-                clearTimeout(batchTimeout);
-                try { client.end(); } catch {}
-                batchResolve();
-              }
-            });
-
-            chart.onSymbolLoaded(() => {
-              clearTimeout(symbolTimeout);
-              
-              const info = chart.infos || {};
-              const periods = chart.periods || [];
-              const latestPeriod = periods[0] || {};
-
-              const quote: LiveQuote = {
-                symbol: upperSymbol,
-                price: Number(latestPeriod.close) || 0,
-                change: Number(info.change) || 0,
-                changePercent: Number(info.change_percent) || 0,
-                volume: Number(latestPeriod.volume) || Number(info.volume) || 0,
-                open: Number(latestPeriod.open) || 0,
-                high: Number(latestPeriod.max) || Number(latestPeriod.high) || 0,
-                low: Number(latestPeriod.min) || Number(latestPeriod.low) || 0,
-                previousClose: Number(info.prev_close_price) || 0,
-                marketCap: Number(info.market_cap_basic) || 0,
-                high52Week: Number(info.price_52_week_high) || 0,
-                low52Week: Number(info.price_52_week_low) || 0,
-                timestamp: Date.now(),
-                isLive: true,
-              };
-
-              if (quote.price > 0) {
-                results.set(upperSymbol, quote);
-                quoteCache.set(upperSymbol, quote);
-              }
-
-              try { chart.delete(); } catch {}
-              pendingCount.value++;
-              
-              if (pendingCount.value >= totalInBatch) {
-                clearTimeout(batchTimeout);
-                try { client.end(); } catch {}
-                batchResolve();
-              }
-            });
-          } catch (err) {
-            console.error(`Error setting up chart for ${symbol}:`, err);
-            pendingCount.value++;
-            const cached = quoteCache.get(upperSymbol);
-            if (cached) results.set(upperSymbol, cached);
-            if (pendingCount.value >= totalInBatch) {
-              clearTimeout(batchTimeout);
-              try { client.end(); } catch {}
-              batchResolve();
-            }
-          }
-        });
-      });
-    } catch (error) {
-      console.error('Failed to fetch batch:', error);
-      batch.forEach(symbol => {
-        const cached = quoteCache.get(symbol.toUpperCase());
-        if (cached) results.set(symbol.toUpperCase(), cached);
-      });
+  const allStocks = await fetchNigerianStocksFromScanner();
+  
+  for (const stock of allStocks) {
+    if (symbols.includes(stock.symbol) || symbols.length === 0) {
+      results.set(stock.symbol, stock);
     }
   }
 
@@ -295,12 +173,4 @@ export async function fetchLiveQuotes(symbols: string[]): Promise<Map<string, Li
   });
 
   return results;
-}
-
-export function getCachedQuote(symbol: string): LiveQuote | undefined {
-  return quoteCache.get(symbol.toUpperCase());
-}
-
-export function hasSession(): boolean {
-  return !!getSessionId();
 }

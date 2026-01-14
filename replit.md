@@ -13,6 +13,13 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 - **News & Blog**: Market news page with multiple sources and top performers sidebar
 
 ## Recent Changes (January 2026)
+- **Modern Theme & Dark Mode**: Complete UI redesign with dark mode support
+  - ThemeContext with localStorage persistence for user preference
+  - Dark mode toggle button in header (moon/sun icon)
+  - Gradient hero section with grid pattern overlay
+  - Modern cards with colored icon badges (blue for Market Cap, purple for Volume, green for Gainers, red for Losers)
+  - Animated progress bars and pulsing live data indicator
+  - CSS custom properties for consistent theming
 - **News/Blog Feature**: Added comprehensive market news page
   - Main blog page with news from NGX Official, BusinessDay, Nairametrics, ThisDay, Punch
   - Filterable news by source with tab navigation
@@ -43,6 +50,8 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 ## Project Architecture
 
 ### Key Files
+- `src/contexts/ThemeContext.tsx` - Dark mode context with localStorage persistence
+- `src/components/Providers.tsx` - Client-side providers wrapper (Theme, Auth)
 - `src/lib/tradingviewClient.ts` - TradingView WebSocket client using @mathieuc/tradingview
 - `src/lib/stockData.ts` - Static stock data for 129 NGX stocks
 - `src/lib/auth.ts` - Replit OIDC authentication logic

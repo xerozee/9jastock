@@ -5,7 +5,7 @@ import { Stock } from '@/types/stock';
 
 interface LiveStockData extends Stock {
   isLive: boolean;
-  lastUpdated: number | null;
+  lastUpdated?: number;
 }
 
 interface UseLiveStocksReturn {

@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStockBySymbol } from '@/lib/stockData';
-import { fetchLiveQuote, hasSession } from '@/lib/tradingviewClient';
+import { getCachedQuote, hasSession, fetchNigerianStocksFromScanner, getLastScanTime, getAllCachedQuotes } from '@/lib/tradingviewClient';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+const CACHE_TTL = 5 * 60 * 1000;
 
 export async function GET(
   request: NextRequest,
@@ -12,7 +14,6 @@ export async function GET(
   const { symbol } = await params;
   const upperSymbol = symbol.toUpperCase();
 
-  // Get static stock info
   const staticStock = getStockBySymbol(upperSymbol);
 
   if (!staticStock) {
@@ -22,7 +23,6 @@ export async function GET(
     );
   }
 
-  // Check if TradingView session is configured
   if (!hasSession()) {
     return NextResponse.json({
       success: true,
@@ -32,38 +32,136 @@ export async function GET(
         lastUpdated: Date.now(),
       },
       timestamp: Date.now(),
-      note: 'TradingView session not configured. Add TRADINGVIEW_SESSION to .env.local for live data.',
+      note: 'TradingView session not configured.',
     });
   }
 
   try {
-    // Fetch live quote from TradingView
-    const liveQuote = await fetchLiveQuote(upperSymbol);
+    const now = Date.now();
+    const lastScan = getLastScanTime();
+    const timeSinceLastScan = now - lastScan;
+    const cachedQuotes = getAllCachedQuotes();
 
-    if (liveQuote && liveQuote.price > 0) {
+    if (cachedQuotes.size === 0 || timeSinceLastScan > CACHE_TTL) {
+      await fetchNigerianStocksFromScanner();
+    }
+
+    const cached = getCachedQuote(upperSymbol);
+
+    if (cached && cached.price > 0) {
+      const isFresh = (now - cached.timestamp) < CACHE_TTL;
       return NextResponse.json({
         success: true,
         data: {
           ...staticStock,
-          price: liveQuote.price,
-          change: liveQuote.change,
-          changePercent: liveQuote.changePercent,
-          volume: liveQuote.volume || staticStock.volume,
-          open: liveQuote.open || staticStock.open,
-          high: liveQuote.high || staticStock.high,
-          low: liveQuote.low || staticStock.low,
-          previousClose: liveQuote.previousClose || staticStock.previousClose,
-          marketCap: liveQuote.marketCap || staticStock.marketCap,
-          high52Week: liveQuote.high52Week || staticStock.high52Week,
-          low52Week: liveQuote.low52Week || staticStock.low52Week,
-          isLive: true,
-          lastUpdated: liveQuote.timestamp,
+          name: cached.name || staticStock.name,
+          description: cached.description || '',
+          sector: cached.sector || staticStock.sector,
+          industry: cached.industry || '',
+          
+          price: cached.price,
+          change: cached.change,
+          changePercent: cached.changePercent,
+          volume: cached.volume || staticStock.volume,
+          open: cached.open || staticStock.open,
+          high: cached.high || staticStock.high,
+          low: cached.low || staticStock.low,
+          previousClose: cached.previousClose || staticStock.previousClose,
+          
+          marketCap: cached.marketCap || staticStock.marketCap,
+          high52Week: cached.high52Week || staticStock.high52Week,
+          low52Week: cached.low52Week || staticStock.low52Week,
+          
+          perfWeek: cached.perfWeek,
+          perfMonth: cached.perfMonth,
+          perf3Month: cached.perf3Month,
+          perf6Month: cached.perf6Month,
+          perfYTD: cached.perfYTD,
+          perfYear: cached.perfYear,
+          perf5Year: cached.perf5Year,
+          perfAllTime: cached.perfAllTime,
+          
+          avgVolume10d: cached.avgVolume10d,
+          avgVolume30d: cached.avgVolume30d,
+          avgVolume90d: cached.avgVolume90d,
+          relativeVolume: cached.relativeVolume,
+          
+          volatilityWeek: cached.volatilityWeek,
+          volatilityMonth: cached.volatilityMonth,
+          
+          pe: cached.pe,
+          eps: cached.eps,
+          epsDiluted: cached.epsDiluted,
+          dividend: cached.dividend,
+          dividendYield: cached.dividendYield,
+          priceToBook: cached.priceToBook,
+          priceToSales: cached.priceToSales,
+          priceToRevenue: cached.priceToRevenue,
+          
+          roe: cached.roe,
+          roa: cached.roa,
+          
+          revenue: cached.revenue,
+          grossProfit: cached.grossProfit,
+          netIncome: cached.netIncome,
+          ebitda: cached.ebitda,
+          
+          totalAssets: cached.totalAssets,
+          totalDebt: cached.totalDebt,
+          totalCash: cached.totalCash,
+          debtToEquity: cached.debtToEquity,
+          currentRatio: cached.currentRatio,
+          quickRatio: cached.quickRatio,
+          
+          sharesOutstanding: cached.sharesOutstanding,
+          floatShares: cached.floatShares,
+          
+          rsi: cached.rsi,
+          rsi7: cached.rsi7,
+          
+          macd: cached.macd,
+          macdSignal: cached.macdSignal,
+          macdHist: cached.macdHist,
+          
+          sma20: cached.sma20,
+          sma50: cached.sma50,
+          sma200: cached.sma200,
+          ema20: cached.ema20,
+          ema50: cached.ema50,
+          ema200: cached.ema200,
+          
+          stochK: cached.stochK,
+          stochD: cached.stochD,
+          
+          atr: cached.atr,
+          adx: cached.adx,
+          cci: cached.cci,
+          williamsR: cached.williamsR,
+          
+          bbUpper: cached.bbUpper,
+          bbMiddle: cached.bbMiddle,
+          bbLower: cached.bbLower,
+          
+          recommendAll: cached.recommendAll,
+          recommendMA: cached.recommendMA,
+          recommendOther: cached.recommendOther,
+          
+          buySignals: cached.buySignals,
+          sellSignals: cached.sellSignals,
+          neutralSignals: cached.neutralSignals,
+          
+          gap: cached.gap,
+          gapPercent: cached.gapPercent,
+          
+          beta1Year: cached.beta1Year,
+          
+          isLive: isFresh,
+          lastUpdated: cached.timestamp,
         },
-        timestamp: Date.now(),
+        timestamp: now,
       });
     }
 
-    // Return static data as fallback
     return NextResponse.json({
       success: true,
       data: {

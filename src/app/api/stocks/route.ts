@@ -3,15 +3,135 @@ import { nigerianStocks } from '@/lib/stockData';
 import { 
   fetchNigerianStocksFromScanner, 
   hasSession, 
-  getCachedQuote,
   getLastScanTime,
-  getAllCachedQuotes
+  getAllCachedQuotes,
+  LiveQuote
 } from '@/lib/tradingviewClient';
+import { Stock } from '@/types/stock';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 const CACHE_TTL = 5 * 60 * 1000;
+
+function convertLiveQuoteToStock(quote: LiveQuote): Stock & { isLive: boolean; lastUpdated: number } {
+  const now = Date.now();
+  const isFresh = (now - quote.timestamp) < CACHE_TTL;
+  
+  return {
+    symbol: quote.symbol,
+    name: quote.name || quote.symbol,
+    description: quote.description || '',
+    sector: quote.sector || 'Other',
+    industry: quote.industry || '',
+    
+    price: quote.price,
+    change: quote.change,
+    changePercent: quote.changePercent,
+    volume: quote.volume,
+    open: quote.open,
+    high: quote.high,
+    low: quote.low,
+    previousClose: quote.previousClose,
+    
+    marketCap: quote.marketCap,
+    high52Week: quote.high52Week,
+    low52Week: quote.low52Week,
+    
+    perfWeek: quote.perfWeek,
+    perfMonth: quote.perfMonth,
+    perf3Month: quote.perf3Month,
+    perf6Month: quote.perf6Month,
+    perfYTD: quote.perfYTD,
+    perfYear: quote.perfYear,
+    perf5Year: quote.perf5Year,
+    perfAllTime: quote.perfAllTime,
+    
+    avgVolume10d: quote.avgVolume10d,
+    avgVolume30d: quote.avgVolume30d,
+    avgVolume90d: quote.avgVolume90d,
+    relativeVolume: quote.relativeVolume,
+    
+    volatilityWeek: quote.volatilityWeek,
+    volatilityMonth: quote.volatilityMonth,
+    
+    pe: quote.pe,
+    eps: quote.eps,
+    epsDiluted: quote.epsDiluted,
+    dividend: quote.dividend,
+    dividendYield: quote.dividendYield,
+    priceToBook: quote.priceToBook,
+    priceToSales: quote.priceToSales,
+    priceToRevenue: quote.priceToRevenue,
+    
+    roe: quote.roe,
+    roa: quote.roa,
+    
+    revenue: quote.revenue,
+    grossProfit: quote.grossProfit,
+    netIncome: quote.netIncome,
+    ebitda: quote.ebitda,
+    
+    totalAssets: quote.totalAssets,
+    totalDebt: quote.totalDebt,
+    totalCash: quote.totalCash,
+    debtToEquity: quote.debtToEquity,
+    currentRatio: quote.currentRatio,
+    quickRatio: quote.quickRatio,
+    
+    sharesOutstanding: quote.sharesOutstanding,
+    floatShares: quote.floatShares,
+    
+    rsi: quote.rsi,
+    rsi7: quote.rsi7,
+    
+    macd: quote.macd,
+    macdSignal: quote.macdSignal,
+    macdHist: quote.macdHist,
+    
+    sma20: quote.sma20,
+    sma50: quote.sma50,
+    sma200: quote.sma200,
+    ema20: quote.ema20,
+    ema50: quote.ema50,
+    ema200: quote.ema200,
+    
+    stochK: quote.stochK,
+    stochD: quote.stochD,
+    
+    atr: quote.atr,
+    adx: quote.adx,
+    cci: quote.cci,
+    williamsR: quote.williamsR,
+    
+    bbUpper: quote.bbUpper,
+    bbMiddle: quote.bbMiddle,
+    bbLower: quote.bbLower,
+    
+    recommendAll: quote.recommendAll,
+    recommendMA: quote.recommendMA,
+    recommendOther: quote.recommendOther,
+    
+    buySignals: quote.buySignals,
+    sellSignals: quote.sellSignals,
+    neutralSignals: quote.neutralSignals,
+    
+    gap: quote.gap,
+    gapPercent: quote.gapPercent,
+    
+    beta1Year: quote.beta1Year,
+    
+    preMarketPrice: quote.preMarketPrice,
+    preMarketChange: quote.preMarketChange,
+    postMarketPrice: quote.postMarketPrice,
+    postMarketChange: quote.postMarketChange,
+    
+    earningsDate: quote.earningsDate,
+    
+    isLive: isFresh,
+    lastUpdated: quote.timestamp,
+  };
+}
 
 export async function GET() {
   try {
@@ -20,134 +140,39 @@ export async function GET() {
     const timeSinceLastScan = now - lastScan;
     const cachedQuotes = getAllCachedQuotes();
 
+    // Fetch fresh data if cache is empty or stale
     if (hasSession() && (cachedQuotes.size === 0 || timeSinceLastScan > CACHE_TTL)) {
       await fetchNigerianStocksFromScanner();
     }
 
-    const stocks = nigerianStocks.map(stock => {
-      const cached = getCachedQuote(stock.symbol);
-      if (cached && cached.price > 0) {
-        const isFresh = (now - cached.timestamp) < CACHE_TTL;
-        return {
-          ...stock,
-          name: cached.name || stock.name,
-          description: cached.description || stock.description || '',
-          sector: cached.sector || stock.sector,
-          industry: cached.industry || stock.industry || '',
-          
-          price: cached.price,
-          change: cached.change,
-          changePercent: cached.changePercent,
-          volume: cached.volume || stock.volume,
-          open: cached.open || stock.open,
-          high: cached.high || stock.high,
-          low: cached.low || stock.low,
-          previousClose: cached.previousClose || stock.previousClose,
-          
-          marketCap: cached.marketCap || stock.marketCap,
-          high52Week: cached.high52Week || stock.high52Week,
-          low52Week: cached.low52Week || stock.low52Week,
-          
-          perfWeek: cached.perfWeek,
-          perfMonth: cached.perfMonth,
-          perf3Month: cached.perf3Month,
-          perf6Month: cached.perf6Month,
-          perfYTD: cached.perfYTD,
-          perfYear: cached.perfYear,
-          perf5Year: cached.perf5Year,
-          perfAllTime: cached.perfAllTime,
-          
-          avgVolume10d: cached.avgVolume10d,
-          avgVolume30d: cached.avgVolume30d,
-          avgVolume90d: cached.avgVolume90d,
-          relativeVolume: cached.relativeVolume,
-          
-          volatilityWeek: cached.volatilityWeek,
-          volatilityMonth: cached.volatilityMonth,
-          
-          pe: cached.pe,
-          eps: cached.eps,
-          epsDiluted: cached.epsDiluted,
-          dividend: cached.dividend,
-          dividendYield: cached.dividendYield,
-          priceToBook: cached.priceToBook,
-          priceToSales: cached.priceToSales,
-          priceToRevenue: cached.priceToRevenue,
-          
-          roe: cached.roe,
-          roa: cached.roa,
-          
-          revenue: cached.revenue,
-          grossProfit: cached.grossProfit,
-          netIncome: cached.netIncome,
-          ebitda: cached.ebitda,
-          
-          totalAssets: cached.totalAssets,
-          totalDebt: cached.totalDebt,
-          totalCash: cached.totalCash,
-          debtToEquity: cached.debtToEquity,
-          currentRatio: cached.currentRatio,
-          quickRatio: cached.quickRatio,
-          
-          sharesOutstanding: cached.sharesOutstanding,
-          floatShares: cached.floatShares,
-          
-          rsi: cached.rsi,
-          rsi7: cached.rsi7,
-          
-          macd: cached.macd,
-          macdSignal: cached.macdSignal,
-          macdHist: cached.macdHist,
-          
-          sma20: cached.sma20,
-          sma50: cached.sma50,
-          sma200: cached.sma200,
-          ema20: cached.ema20,
-          ema50: cached.ema50,
-          ema200: cached.ema200,
-          
-          stochK: cached.stochK,
-          stochD: cached.stochD,
-          
-          atr: cached.atr,
-          adx: cached.adx,
-          cci: cached.cci,
-          williamsR: cached.williamsR,
-          
-          bbUpper: cached.bbUpper,
-          bbMiddle: cached.bbMiddle,
-          bbLower: cached.bbLower,
-          
-          recommendAll: cached.recommendAll,
-          recommendMA: cached.recommendMA,
-          recommendOther: cached.recommendOther,
-          
-          buySignals: cached.buySignals,
-          sellSignals: cached.sellSignals,
-          neutralSignals: cached.neutralSignals,
-          
-          gap: cached.gap,
-          gapPercent: cached.gapPercent,
-          
-          beta1Year: cached.beta1Year,
-          
-          preMarketPrice: cached.preMarketPrice,
-          preMarketChange: cached.preMarketChange,
-          postMarketPrice: cached.postMarketPrice,
-          postMarketChange: cached.postMarketChange,
-          
-          earningsDate: cached.earningsDate,
-          
-          isLive: isFresh,
-          lastUpdated: cached.timestamp,
-        };
+    // Get all cached quotes from TradingView
+    const allCachedQuotes = getAllCachedQuotes();
+    const processedSymbols = new Set<string>();
+    const stocks: (Stock & { isLive: boolean; lastUpdated: number })[] = [];
+
+    // First, add all stocks from TradingView live data
+    allCachedQuotes.forEach((quote, symbol) => {
+      if (quote.price > 0) {
+        stocks.push(convertLiveQuoteToStock(quote));
+        processedSymbols.add(symbol.toUpperCase());
       }
-      return {
-        ...stock,
-        isLive: false,
-        lastUpdated: now,
-      };
     });
+
+    // Then, add any stocks from static data that weren't in TradingView
+    // (as fallback with isLive: false)
+    for (const staticStock of nigerianStocks) {
+      if (!processedSymbols.has(staticStock.symbol.toUpperCase())) {
+        stocks.push({
+          ...staticStock,
+          isLive: false,
+          lastUpdated: now,
+        });
+        processedSymbols.add(staticStock.symbol.toUpperCase());
+      }
+    }
+
+    // Sort by market cap descending
+    stocks.sort((a, b) => (b.marketCap || 0) - (a.marketCap || 0));
 
     const liveCount = stocks.filter(s => s.isLive).length;
 

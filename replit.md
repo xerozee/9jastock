@@ -5,7 +5,8 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 
 ## Current State
 - **LIVE DATA ACTIVE**: Fetches real-time data from TradingView's scanner API
-- Successfully scrapes 145 Nigerian stocks from TradingView
+- Fetches ALL Nigerian stocks available on TradingView (145+ stocks)
+- Dynamic stock list - automatically includes new listings from TradingView
 - Market overview shows computed totals from live stock data
 - Auto-refreshes every 5 minutes
 - **User Authentication**: Replit OIDC authentication with session management

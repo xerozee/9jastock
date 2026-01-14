@@ -1,85 +1,76 @@
 import { NextResponse } from 'next/server';
 import { nigerianStocks } from '@/lib/stockData';
-import { fetchLiveQuotes, hasSession, NGX_TV_SYMBOLS } from '@/lib/tradingviewClient';
+import { fetchLiveQuotes, hasSession, getCachedQuote } from '@/lib/tradingviewClient';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+const TOP_STOCKS = [
+  'GTCO', 'ZENITHBANK', 'ACCESSCORP', 'UBA', 'FBNH',
+  'MTNN', 'AIRTELAFRI', 'DANGCEM', 'BUACEMENT', 'SEPLAT',
+  'NESTLE', 'NB', 'GUINNESS', 'DANGSUGAR', 'FLOURMILL',
+  'PRESCO', 'OKOMUOIL', 'TRANSCORP', 'GEREGU', 'BUAFOODS'
+];
+
+const CACHE_TTL = 5 * 60 * 1000;
+let lastFetchTime = 0;
+
 export async function GET() {
   try {
-    // Check if TradingView session is configured
-    if (!hasSession()) {
-      // Return static data if no session
-      const stocks = nigerianStocks.map(stock => ({
-        ...stock,
-        isLive: false,
-        lastUpdated: Date.now(),
-      }));
-
-      return NextResponse.json({
-        success: true,
-        data: stocks,
-        liveCount: 0,
-        totalCount: stocks.length,
-        timestamp: Date.now(),
-        note: 'TradingView session not configured. Add TRADINGVIEW_SESSION to .env.local for live data.',
-      });
-    }
-
-    // Fetch live quotes from TradingView
-    const symbols = Object.keys(NGX_TV_SYMBOLS);
-    const liveQuotes = await fetchLiveQuotes(symbols);
-
-    // Merge live data with static stock info
+    const now = Date.now();
     const stocks = nigerianStocks.map(stock => {
-      const liveQuote = liveQuotes.get(stock.symbol);
-
-      if (liveQuote && liveQuote.price > 0) {
+      const cached = getCachedQuote(stock.symbol);
+      if (cached && cached.price > 0) {
+        const isFresh = (now - cached.timestamp) < CACHE_TTL;
         return {
           ...stock,
-          price: liveQuote.price,
-          change: liveQuote.change,
-          changePercent: liveQuote.changePercent,
-          volume: liveQuote.volume || stock.volume,
-          open: liveQuote.open || stock.open,
-          high: liveQuote.high || stock.high,
-          low: liveQuote.low || stock.low,
-          previousClose: liveQuote.previousClose || stock.previousClose,
-          marketCap: liveQuote.marketCap || stock.marketCap,
-          high52Week: liveQuote.high52Week || stock.high52Week,
-          low52Week: liveQuote.low52Week || stock.low52Week,
-          isLive: true,
-          lastUpdated: liveQuote.timestamp,
+          price: cached.price,
+          change: cached.change,
+          changePercent: cached.changePercent,
+          volume: cached.volume || stock.volume,
+          isLive: isFresh,
+          lastUpdated: cached.timestamp,
         };
       }
-
       return {
         ...stock,
         isLive: false,
-        lastUpdated: Date.now(),
+        lastUpdated: now,
       };
     });
 
     const liveCount = stocks.filter(s => s.isLive).length;
+    const timeSinceLastFetch = now - lastFetchTime;
+
+    if (hasSession() && timeSinceLastFetch > CACHE_TTL) {
+      lastFetchTime = now;
+      fetchLiveQuotes(TOP_STOCKS).catch(err => {
+        console.error('Background fetch error:', err);
+      });
+    }
 
     return NextResponse.json({
       success: true,
       data: stocks,
       liveCount,
       totalCount: stocks.length,
-      timestamp: Date.now(),
+      timestamp: now,
     });
   } catch (error) {
-    console.error('Error fetching live stocks:', error);
+    console.error('Error in stocks API:', error);
 
-    // Return static data as fallback
+    const stocks = nigerianStocks.map(stock => ({
+      ...stock,
+      isLive: false,
+      lastUpdated: Date.now(),
+    }));
+
     return NextResponse.json({
-      success: false,
-      data: nigerianStocks.map(stock => ({ ...stock, isLive: false, lastUpdated: Date.now() })),
+      success: true,
+      data: stocks,
       liveCount: 0,
-      totalCount: nigerianStocks.length,
+      totalCount: stocks.length,
       timestamp: Date.now(),
-      error: 'Failed to fetch live data, showing cached data',
     });
   }
 }

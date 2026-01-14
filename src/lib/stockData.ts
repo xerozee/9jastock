@@ -2216,27 +2216,6 @@ export const nigerianStocks: Stock[] = [
     dividend: 0.12,
   },
 
-  // ============ PETROLEUM / ENERGY ============
-  {
-    symbol: 'JAPAULGOLD',
-    name: 'Japaul Gold & Ventures Plc',
-    sector: 'Mining',
-    price: 2.85,
-    change: 0.08,
-    changePercent: 2.89,
-    volume: 74000000,
-    marketCap: 14250000000,
-    high52Week: 4.00,
-    low52Week: 1.80,
-    open: 2.77,
-    high: 2.90,
-    low: 2.75,
-    previousClose: 2.77,
-    pe: 14.3,
-    eps: 0.20,
-    dividend: 0.00,
-  },
-
   // ============ PACKAGING ============
   {
     symbol: 'GREIF',
@@ -2555,25 +2534,6 @@ export const nigerianStocks: Stock[] = [
     pe: 0,
     eps: -0.15,
     dividend: 0.00,
-  },
-  {
-    symbol: 'LIVESTOCK',
-    name: 'Livestock Feeds Plc',
-    sector: 'Agriculture',
-    price: 3.25,
-    change: 0.08,
-    changePercent: 2.52,
-    volume: 580000,
-    marketCap: 6400000000,
-    high52Week: 4.50,
-    low52Week: 2.40,
-    open: 3.17,
-    high: 3.30,
-    low: 3.15,
-    previousClose: 3.17,
-    pe: 16.3,
-    eps: 0.20,
-    dividend: 0.05,
   },
 ];
 

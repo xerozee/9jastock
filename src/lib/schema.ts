@@ -37,3 +37,17 @@ export const portfolioItems = pgTable(
 
 export type PortfolioItem = typeof portfolioItems.$inferSelect;
 export type InsertPortfolioItem = typeof portfolioItems.$inferInsert;
+
+export const newsletterSubscribers = pgTable(
+  "newsletter_subscribers",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    email: varchar("email").notNull().unique(),
+    subscribedAt: timestamp("subscribed_at").defaultNow(),
+    isActive: varchar("is_active").default("true"),
+  },
+  (table) => [index("IDX_newsletter_email").on(table.email)]
+);
+
+export type NewsletterSubscriber = typeof newsletterSubscribers.$inferSelect;
+export type InsertNewsletterSubscriber = typeof newsletterSubscribers.$inferInsert;

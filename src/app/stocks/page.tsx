@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Search, Filter, ArrowUpDown, RefreshCw, Wifi } from 'lucide-react';
 import StockTable from '@/components/StockTable';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import { nigerianStocks, getAllSectors } from '@/lib/stockData';
 import { Stock } from '@/types/stock';
 
@@ -234,22 +235,24 @@ function StocksContent() {
 
 export default function StocksPage() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">All Stocks</h1>
-        <p className="text-gray-600">
-          Browse and filter all stocks listed on the Nigerian Stock Exchange (NGX) with live prices
-        </p>
-      </div>
-
-      <Suspense fallback={
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
-          <RefreshCw size={32} className="animate-spin text-green-600 mx-auto mb-4" />
-          <p className="text-gray-500">Loading stocks...</p>
+    <ProtectedRoute>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">All Stocks</h1>
+          <p className="text-gray-600 dark:text-slate-400">
+            Browse and filter all stocks listed on the Nigerian Stock Exchange (NGX) with live prices
+          </p>
         </div>
-      }>
-        <StocksContent />
-      </Suspense>
-    </div>
+
+        <Suspense fallback={
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-8 text-center">
+            <RefreshCw size={32} className="animate-spin text-green-600 mx-auto mb-4" />
+            <p className="text-gray-500 dark:text-slate-400">Loading stocks...</p>
+          </div>
+        }>
+          <StocksContent />
+        </Suspense>
+      </div>
+    </ProtectedRoute>
   );
 }

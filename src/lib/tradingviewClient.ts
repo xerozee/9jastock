@@ -88,10 +88,40 @@ export const NGX_TV_SYMBOLS: Record<string, string> = {
   'JBERGER': 'NSENG:JBERGER',
   'UPDC': 'NSENG:UPDC',
 
-  // ============ SERVICES / LOGISTICS (3) ============
+  // ============ SERVICES / LOGISTICS (5) ============
   'NAHCO': 'NSENG:NAHCO',
   'ABCTRANS': 'NSENG:ABCTRANS',
   'REDSTAREX': 'NSENG:REDSTAREX',
+  'CAVERTON': 'NSENG:CAVERTON',
+  'SCOA': 'NSENG:SCOA',
+
+  // ============ UTILITIES / POWER (2) ============
+  'GEREGU': 'NSENG:GEREGU',
+  'TRANSCPOWER': 'NSENG:TRANSCPOWER',
+
+  // ============ ADDITIONAL OIL & GAS (1) ============
+  'ARADEL': 'NSENG:ARADEL',
+
+  // ============ ADDITIONAL ICT / FINTECH (3) ============
+  'ETRANZACT': 'NSENG:ETRANZACT',
+  'CHAMS': 'NSENG:CHAMS',
+  'COURTVILLE': 'NSENG:COURTVILLE',
+
+  // ============ MINING (2) ============
+  'MULTIVERSE': 'NSENG:MULTIVERSE',
+  'JAPAULGOLD': 'NSENG:JAPAULGOLD',
+
+  // ============ EDUCATION (1) ============
+  'LEARNAFRICA': 'NSENG:LEARNAFRICA',
+
+  // ============ ADDITIONAL HEALTHCARE (1) ============
+  'MORISON': 'NSENG:MORISON',
+
+  // ============ ADDITIONAL FINANCIAL SERVICES (1) ============
+  'NPFMCRFBK': 'NSENG:NPFMCRFBK',
+
+  // ============ ADDITIONAL INSURANCE (1) ============
+  'SOVRENINS': 'NSENG:SOVRENINS',
 };
 
 export interface LiveQuote {

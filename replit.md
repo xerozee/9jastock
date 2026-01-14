@@ -11,10 +11,16 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 
 ## Recent Changes (January 2026)
 - Implemented TradingView Scanner API for bulk data fetching
-- Fetches all 145 NGX stocks in a single API call (~400ms)
-- Real-time price, volume, change%, market cap, 52-week high/low
-- Removed duplicate stock entries (JAPAULGOLD, LIVESTOCK)
+- Expanded to 76 comprehensive data fields for in-depth stock analysis
+- **Technical Indicators**: RSI (14-day, 7-day), MACD (line, signal, histogram), SMA/EMA (20, 50, 200), Bollinger Bands, Stochastic K/D, ATR, ADX, CCI, Williams %R
+- **Fundamental Data**: P/E ratio, EPS, dividend yield, P/B ratio, P/S ratio, ROE, ROA
+- **Financial Metrics**: Revenue, Net Income, EBITDA, Total Assets, Total Debt, Debt-to-Equity, Current Ratio, Quick Ratio
+- **Performance**: Week, Month, 3M, 6M, YTD, 1Y, 5Y, All-time returns
+- **Volume Analysis**: 10d/30d/90d averages, relative volume
+- **Recommendations**: TradingView buy/sell/neutral signals
+- **Volatility**: Weekly and monthly volatility metrics
 - 5-minute cache TTL with automatic refresh
+- Removed duplicate stock entries (JAPAULGOLD, LIVESTOCK)
 
 ## Project Architecture
 

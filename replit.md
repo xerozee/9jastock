@@ -10,8 +10,16 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 - Auto-refreshes every 5 minutes
 - **User Authentication**: Replit OIDC authentication with session management
 - **Portfolio Tracking**: Authenticated users can add stocks to their personal portfolio
+- **News & Blog**: Market news page with multiple sources and top performers sidebar
 
 ## Recent Changes (January 2026)
+- **News/Blog Feature**: Added comprehensive market news page
+  - Main blog page with news from NGX Official, BusinessDay, Nairametrics, ThisDay, Punch
+  - Filterable news by source with tab navigation
+  - Top 10 performing stocks sidebar with live data (auto-refreshes)
+  - Individual stock news pages with annual reports and financial links
+  - Links to NGX document library, corporate actions, and company profiles
+- **Stocks Page Live Data**: Updated to fetch live prices from API instead of static data
 - **Portfolio Feature**: Added personal portfolio tracking for authenticated users
   - Add/remove stocks from portfolio via + button on stock cards and detail pages
   - My Portfolio page with performance stats (avg change, gainers/losers count)
@@ -45,8 +53,10 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 - `src/app/api/auth/*/route.ts` - Authentication API routes
 - `src/app/api/portfolio/route.ts` - Portfolio API (add/remove/list stocks)
 - `src/app/page.tsx` - Dashboard with market overview
-- `src/app/stocks/page.tsx` - All stocks listing with filters
+- `src/app/stocks/page.tsx` - All stocks listing with live data and filters
 - `src/app/portfolio/page.tsx` - Personal portfolio page
+- `src/app/blog/page.tsx` - Market news page with source filters
+- `src/app/blog/[symbol]/page.tsx` - Individual stock news with annual reports
 - `src/hooks/useAuth.ts` - React hook for authentication state
 - `src/hooks/usePortfolio.ts` - React hook for portfolio management
 

@@ -1,20 +1,33 @@
+'use client';
+
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, RefreshCw, Wifi, WifiOff, Clock } from 'lucide-react';
 import SearchBar from '@/components/SearchBar';
 import MarketOverview from '@/components/MarketOverview';
 import StockCard from '@/components/StockCard';
-import {
-  getMarketSummary,
-  getTopGainers,
-  getTopLosers,
-  getMostActive,
-} from '@/lib/stockData';
+import { useLiveStocks, formatLastUpdate } from '@/lib/useLiveStocks';
+import { getMarketSummary } from '@/lib/stockData';
+import { Stock } from '@/types/stock';
+
+// 30 minutes in milliseconds
+const REFRESH_INTERVAL = 30 * 60 * 1000;
 
 export default function Dashboard() {
+  const { stocks, isLoading, error, liveCount, refresh, lastRefresh } = useLiveStocks(REFRESH_INTERVAL);
   const marketSummary = getMarketSummary();
-  const topGainers = getTopGainers(4);
-  const topLosers = getTopLosers(4);
-  const mostActive = getMostActive(4);
+
+  // Calculate top gainers, losers, most active from live data
+  const topGainers = [...stocks]
+    .sort((a, b) => b.changePercent - a.changePercent)
+    .slice(0, 4);
+
+  const topLosers = [...stocks]
+    .sort((a, b) => a.changePercent - b.changePercent)
+    .slice(0, 4);
+
+  const mostActive = [...stocks]
+    .sort((a, b) => b.volume - a.volume)
+    .slice(0, 4);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -30,6 +43,53 @@ export default function Dashboard() {
           </p>
           <SearchBar />
         </div>
+      </div>
+
+      {/* Live Data Status Bar */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              {liveCount > 0 ? (
+                <>
+                  <Wifi className="text-green-500" size={20} />
+                  <span className="text-sm font-medium text-green-600">
+                    {liveCount} stocks with live data
+                  </span>
+                </>
+              ) : (
+                <>
+                  <WifiOff className="text-orange-500" size={20} />
+                  <span className="text-sm font-medium text-orange-600">
+                    Using cached data
+                  </span>
+                </>
+              )}
+            </div>
+            <div className="flex items-center gap-2 text-gray-500">
+              <Clock size={16} />
+              <span className="text-sm">
+                Last update: {formatLastUpdate(lastRefresh)}
+              </span>
+            </div>
+            <span className="text-xs text-gray-400">
+              Auto-refresh: every 30 minutes
+            </span>
+          </div>
+          <button
+            onClick={refresh}
+            disabled={isLoading}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
+            {isLoading ? 'Refreshing...' : 'Refresh Now'}
+          </button>
+        </div>
+        {error && (
+          <div className="mt-2 text-sm text-orange-600 bg-orange-50 px-3 py-2 rounded">
+            {error} - Showing cached data
+          </div>
+        )}
       </div>
 
       {/* Market Overview */}
@@ -49,11 +109,19 @@ export default function Dashboard() {
             View all <ArrowRight size={18} className="ml-1" />
           </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {topGainers.map((stock) => (
-            <StockCard key={stock.symbol} stock={stock} />
-          ))}
-        </div>
+        {isLoading && stocks.length === 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-gray-100 animate-pulse h-40 rounded-xl" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {topGainers.map((stock) => (
+              <StockCard key={stock.symbol} stock={stock as Stock} />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Top Losers */}
@@ -67,11 +135,19 @@ export default function Dashboard() {
             View all <ArrowRight size={18} className="ml-1" />
           </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {topLosers.map((stock) => (
-            <StockCard key={stock.symbol} stock={stock} />
-          ))}
-        </div>
+        {isLoading && stocks.length === 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-gray-100 animate-pulse h-40 rounded-xl" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {topLosers.map((stock) => (
+              <StockCard key={stock.symbol} stock={stock as Stock} />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Most Active */}
@@ -85,10 +161,45 @@ export default function Dashboard() {
             View all <ArrowRight size={18} className="ml-1" />
           </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {mostActive.map((stock) => (
-            <StockCard key={stock.symbol} stock={stock} showDetails />
-          ))}
+        {isLoading && stocks.length === 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-gray-100 animate-pulse h-40 rounded-xl" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {mostActive.map((stock) => (
+              <StockCard key={stock.symbol} stock={stock as Stock} showDetails />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Stats */}
+      <section className="bg-gray-50 rounded-xl p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Platform Stats</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-white rounded-lg p-4 text-center">
+            <div className="text-2xl font-bold text-green-600">{stocks.length}</div>
+            <div className="text-sm text-gray-500">Total Stocks</div>
+          </div>
+          <div className="bg-white rounded-lg p-4 text-center">
+            <div className="text-2xl font-bold text-green-600">{liveCount}</div>
+            <div className="text-sm text-gray-500">Live Data</div>
+          </div>
+          <div className="bg-white rounded-lg p-4 text-center">
+            <div className="text-2xl font-bold text-green-600">
+              {stocks.filter(s => s.changePercent > 0).length}
+            </div>
+            <div className="text-sm text-gray-500">Gainers</div>
+          </div>
+          <div className="bg-white rounded-lg p-4 text-center">
+            <div className="text-2xl font-bold text-red-600">
+              {stocks.filter(s => s.changePercent < 0).length}
+            </div>
+            <div className="text-sm text-gray-500">Losers</div>
+          </div>
         </div>
       </section>
     </div>

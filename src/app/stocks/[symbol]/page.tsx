@@ -2,11 +2,11 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, TrendingUp, TrendingDown, Star, ExternalLink } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Star, ExternalLink, RefreshCw, Clock, Activity, BarChart3, PieChart } from 'lucide-react';
 import StockChart from '@/components/StockChart';
 import LiveIndicator from '@/components/LiveIndicator';
 import { useWatchlist } from '@/lib/watchlistContext';
-import { useLiveStock } from '@/lib/useLiveStocks';
+import { useLiveStock, formatLastUpdate } from '@/lib/useLiveStocks';
 import {
   getStockBySymbol,
   generateHistoricalData,
@@ -14,14 +14,17 @@ import {
   formatVolume,
 } from '@/lib/stockData';
 
+// 30 minutes in milliseconds
+const REFRESH_INTERVAL = 30 * 60 * 1000;
+
 export default function StockDetailPage() {
   const params = useParams();
   const router = useRouter();
   const symbol = (params.symbol as string).toUpperCase();
   const { isInWatchlist, toggleWatchlist } = useWatchlist();
 
-  // Fetch live data
-  const { stock: liveStock, isLoading, refresh, lastRefresh } = useLiveStock(symbol, 30000);
+  // Fetch live data with 30-minute refresh
+  const { stock: liveStock, isLoading, refresh, lastRefresh } = useLiveStock(symbol, REFRESH_INTERVAL);
 
   // Fallback to static data while loading
   const staticStock = getStockBySymbol(symbol);
@@ -201,12 +204,85 @@ export default function StockDetailPage() {
         </div>
       </div>
 
-      {/* TradingView Widget */}
+      {/* Data Refresh Status */}
+      <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-blue-700">
+              <Clock size={18} />
+              <span className="text-sm font-medium">
+                Last updated: {formatLastUpdate(lastRefresh)}
+              </span>
+            </div>
+            <span className="text-xs text-blue-600">
+              Auto-refresh: every 30 minutes
+            </span>
+          </div>
+          <button
+            onClick={refresh}
+            disabled={isLoading}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
+            {isLoading ? 'Refreshing...' : 'Refresh Data'}
+          </button>
+        </div>
+      </div>
+
+      {/* TradingView Advanced Chart */}
       <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">TradingView Chart</h2>
+        <div className="flex items-center gap-2 mb-4">
+          <BarChart3 className="text-purple-600" size={24} />
+          <h2 className="text-xl font-semibold text-gray-900">Advanced Chart</h2>
+        </div>
         <div className="rounded-lg overflow-hidden border border-gray-200">
           <iframe
-            src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=NSENG:${stock.symbol}&interval=D&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=light&style=1&timezone=Africa/Lagos&withdateranges=1&showpopupbutton=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en&utm_source=localhost&utm_medium=widget&utm_campaign=chart`}
+            src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=NSENG:${stock.symbol}&interval=D&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=RSI@tv-basicstudies,MACD@tv-basicstudies&theme=light&style=1&timezone=Africa/Lagos&withdateranges=1&showpopupbutton=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en`}
+            style={{ width: '100%', height: '550px' }}
+            allowFullScreen
+          />
+        </div>
+      </div>
+
+      {/* TradingView Technical Analysis & Overview Widgets */}
+      <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Technical Analysis Widget */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Activity className="text-green-600" size={24} />
+            <h2 className="text-xl font-semibold text-gray-900">Technical Analysis</h2>
+          </div>
+          <div className="rounded-lg overflow-hidden border border-gray-200">
+            <iframe
+              src={`https://s.tradingview.com/embed-widget/technical-analysis/?locale=en#%7B%22symbol%22%3A%22NSENG%3A${stock.symbol}%22%2C%22interval%22%3A%221D%22%2C%22width%22%3A%22100%25%22%2C%22isTransparent%22%3Afalse%2C%22height%22%3A%22400%22%2C%22colorTheme%22%3A%22light%22%7D`}
+              style={{ width: '100%', height: '400px' }}
+              allowFullScreen
+            />
+          </div>
+        </div>
+
+        {/* Symbol Info Widget */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <PieChart className="text-blue-600" size={24} />
+            <h2 className="text-xl font-semibold text-gray-900">Company Profile</h2>
+          </div>
+          <div className="rounded-lg overflow-hidden border border-gray-200">
+            <iframe
+              src={`https://s.tradingview.com/embed-widget/symbol-profile/?locale=en#%7B%22symbol%22%3A%22NSENG%3A${stock.symbol}%22%2C%22width%22%3A%22100%25%22%2C%22height%22%3A%22400%22%2C%22colorTheme%22%3A%22light%22%2C%22isTransparent%22%3Afalse%7D`}
+              style={{ width: '100%', height: '400px' }}
+              allowFullScreen
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Financials Widget */}
+      <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Financial Data</h2>
+        <div className="rounded-lg overflow-hidden border border-gray-200">
+          <iframe
+            src={`https://s.tradingview.com/embed-widget/financials/?locale=en#%7B%22symbol%22%3A%22NSENG%3A${stock.symbol}%22%2C%22width%22%3A%22100%25%22%2C%22height%22%3A%22500%22%2C%22colorTheme%22%3A%22light%22%2C%22isTransparent%22%3Afalse%2C%22displayMode%22%3A%22regular%22%7D`}
             style={{ width: '100%', height: '500px' }}
             allowFullScreen
           />
@@ -227,7 +303,16 @@ export default function StockDetailPage() {
             View on TradingView
           </a>
           <a
-            href={`https://ngxgroup.com/exchange/data/equity-data/company-listed/${stock.symbol.toLowerCase()}/`}
+            href={`https://www.tradingview.com/symbols/NSENG-${stock.symbol}/technicals/`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-4 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors"
+          >
+            <Activity size={16} className="mr-2" />
+            Technicals on TradingView
+          </a>
+          <a
+            href={`https://ngxgroup.com/exchange/data/company-profile/?symbol=${stock.symbol}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center px-4 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors"

@@ -4,7 +4,9 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, TrendingUp, TrendingDown, Star, ExternalLink } from 'lucide-react';
 import StockChart from '@/components/StockChart';
+import LiveIndicator from '@/components/LiveIndicator';
 import { useWatchlist } from '@/lib/watchlistContext';
+import { useLiveStock } from '@/lib/useLiveStocks';
 import {
   getStockBySymbol,
   generateHistoricalData,
@@ -15,12 +17,17 @@ import {
 export default function StockDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const symbol = params.symbol as string;
+  const symbol = (params.symbol as string).toUpperCase();
   const { isInWatchlist, toggleWatchlist } = useWatchlist();
 
-  const stock = getStockBySymbol(symbol);
+  // Fetch live data
+  const { stock: liveStock, isLoading, refresh, lastRefresh } = useLiveStock(symbol, 30000);
 
-  if (!stock) {
+  // Fallback to static data while loading
+  const staticStock = getStockBySymbol(symbol);
+  const stock = liveStock || staticStock;
+
+  if (!stock && !isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
@@ -40,9 +47,24 @@ export default function StockDetailPage() {
     );
   }
 
+  if (!stock) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/3 mx-auto mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const historicalData = generateHistoricalData(stock.price);
   const isPositive = stock.change >= 0;
   const inWatchlist = isInWatchlist(stock.symbol);
+  const isLive = 'isLive' in stock ? Boolean(stock.isLive) : false;
+  const lastUpdated = 'lastUpdated' in stock ? (stock.lastUpdated as number | null) : null;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -77,6 +99,14 @@ export default function StockDetailPage() {
               </button>
             </div>
             <p className="text-lg text-gray-600">{stock.name}</p>
+            <div className="mt-2">
+              <LiveIndicator
+                isLive={isLive}
+                lastUpdated={lastUpdated}
+                onRefresh={refresh}
+                isLoading={isLoading}
+              />
+            </div>
           </div>
 
           <div className="text-left md:text-right">
@@ -171,10 +201,31 @@ export default function StockDetailPage() {
         </div>
       </div>
 
+      {/* TradingView Widget */}
+      <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">TradingView Chart</h2>
+        <div className="rounded-lg overflow-hidden border border-gray-200">
+          <iframe
+            src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=NSENG:${stock.symbol}&interval=D&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=light&style=1&timezone=Africa/Lagos&withdateranges=1&showpopupbutton=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en&utm_source=localhost&utm_medium=widget&utm_campaign=chart`}
+            style={{ width: '100%', height: '500px' }}
+            allowFullScreen
+          />
+        </div>
+      </div>
+
       {/* External Links */}
       <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">External Resources</h2>
         <div className="flex flex-wrap gap-3">
+          <a
+            href={`https://www.tradingview.com/symbols/NSENG-${stock.symbol}/`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-4 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors"
+          >
+            <ExternalLink size={16} className="mr-2" />
+            View on TradingView
+          </a>
           <a
             href={`https://ngxgroup.com/exchange/data/equity-data/company-listed/${stock.symbol.toLowerCase()}/`}
             target="_blank"

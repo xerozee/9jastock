@@ -1,22 +1,88 @@
 'use client';
 
+import { useMemo } from 'react';
 import Link from 'next/link';
 import { ArrowRight, RefreshCw, Wifi, WifiOff, Clock } from 'lucide-react';
 import SearchBar from '@/components/SearchBar';
 import MarketOverview from '@/components/MarketOverview';
 import StockCard from '@/components/StockCard';
 import { useLiveStocks, formatLastUpdate } from '@/lib/useLiveStocks';
-import { getMarketSummary } from '@/lib/stockData';
-import { Stock } from '@/types/stock';
+import { Stock, MarketSummary } from '@/types/stock';
 
-// 30 minutes in milliseconds
 const REFRESH_INTERVAL = 30 * 60 * 1000;
+
+function computeMarketSummary(stocks: Stock[]): MarketSummary {
+  const advancers = stocks.filter(s => s.changePercent > 0).length;
+  const decliners = stocks.filter(s => s.changePercent < 0).length;
+  const unchanged = stocks.filter(s => s.changePercent === 0).length;
+  const totalMarketCap = stocks.reduce((sum, s) => sum + s.marketCap, 0);
+  const totalVolume = stocks.reduce((sum, s) => sum + s.volume, 0);
+
+  const financialStocks = stocks.filter(s => s.sector === 'Financial Services');
+  const consumerStocks = stocks.filter(s => s.sector === 'Consumer Goods');
+  const oilGasStocks = stocks.filter(s => s.sector === 'Oil & Gas');
+  const industrialStocks = stocks.filter(s => s.sector === 'Industrial Goods');
+  const insuranceStocks = stocks.filter(s => s.sector === 'Insurance');
+
+  const calcIndex = (sectorStocks: Stock[], baseValue: number) => {
+    if (sectorStocks.length === 0) return { value: baseValue, change: 0, changePercent: 0 };
+    const avgChange = sectorStocks.reduce((sum, s) => sum + s.changePercent, 0) / sectorStocks.length;
+    const change = baseValue * (avgChange / 100);
+    return { value: baseValue + change, change, changePercent: avgChange };
+  };
+
+  const allShareBase = 99876.54;
+  const allShareAvgChange = stocks.length > 0 
+    ? stocks.reduce((sum, s) => sum + s.changePercent, 0) / stocks.length 
+    : 0;
+  const allShareChange = allShareBase * (allShareAvgChange / 100);
+
+  return {
+    totalMarketCap,
+    totalVolume,
+    advancers,
+    decliners,
+    unchanged,
+    indices: [
+      {
+        name: 'NGX All-Share Index',
+        value: allShareBase + allShareChange,
+        change: allShareChange,
+        changePercent: allShareAvgChange,
+      },
+      {
+        name: 'NGX 30 Index',
+        ...calcIndex(stocks.slice(0, 30), 3456.78),
+      },
+      {
+        name: 'NGX Banking Index',
+        ...calcIndex(financialStocks, 876.32),
+      },
+      {
+        name: 'NGX Consumer Goods',
+        ...calcIndex(consumerStocks, 1234.56),
+      },
+      {
+        name: 'NGX Oil & Gas Index',
+        ...calcIndex(oilGasStocks, 567.89),
+      },
+      {
+        name: 'NGX Industrial Index',
+        ...calcIndex(industrialStocks, 2345.67),
+      },
+      {
+        name: 'NGX Insurance Index',
+        ...calcIndex(insuranceStocks, 234.56),
+      },
+    ],
+  };
+}
 
 export default function Dashboard() {
   const { stocks, isLoading, error, liveCount, refresh, lastRefresh } = useLiveStocks(REFRESH_INTERVAL);
-  const marketSummary = getMarketSummary();
 
-  // Calculate top gainers, losers, most active from live data
+  const marketSummary = useMemo(() => computeMarketSummary(stocks), [stocks]);
+
   const topGainers = [...stocks]
     .sort((a, b) => b.changePercent - a.changePercent)
     .slice(0, 4);

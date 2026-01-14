@@ -31,9 +31,9 @@ export async function GET() {
         return {
           ...stock,
           name: cached.name || stock.name,
-          description: cached.description || '',
+          description: cached.description || stock.description || '',
           sector: cached.sector || stock.sector,
-          industry: cached.industry || '',
+          industry: cached.industry || stock.industry || '',
           
           price: cached.price,
           change: cached.change,

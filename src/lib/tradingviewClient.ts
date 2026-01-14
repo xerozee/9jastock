@@ -369,7 +369,7 @@ export async function fetchNigerianStocksFromScanner(): Promise<LiveQuote[]> {
         neutralSignals: 0,
         
         gap: Number(d[71]) || 0,
-        gapPercent: 0,
+        gapPercent: Number(d[72]) || 0,
         
         beta1Year: Number(d[73]) || 0,
         

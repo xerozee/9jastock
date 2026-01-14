@@ -1,10 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { TrendingUp, TrendingDown, Star } from 'lucide-react';
+import { TrendingUp, TrendingDown, Star, Plus, Check } from 'lucide-react';
 import { Stock } from '@/types/stock';
 import { formatCurrency, formatVolume } from '@/lib/stockData';
 import { useWatchlist } from '@/lib/watchlistContext';
+import { usePortfolio } from '@/hooks/usePortfolio';
+import { useAuth } from '@/hooks/useAuth';
 
 interface StockTableProps {
   stocks: Stock[];
@@ -13,6 +15,16 @@ interface StockTableProps {
 
 export default function StockTable({ stocks, title }: StockTableProps) {
   const { isInWatchlist, toggleWatchlist } = useWatchlist();
+  const { isInPortfolio, addToPortfolio, removeFromPortfolio } = usePortfolio();
+  const { isAuthenticated } = useAuth();
+
+  const handlePortfolioToggle = async (symbol: string) => {
+    if (isInPortfolio(symbol)) {
+      await removeFromPortfolio(symbol);
+    } else {
+      await addToPortfolio(symbol);
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -44,7 +56,7 @@ export default function StockTable({ stocks, title }: StockTableProps) {
                 Market Cap
               </th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Watch
+                Actions
               </th>
             </tr>
           </thead>
@@ -52,6 +64,7 @@ export default function StockTable({ stocks, title }: StockTableProps) {
             {stocks.map((stock) => {
               const isPositive = stock.change >= 0;
               const inWatchlist = isInWatchlist(stock.symbol);
+              const inPortfolio = isInPortfolio(stock.symbol);
 
               return (
                 <tr
@@ -100,16 +113,31 @@ export default function StockTable({ stocks, title }: StockTableProps) {
                     {formatCurrency(stock.marketCap)}
                   </td>
                   <td className="px-4 py-4 text-center">
-                    <button
-                      onClick={() => toggleWatchlist(stock.symbol)}
-                      className={`p-1.5 rounded-lg transition-colors ${
-                        inWatchlist
-                          ? 'text-yellow-500 bg-yellow-50 hover:bg-yellow-100'
-                          : 'text-gray-400 hover:text-yellow-500 hover:bg-gray-100'
-                      }`}
-                    >
-                      <Star size={16} fill={inWatchlist ? 'currentColor' : 'none'} />
-                    </button>
+                    <div className="flex items-center justify-center space-x-1">
+                      {isAuthenticated && (
+                        <button
+                          onClick={() => handlePortfolioToggle(stock.symbol)}
+                          title={inPortfolio ? 'Remove from portfolio' : 'Add to portfolio'}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            inPortfolio
+                              ? 'text-green-600 bg-green-50 hover:bg-green-100'
+                              : 'text-gray-400 hover:text-green-600 hover:bg-gray-100'
+                          }`}
+                        >
+                          {inPortfolio ? <Check size={16} /> : <Plus size={16} />}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => toggleWatchlist(stock.symbol)}
+                        className={`p-1.5 rounded-lg transition-colors ${
+                          inWatchlist
+                            ? 'text-yellow-500 bg-yellow-50 hover:bg-yellow-100'
+                            : 'text-gray-400 hover:text-yellow-500 hover:bg-gray-100'
+                        }`}
+                      >
+                        <Star size={16} fill={inWatchlist ? 'currentColor' : 'none'} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );

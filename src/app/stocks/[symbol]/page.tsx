@@ -5,12 +5,14 @@ import Link from 'next/link';
 import { 
   ArrowLeft, TrendingUp, TrendingDown, Star, ExternalLink, RefreshCw, Clock, 
   Activity, BarChart3, PieChart, DollarSign, Percent, TrendingDown as TrendDown,
-  ChevronRight, Building2, LineChart, Scale, Wallet, Users, BarChart2
+  ChevronRight, Building2, LineChart, Scale, Wallet, Users, BarChart2, Plus, Check
 } from 'lucide-react';
 import StockChart from '@/components/StockChart';
 import LiveIndicator from '@/components/LiveIndicator';
 import { useWatchlist } from '@/lib/watchlistContext';
 import { useLiveStock, formatLastUpdate } from '@/lib/useLiveStocks';
+import { usePortfolio } from '@/hooks/usePortfolio';
+import { useAuth } from '@/hooks/useAuth';
 import {
   getStockBySymbol,
   generateHistoricalData,
@@ -123,6 +125,18 @@ export default function StockDetailPage() {
   const router = useRouter();
   const symbol = (params.symbol as string).toUpperCase();
   const { isInWatchlist, toggleWatchlist } = useWatchlist();
+  const { isInPortfolio, addToPortfolio, removeFromPortfolio } = usePortfolio();
+  const { isAuthenticated } = useAuth();
+
+  const inPortfolio = isInPortfolio(symbol);
+
+  const handlePortfolioToggle = async () => {
+    if (inPortfolio) {
+      await removeFromPortfolio(symbol);
+    } else {
+      await addToPortfolio(symbol);
+    }
+  };
 
   const { stock: liveStock, isLoading, refresh, lastRefresh } = useLiveStock(symbol, REFRESH_INTERVAL);
   const staticStock = getStockBySymbol(symbol);
@@ -187,6 +201,17 @@ export default function StockDetailPage() {
               <span className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">{stock.sector}</span>
               {extendedStock.industry && (
                 <span className="px-3 py-1 bg-blue-50 text-blue-600 text-sm rounded-full">{extendedStock.industry}</span>
+              )}
+              {isAuthenticated && (
+                <button
+                  onClick={handlePortfolioToggle}
+                  title={inPortfolio ? 'Remove from portfolio' : 'Add to portfolio'}
+                  className={`p-2 rounded-lg transition-colors ${
+                    inPortfolio ? 'text-green-600 bg-green-50 hover:bg-green-100' : 'text-gray-400 hover:text-green-600 hover:bg-gray-100'
+                  }`}
+                >
+                  {inPortfolio ? <Check size={20} /> : <Plus size={20} />}
+                </button>
               )}
               <button
                 onClick={() => toggleWatchlist(stock.symbol)}

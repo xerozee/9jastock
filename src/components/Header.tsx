@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { TrendingUp, BarChart3, Star, Menu, X, User, LogIn, LogOut } from 'lucide-react';
+import { TrendingUp, BarChart3, Star, Menu, X, User, LogIn, LogOut, Briefcase } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -14,6 +14,7 @@ export default function Header() {
   const navLinks = [
     { href: '/', label: 'Dashboard', icon: BarChart3 },
     { href: '/stocks', label: 'Stocks', icon: TrendingUp },
+    { href: '/portfolio', label: 'My Portfolio', icon: Briefcase, requiresAuth: true },
     { href: '/watchlist', label: 'Watchlist', icon: Star },
   ];
 

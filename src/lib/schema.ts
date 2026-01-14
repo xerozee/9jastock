@@ -23,3 +23,17 @@ export const users = pgTable("users", {
 
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+export const portfolioItems = pgTable(
+  "portfolio_items",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    symbol: varchar("symbol").notNull(),
+    addedAt: timestamp("added_at").defaultNow(),
+  },
+  (table) => [index("IDX_portfolio_user").on(table.userId)]
+);
+
+export type PortfolioItem = typeof portfolioItems.$inferSelect;
+export type InsertPortfolioItem = typeof portfolioItems.$inferInsert;

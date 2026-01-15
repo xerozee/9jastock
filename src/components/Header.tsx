@@ -14,12 +14,14 @@ export default function Header() {
   const { isDark, toggleTheme } = useTheme();
 
   const navLinks = [
-    { href: '/', label: 'Dashboard', icon: BarChart3 },
-    { href: '/stocks', label: 'Stocks', icon: TrendingUp },
-    { href: '/blog', label: 'News', icon: Newspaper },
+    { href: '/', label: 'Dashboard', icon: BarChart3, requiresAuth: false },
+    { href: '/stocks', label: 'Stocks', icon: TrendingUp, requiresAuth: true },
+    { href: '/blog', label: 'News', icon: Newspaper, requiresAuth: true },
     { href: '/portfolio', label: 'My Portfolio', icon: Briefcase, requiresAuth: true },
-    { href: '/watchlist', label: 'Watchlist', icon: Star },
+    { href: '/watchlist', label: 'Watchlist', icon: Star, requiresAuth: true },
   ];
+
+  const visibleNavLinks = navLinks.filter(link => !link.requiresAuth || isAuthenticated);
 
   return (
     <header className="bg-gradient-to-r from-green-800 via-green-700 to-emerald-700 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-white shadow-lg sticky top-0 z-50 backdrop-blur-sm">
@@ -36,7 +38,7 @@ export default function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center space-x-1">
-            {navLinks.map((link) => {
+            {visibleNavLinks.map((link) => {
               const Icon = link.icon;
               const isActive = pathname === link.href;
               return (
@@ -123,7 +125,7 @@ export default function Header() {
 
         {isMenuOpen && (
           <nav className="md:hidden py-4 border-t border-white/10">
-            {navLinks.map((link) => {
+            {visibleNavLinks.map((link) => {
               const Icon = link.icon;
               const isActive = pathname === link.href;
               return (

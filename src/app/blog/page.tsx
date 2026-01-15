@@ -109,6 +109,28 @@ export default function BlogPage() {
     return date.toLocaleDateString('en-NG', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  const formatRelativeTime = (dateStr: string | null) => {
+    if (!dateStr) return 'Just now';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} min ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    return formatDate(dateStr);
+  };
+
+  const truncateSummary = (text: string | null, maxLength: number = 150) => {
+    if (!text) return null;
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength).trim() + '...';
+  };
+
   return (
     <AuthGuard pageName="market news">
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
@@ -219,15 +241,20 @@ export default function BlogPage() {
               </div>
             ) : (
               <div className="grid gap-6">
-                {filteredNews.map(item => {
+                {filteredNews.slice(0, 10).map(item => {
                   const sourceInfo = getSourceInfo(item.source);
+                  const previewText = truncateSummary(item.summary) || truncateSummary(item.title, 100);
                   return (
-                    <article key={item.id} className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-6 hover:shadow-md transition-shadow">
+                    <article key={item.id} className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-6 hover:shadow-md transition-shadow group">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <div className="flex items-center gap-2 mb-3 flex-wrap">
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${sourceInfo.color}`}>
                               {item.source}
+                            </span>
+                            <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                              <Clock size={12} />
+                              {formatRelativeTime(item.publishedAt || item.scrapedAt)}
                             </span>
                             {item.category && (
                               <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-full">
@@ -243,26 +270,25 @@ export default function BlogPage() {
                               </Link>
                             )}
                           </div>
-                          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 hover:text-green-600 dark:hover:text-green-400">
+                          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
                             <a href={item.url} target="_blank" rel="noopener noreferrer">
                               {item.title}
                             </a>
                           </h2>
-                          {item.summary && (
-                            <p className="text-gray-600 dark:text-gray-400 mb-3">{item.summary}</p>
-                          )}
-                          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                            <span className="flex items-center gap-1">
-                              <Clock size={14} />
+                          <p className="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
+                            {previewText || 'Click to read the full article and get detailed insights on this market news.'}
+                          </p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
                               {formatDate(item.publishedAt || item.scrapedAt)}
                             </span>
                             <a 
                               href={item.url} 
                               target="_blank" 
                               rel="noopener noreferrer"
-                              className="flex items-center gap-1 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                              className="flex items-center gap-1 text-sm font-medium text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
                             >
-                              Read More <ExternalLink size={14} />
+                              Read Full Article <ExternalLink size={14} />
                             </a>
                           </div>
                         </div>
@@ -270,6 +296,11 @@ export default function BlogPage() {
                     </article>
                   );
                 })}
+                {filteredNews.length > 10 && (
+                  <p className="text-center text-gray-500 dark:text-gray-400 text-sm">
+                    Showing 10 of {filteredNews.length} articles
+                  </p>
+                )}
               </div>
             )}
 

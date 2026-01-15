@@ -6,6 +6,7 @@ import {
   TrendingUp, TrendingDown, Newspaper, ExternalLink, Clock, 
   Building2, BarChart3, FileText, RefreshCw, ChevronRight
 } from 'lucide-react';
+import AuthGuard from '@/components/AuthGuard';
 import { Stock } from '@/types/stock';
 
 interface NewsItem {
@@ -97,6 +98,7 @@ export default function BlogPage() {
   };
 
   return (
+    <AuthGuard pageName="market news">
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
@@ -368,5 +370,6 @@ export default function BlogPage() {
         </div>
       </div>
     </div>
+    </AuthGuard>
   );
 }

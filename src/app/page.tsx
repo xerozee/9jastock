@@ -6,7 +6,9 @@ import { ArrowRight, RefreshCw, Wifi, WifiOff, Clock } from 'lucide-react';
 import SearchBar from '@/components/SearchBar';
 import MarketOverview from '@/components/MarketOverview';
 import StockCard from '@/components/StockCard';
+import LandingPage from '@/components/LandingPage';
 import { useLiveStocks, formatLastUpdate } from '@/lib/useLiveStocks';
+import { useAuth } from '@/hooks/useAuth';
 import { Stock, MarketSummary } from '@/types/stock';
 
 const REFRESH_INTERVAL = 30 * 60 * 1000;
@@ -86,6 +88,7 @@ function computeMarketSummary(stocks: Stock[]): MarketSummary {
 }
 
 export default function HomePage() {
+  const { isAuthenticated, isLoading: authLoading, login } = useAuth();
   const { stocks, isLoading, error, liveCount, refresh, lastRefresh } = useLiveStocks(REFRESH_INTERVAL);
 
   const marketSummary = useMemo(() => computeMarketSummary(stocks), [stocks]);
@@ -101,6 +104,21 @@ export default function HomePage() {
   const mostActive = [...stocks]
     .sort((a, b) => b.volume - a.volume)
     .slice(0, 4);
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-500 dark:text-slate-400">Loading 9jaStock...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LandingPage onLogin={login} />;
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

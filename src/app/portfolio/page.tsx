@@ -13,6 +13,7 @@ import {
   ArrowUpRight,
   Search
 } from "lucide-react";
+import AuthGuard from "@/components/AuthGuard";
 
 interface StockData {
   symbol: string;
@@ -125,6 +126,7 @@ export default function PortfolioPage() {
   const stats = calculatePortfolioStats();
 
   return (
+    <AuthGuard pageName="your portfolio">
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
@@ -344,5 +346,6 @@ export default function PortfolioPage() {
         </div>
       )}
     </div>
+    </AuthGuard>
   );
 }

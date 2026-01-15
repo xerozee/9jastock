@@ -50,10 +50,14 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
   - Session-based authentication with cookies
   - User profile display with avatar
   - Supports email/password, Google, Apple sign-in
-- **Database-backed Portfolio**: Portfolio tracking for authenticated users
-  - POST /api/portfolio to add stocks
-  - DELETE /api/portfolio to remove stocks
-  - GET /api/portfolio to list user's stocks
+- **Database-backed Portfolio & Holdings Tracker**: Portfolio tracking for authenticated users
+  - Holdings table for tracking individual stock purchases with shares, price, and date
+  - POST /api/holdings to add stock positions with purchase details
+  - GET /api/holdings to list user's holdings with all transaction history
+  - DELETE /api/holdings?id={id} to remove individual transactions
+  - Grouped view showing total shares, avg cost basis, current value, and gain/loss per stock
+  - Expandable transaction history for each stock position
+  - Portfolio summary with total value, total gain/loss, cost basis, and position count
 - **Modern Theme & Dark Mode**: Complete UI redesign with dark mode support
   - ThemeContext with localStorage persistence for user preference
   - Dark mode toggle button in header (moon/sun icon)

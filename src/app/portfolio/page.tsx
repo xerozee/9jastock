@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { 
   TrendingUp, 
@@ -12,7 +12,13 @@ import {
   Loader2,
   ArrowUpRight,
   Search,
-  Clock
+  Clock,
+  Calendar,
+  DollarSign,
+  Hash,
+  Trash2,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 import AuthGuard from "@/components/AuthGuard";
 
@@ -25,31 +31,70 @@ interface StockData {
   marketCap: number;
   volume: number;
   sector: string;
-  perfWeek?: number;
-  perfMonth?: number;
-  perfYear?: number;
+}
+
+interface Holding {
+  id: string;
+  symbol: string;
+  shares: number;
+  purchasePrice: number;
+  purchaseDate: string;
+  notes: string | null;
+  createdAt: string;
+}
+
+interface GroupedHolding {
+  symbol: string;
+  name: string;
+  totalShares: number;
+  avgCostBasis: number;
+  totalCost: number;
+  currentPrice: number;
+  currentValue: number;
+  totalGainLoss: number;
+  totalGainLossPercent: number;
+  holdings: Holding[];
 }
 
 export default function PortfolioPage() {
-  const [portfolioSymbols, setPortfolioSymbols] = useState<string[]>([]);
+  const [holdings, setHoldings] = useState<Holding[]>([]);
   const [allStocks, setAllStocks] = useState<StockData[]>([]);
-  const [stocksData, setStocksData] = useState<Map<string, StockData>>(new Map());
+  const [stocksMap, setStocksMap] = useState<Map<string, StockData>>(new Map());
   const [isLoadingStocks, setIsLoadingStocks] = useState(true);
+  const [isLoadingHoldings, setIsLoadingHoldings] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandedSymbols, setExpandedSymbols] = useState<Set<string>>(new Set());
+
+  const [newHolding, setNewHolding] = useState({
+    symbol: "",
+    shares: "",
+    purchasePrice: "",
+    purchaseDate: new Date().toISOString().split("T")[0],
+    notes: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("portfolio");
-    if (saved) {
-      setPortfolioSymbols(JSON.parse(saved));
-    }
+    fetchHoldings();
     fetchStocksData();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("portfolio", JSON.stringify(portfolioSymbols));
-  }, [portfolioSymbols]);
+  const fetchHoldings = async () => {
+    setIsLoadingHoldings(true);
+    try {
+      const response = await fetch("/api/holdings");
+      if (response.ok) {
+        const data = await response.json();
+        setHoldings(data.data || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch holdings:", error);
+    } finally {
+      setIsLoadingHoldings(false);
+    }
+  };
 
   const fetchStocksData = async () => {
     setIsLoadingStocks(true);
@@ -57,11 +102,11 @@ export default function PortfolioPage() {
       const response = await fetch("/api/stocks");
       if (response.ok) {
         const data = await response.json();
-        const stocksMap = new Map<string, StockData>();
+        const map = new Map<string, StockData>();
         data.data.forEach((stock: StockData) => {
-          stocksMap.set(stock.symbol, stock);
+          map.set(stock.symbol, stock);
         });
-        setStocksData(stocksMap);
+        setStocksMap(map);
         setAllStocks(data.data);
         setLastUpdated(new Date());
       }
@@ -72,59 +117,141 @@ export default function PortfolioPage() {
     }
   };
 
-  const addToPortfolio = (symbol: string) => {
-    if (!portfolioSymbols.includes(symbol)) {
-      setPortfolioSymbols([...portfolioSymbols, symbol]);
+  const handleAddHolding = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newHolding.symbol || !newHolding.shares || !newHolding.purchasePrice) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/holdings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          symbol: newHolding.symbol,
+          shares: parseFloat(newHolding.shares),
+          purchasePrice: parseFloat(newHolding.purchasePrice),
+          purchaseDate: newHolding.purchaseDate,
+          notes: newHolding.notes || null,
+        }),
+      });
+
+      if (response.ok) {
+        await fetchHoldings();
+        setShowAddModal(false);
+        setNewHolding({
+          symbol: "",
+          shares: "",
+          purchasePrice: "",
+          purchaseDate: new Date().toISOString().split("T")[0],
+          notes: "",
+        });
+        setSearchQuery("");
+      }
+    } catch (error) {
+      console.error("Failed to add holding:", error);
+    } finally {
+      setIsSubmitting(false);
     }
-    setShowAddModal(false);
+  };
+
+  const handleDeleteHolding = async (holdingId: string) => {
+    try {
+      const response = await fetch(`/api/holdings?id=${holdingId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        await fetchHoldings();
+      }
+    } catch (error) {
+      console.error("Failed to delete holding:", error);
+    }
+  };
+
+  const selectStock = (stock: StockData) => {
+    setNewHolding({
+      ...newHolding,
+      symbol: stock.symbol,
+      purchasePrice: stock.price.toString(),
+    });
     setSearchQuery("");
   };
 
-  const removeFromPortfolio = (symbol: string) => {
-    setPortfolioSymbols(portfolioSymbols.filter(s => s !== symbol));
+  const toggleExpanded = (symbol: string) => {
+    const newExpanded = new Set(expandedSymbols);
+    if (newExpanded.has(symbol)) {
+      newExpanded.delete(symbol);
+    } else {
+      newExpanded.add(symbol);
+    }
+    setExpandedSymbols(newExpanded);
   };
 
-  const formatCurrency = (value: number) => {
-    if (value >= 1e12) return `₦${(value / 1e12).toFixed(2)}T`;
-    if (value >= 1e9) return `₦${(value / 1e9).toFixed(2)}B`;
-    if (value >= 1e6) return `₦${(value / 1e6).toFixed(2)}M`;
-    return `₦${value.toLocaleString()}`;
-  };
+  const groupedHoldings = useMemo(() => {
+    const groups = new Map<string, GroupedHolding>();
 
-  const formatVolume = (value: number) => {
-    if (value >= 1e9) return `${(value / 1e9).toFixed(2)}B`;
-    if (value >= 1e6) return `${(value / 1e6).toFixed(2)}M`;
-    if (value >= 1e3) return `${(value / 1e3).toFixed(2)}K`;
-    return value.toString();
-  };
+    holdings.forEach(holding => {
+      const stock = stocksMap.get(holding.symbol);
+      const currentPrice = stock?.price || holding.purchasePrice;
+      const holdingValue = holding.shares * currentPrice;
+      const holdingCost = holding.shares * holding.purchasePrice;
 
-  const calculatePortfolioStats = () => {
-    let totalChange = 0;
-    let gainers = 0;
-    let losers = 0;
-    let validStocks = 0;
-
-    portfolioSymbols.forEach(symbol => {
-      const stock = stocksData.get(symbol);
-      if (stock) {
-        validStocks++;
-        totalChange += stock.changePercent || 0;
-        if ((stock.changePercent || 0) > 0) gainers++;
-        else if ((stock.changePercent || 0) < 0) losers++;
+      if (groups.has(holding.symbol)) {
+        const group = groups.get(holding.symbol)!;
+        group.totalShares += holding.shares;
+        group.totalCost += holdingCost;
+        group.currentValue += holdingValue;
+        group.holdings.push(holding);
+      } else {
+        groups.set(holding.symbol, {
+          symbol: holding.symbol,
+          name: stock?.name || holding.symbol,
+          totalShares: holding.shares,
+          avgCostBasis: holding.purchasePrice,
+          totalCost: holdingCost,
+          currentPrice,
+          currentValue: holdingValue,
+          totalGainLoss: 0,
+          totalGainLossPercent: 0,
+          holdings: [holding],
+        });
       }
     });
 
-    const avgChange = validStocks > 0 ? totalChange / validStocks : 0;
-    return { avgChange, gainers, losers };
+    groups.forEach(group => {
+      group.avgCostBasis = group.totalCost / group.totalShares;
+      group.totalGainLoss = group.currentValue - group.totalCost;
+      group.totalGainLossPercent = ((group.currentValue - group.totalCost) / group.totalCost) * 100;
+    });
+
+    return Array.from(groups.values()).sort((a, b) => b.currentValue - a.currentValue);
+  }, [holdings, stocksMap]);
+
+  const portfolioStats = useMemo(() => {
+    const totalValue = groupedHoldings.reduce((sum, g) => sum + g.currentValue, 0);
+    const totalCost = groupedHoldings.reduce((sum, g) => sum + g.totalCost, 0);
+    const totalGainLoss = totalValue - totalCost;
+    const totalGainLossPercent = totalCost > 0 ? ((totalValue - totalCost) / totalCost) * 100 : 0;
+    const positionsCount = groupedHoldings.length;
+    const transactionsCount = holdings.length;
+
+    return { totalValue, totalCost, totalGainLoss, totalGainLossPercent, positionsCount, transactionsCount };
+  }, [groupedHoldings, holdings]);
+
+  const formatCurrency = (value: number) => {
+    return `₦${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  const formatNumber = (value: number) => {
+    return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
   const filteredStocks = allStocks.filter(stock => 
-    !portfolioSymbols.includes(stock.symbol) &&
-    (stock.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     stock.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    stock.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    stock.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const stats = calculatePortfolioStats();
+  const isLoading = isLoadingStocks || isLoadingHoldings;
 
   return (
     <AuthGuard pageName="your portfolio">
@@ -136,11 +263,11 @@ export default function PortfolioPage() {
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-sm mb-4">
                 <Briefcase size={16} />
-                <span>Personal Portfolio</span>
+                <span>Holdings Tracker</span>
               </div>
               <h1 className="text-3xl md:text-4xl font-bold mb-2">My Portfolio</h1>
               <p className="text-purple-100 dark:text-slate-300 text-lg">
-                Track your favorite Nigerian stocks in one place
+                Track your NGX stock holdings and performance
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -149,14 +276,14 @@ export default function PortfolioPage() {
                 className="flex items-center gap-2 px-5 py-3 bg-white text-purple-700 font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all"
               >
                 <Plus size={18} />
-                <span>Add Stock</span>
+                <span>Add Position</span>
               </button>
               <button
-                onClick={fetchStocksData}
-                disabled={isLoadingStocks}
+                onClick={() => { fetchHoldings(); fetchStocksData(); }}
+                disabled={isLoading}
                 className="flex items-center gap-2 px-4 py-3 bg-white/10 backdrop-blur-sm text-white rounded-xl hover:bg-white/20 transition-all disabled:opacity-50"
               >
-                <RefreshCw size={18} className={isLoadingStocks ? "animate-spin" : ""} />
+                <RefreshCw size={18} className={isLoading ? "animate-spin" : ""} />
               </button>
             </div>
           </div>
@@ -165,190 +292,334 @@ export default function PortfolioPage() {
         {lastUpdated && (
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-500 mb-6">
             <Clock size={14} />
-            <span>Last updated: {lastUpdated.toLocaleTimeString()}</span>
+            <span>Prices updated: {lastUpdated.toLocaleTimeString()}</span>
           </div>
         )}
 
-        {portfolioSymbols.length > 0 && (
+        {holdings.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-700">
-              <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">Stocks Tracked</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">{portfolioSymbols.length}</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">Portfolio Value</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(portfolioStats.totalValue)}</p>
             </div>
             <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-700">
-              <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">Avg. Daily Change</p>
-              <p className={`text-3xl font-bold ${stats.avgChange >= 0 ? "text-green-600" : "text-red-600"}`}>
-                {stats.avgChange >= 0 ? "+" : ""}{isNaN(stats.avgChange) ? "0.00" : stats.avgChange.toFixed(2)}%
+              <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">Total Gain/Loss</p>
+              <p className={`text-2xl font-bold ${portfolioStats.totalGainLoss >= 0 ? "text-green-600" : "text-red-600"}`}>
+                {portfolioStats.totalGainLoss >= 0 ? "+" : ""}{formatCurrency(portfolioStats.totalGainLoss)}
+              </p>
+              <p className={`text-sm ${portfolioStats.totalGainLoss >= 0 ? "text-green-600" : "text-red-600"}`}>
+                {portfolioStats.totalGainLossPercent >= 0 ? "+" : ""}{formatNumber(portfolioStats.totalGainLossPercent)}%
               </p>
             </div>
             <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-700">
-              <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">Gainers Today</p>
-              <p className="text-3xl font-bold text-green-600">{stats.gainers}</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">Cost Basis</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(portfolioStats.totalCost)}</p>
             </div>
             <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-700">
-              <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">Decliners Today</p>
-              <p className="text-3xl font-bold text-red-600">{stats.losers}</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">Positions</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{portfolioStats.positionsCount}</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400">{portfolioStats.transactionsCount} transactions</p>
             </div>
           </div>
         )}
 
-        {isLoadingStocks ? (
+        {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+            <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
           </div>
-        ) : portfolioSymbols.length === 0 ? (
+        ) : holdings.length === 0 ? (
           <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700">
             <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
               <Briefcase className="w-10 h-10 text-purple-600 dark:text-purple-400" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Your portfolio is empty</h2>
             <p className="text-gray-600 dark:text-slate-400 mb-8 max-w-md mx-auto">
-              Start adding stocks to track their performance and build your investment watchlist
+              Start tracking your holdings by adding your first stock position with shares and purchase details
             </p>
             <button
               onClick={() => setShowAddModal(true)}
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
             >
               <Plus size={20} />
-              <span>Add Your First Stock</span>
+              <span>Add Your First Position</span>
             </button>
           </div>
         ) : (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-slate-700/50 border-b border-gray-100 dark:border-slate-700">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase">Stock</th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase">Price</th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase">Change</th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase hidden md:table-cell">Volume</th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase hidden lg:table-cell">Market Cap</th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
-                  {portfolioSymbols.map((symbol) => {
-                    const stock = stocksData.get(symbol);
-                    const isPositive = (stock?.changePercent || 0) >= 0;
+          <div className="space-y-4">
+            {groupedHoldings.map(group => {
+              const isExpanded = expandedSymbols.has(group.symbol);
+              const isPositive = group.totalGainLoss >= 0;
 
-                    return (
-                      <tr key={symbol} className="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
-                        <td className="px-6 py-4">
-                          <Link href={`/stocks/${symbol}`} className="group">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/40 dark:to-indigo-900/40 rounded-xl flex items-center justify-center">
-                                <span className="text-purple-700 dark:text-purple-400 font-bold text-sm">
-                                  {symbol.slice(0, 2)}
-                                </span>
-                              </div>
-                              <div>
-                                <p className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 flex items-center gap-1 transition-colors">
-                                  {symbol}
-                                  <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                                </p>
-                                <p className="text-sm text-gray-500 dark:text-slate-400 truncate max-w-[200px]">
-                                  {stock?.name || symbol}
-                                </p>
-                              </div>
-                            </div>
+              return (
+                <div key={group.symbol} className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+                  <div
+                    className="p-5 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
+                    onClick={() => toggleExpanded(group.symbol)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/40 dark:to-indigo-900/40 rounded-xl flex items-center justify-center">
+                          <span className="text-purple-700 dark:text-purple-400 font-bold">{group.symbol.slice(0, 2)}</span>
+                        </div>
+                        <div>
+                          <Link href={`/stocks/${group.symbol}`} className="group" onClick={e => e.stopPropagation()}>
+                            <p className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 flex items-center gap-1 transition-colors">
+                              {group.symbol}
+                              <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </p>
                           </Link>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <span className="font-semibold text-gray-900 dark:text-white">
-                            ₦{stock?.price?.toFixed(2) || "—"}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg ${
+                          <p className="text-sm text-gray-500 dark:text-slate-400">{group.name}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-6">
+                        <div className="text-right hidden sm:block">
+                          <p className="text-sm text-gray-500 dark:text-slate-400">Shares</p>
+                          <p className="font-semibold text-gray-900 dark:text-white">{formatNumber(group.totalShares)}</p>
+                        </div>
+                        <div className="text-right hidden md:block">
+                          <p className="text-sm text-gray-500 dark:text-slate-400">Avg Cost</p>
+                          <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(group.avgCostBasis)}</p>
+                        </div>
+                        <div className="text-right hidden md:block">
+                          <p className="text-sm text-gray-500 dark:text-slate-400">Current Price</p>
+                          <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(group.currentPrice)}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-500 dark:text-slate-400">Value</p>
+                          <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(group.currentValue)}</p>
+                        </div>
+                        <div className="text-right min-w-[100px]">
+                          <p className="text-sm text-gray-500 dark:text-slate-400">Gain/Loss</p>
+                          <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg ${
                             isPositive ? "bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400" : "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400"
                           }`}>
                             {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                            <span className="font-medium text-sm">
-                              {isPositive ? "+" : ""}{stock?.changePercent?.toFixed(2) || 0}%
-                            </span>
+                            <span className="font-medium text-sm">{isPositive ? "+" : ""}{formatNumber(group.totalGainLossPercent)}%</span>
                           </div>
-                        </td>
-                        <td className="px-6 py-4 text-right text-gray-600 dark:text-slate-400 hidden md:table-cell">
-                          {stock?.volume ? formatVolume(stock.volume) : "—"}
-                        </td>
-                        <td className="px-6 py-4 text-right text-gray-600 dark:text-slate-400 hidden lg:table-cell">
-                          {stock?.marketCap ? formatCurrency(stock.marketCap) : "—"}
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <button
-                            onClick={() => removeFromPortfolio(symbol)}
-                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-colors"
-                            title="Remove from portfolio"
-                          >
-                            <X size={18} />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                        </div>
+                        <div className="text-gray-400 dark:text-slate-500">
+                          {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {isExpanded && (
+                    <div className="border-t border-gray-100 dark:border-slate-700">
+                      <div className="p-4 bg-gray-50 dark:bg-slate-700/50">
+                        <p className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-3">Transaction History</p>
+                        <div className="space-y-2">
+                          {group.holdings.map(holding => {
+                            const holdingValue = holding.shares * group.currentPrice;
+                            const holdingCost = holding.shares * holding.purchasePrice;
+                            const holdingGain = holdingValue - holdingCost;
+                            const holdingGainPercent = ((holdingValue - holdingCost) / holdingCost) * 100;
+                            const isHoldingPositive = holdingGain >= 0;
+
+                            return (
+                              <div key={holding.id} className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-xl">
+                                <div className="flex items-center gap-4">
+                                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-400">
+                                    <Calendar size={14} />
+                                    <span>{new Date(holding.purchaseDate).toLocaleDateString()}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-400">
+                                    <Hash size={14} />
+                                    <span>{formatNumber(holding.shares)} shares</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-400">
+                                    <DollarSign size={14} />
+                                    <span>@ {formatCurrency(holding.purchasePrice)}</span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <div className={`text-sm font-medium ${isHoldingPositive ? "text-green-600" : "text-red-600"}`}>
+                                    {isHoldingPositive ? "+" : ""}{formatCurrency(holdingGain)} ({isHoldingPositive ? "+" : ""}{formatNumber(holdingGainPercent)}%)
+                                  </div>
+                                  <button
+                                    onClick={() => handleDeleteHolding(holding.id)}
+                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                    title="Delete transaction"
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
 
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden border border-gray-100 dark:border-slate-700">
+          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden border border-gray-100 dark:border-slate-700">
             <div className="p-5 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Add Stock to Portfolio</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Add Stock Position</h2>
               <button
-                onClick={() => { setShowAddModal(false); setSearchQuery(""); }}
+                onClick={() => { setShowAddModal(false); setSearchQuery(""); setNewHolding({ symbol: "", shares: "", purchasePrice: "", purchaseDate: new Date().toISOString().split("T")[0], notes: "" }); }}
                 className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
               >
                 <X size={20} className="text-gray-500 dark:text-slate-400" />
               </button>
             </div>
-            <div className="p-4">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search stocks..."
-                  className="w-full pl-12 pr-4 py-3.5 bg-gray-100 dark:bg-slate-700 border-none rounded-xl text-gray-900 dark:text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  autoFocus
-                />
-              </div>
-            </div>
-            <div className="max-h-[400px] overflow-y-auto">
-              {filteredStocks.slice(0, 20).map((stock) => (
-                <button
-                  key={stock.symbol}
-                  onClick={() => addToPortfolio(stock.symbol)}
-                  className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/40 dark:to-indigo-900/40 rounded-xl flex items-center justify-center">
-                      <span className="text-purple-700 dark:text-purple-400 font-bold text-sm">
-                        {stock.symbol.slice(0, 2)}
-                      </span>
+
+            <form onSubmit={handleAddHolding} className="p-5 space-y-4">
+              {!newHolding.symbol ? (
+                <>
+                  <div className="relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search for a stock..."
+                      className="w-full pl-12 pr-4 py-3.5 bg-gray-100 dark:bg-slate-700 border-none rounded-xl text-gray-900 dark:text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="max-h-[300px] overflow-y-auto -mx-5 px-5">
+                    {filteredStocks.slice(0, 15).map((stock) => (
+                      <button
+                        key={stock.symbol}
+                        type="button"
+                        onClick={() => selectStock(stock)}
+                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/40 dark:to-indigo-900/40 rounded-xl flex items-center justify-center">
+                            <span className="text-purple-700 dark:text-purple-400 font-bold text-sm">{stock.symbol.slice(0, 2)}</span>
+                          </div>
+                          <div className="text-left">
+                            <p className="font-semibold text-gray-900 dark:text-white">{stock.symbol}</p>
+                            <p className="text-sm text-gray-500 dark:text-slate-400 truncate max-w-[180px]">{stock.name}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-gray-900 dark:text-white">₦{stock.price?.toFixed(2)}</p>
+                        </div>
+                      </button>
+                    ))}
+                    {filteredStocks.length === 0 && (
+                      <p className="text-center py-8 text-gray-500 dark:text-slate-400">No stocks found</p>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-3 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-200 to-indigo-200 dark:from-purple-800 dark:to-indigo-800 rounded-xl flex items-center justify-center">
+                      <span className="text-purple-700 dark:text-purple-300 font-bold">{newHolding.symbol.slice(0, 2)}</span>
                     </div>
-                    <div className="text-left">
-                      <p className="font-semibold text-gray-900 dark:text-white">{stock.symbol}</p>
-                      <p className="text-sm text-gray-500 dark:text-slate-400 truncate max-w-[180px]">{stock.name}</p>
+                    <div className="flex-1">
+                      <p className="font-semibold text-purple-900 dark:text-purple-200">{newHolding.symbol}</p>
+                      <p className="text-sm text-purple-600 dark:text-purple-400">{stocksMap.get(newHolding.symbol)?.name}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setNewHolding({ ...newHolding, symbol: "" })}
+                      className="p-2 text-purple-600 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-lg"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                        Number of Shares
+                      </label>
+                      <input
+                        type="number"
+                        step="0.000001"
+                        min="0.000001"
+                        value={newHolding.shares}
+                        onChange={(e) => setNewHolding({ ...newHolding, shares: e.target.value })}
+                        placeholder="100"
+                        className="w-full px-4 py-3 bg-gray-100 dark:bg-slate-700 border-none rounded-xl text-gray-900 dark:text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                        Purchase Price (₦)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        value={newHolding.purchasePrice}
+                        onChange={(e) => setNewHolding({ ...newHolding, purchasePrice: e.target.value })}
+                        placeholder="25.50"
+                        className="w-full px-4 py-3 bg-gray-100 dark:bg-slate-700 border-none rounded-xl text-gray-900 dark:text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        required
+                      />
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-gray-900 dark:text-white">₦{stock.price?.toFixed(2)}</p>
-                    <p className={`text-sm font-medium ${stock.changePercent >= 0 ? "text-green-600" : "text-red-600"}`}>
-                      {stock.changePercent >= 0 ? "+" : ""}{stock.changePercent?.toFixed(2)}%
-                    </p>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                      Purchase Date
+                    </label>
+                    <input
+                      type="date"
+                      value={newHolding.purchaseDate}
+                      onChange={(e) => setNewHolding({ ...newHolding, purchaseDate: e.target.value })}
+                      className="w-full px-4 py-3 bg-gray-100 dark:bg-slate-700 border-none rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      required
+                    />
                   </div>
-                </button>
-              ))}
-              {filteredStocks.length === 0 && (
-                <p className="text-center py-8 text-gray-500 dark:text-slate-400">No stocks found</p>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                      Notes (optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={newHolding.notes}
+                      onChange={(e) => setNewHolding({ ...newHolding, notes: e.target.value })}
+                      placeholder="e.g., Bought via GTBank"
+                      className="w-full px-4 py-3 bg-gray-100 dark:bg-slate-700 border-none rounded-xl text-gray-900 dark:text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+
+                  {newHolding.shares && newHolding.purchasePrice && (
+                    <div className="p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
+                      <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">Total Investment</p>
+                      <p className="text-xl font-bold text-gray-900 dark:text-white">
+                        {formatCurrency(parseFloat(newHolding.shares) * parseFloat(newHolding.purchasePrice))}
+                      </p>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || !newHolding.shares || !newHolding.purchasePrice}
+                    className="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Adding...
+                      </>
+                    ) : (
+                      <>
+                        <Plus size={18} />
+                        Add Position
+                      </>
+                    )}
+                  </button>
+                </>
               )}
-            </div>
+            </form>
           </div>
         </div>
       )}

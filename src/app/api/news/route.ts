@@ -12,9 +12,9 @@ interface NewsCache {
 }
 
 let newsCache: NewsCache | null = null;
-const CACHE_TTL = 5 * 60 * 1000;
+const CACHE_TTL = 2 * 60 * 1000;
 let lastScrapeTime = 0;
-const SCRAPE_INTERVAL = 30 * 60 * 1000;
+const SCRAPE_INTERVAL = 10 * 60 * 1000;
 
 async function triggerBackgroundScrape() {
   const now = Date.now();

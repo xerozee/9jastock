@@ -29,7 +29,7 @@ const NEWS_SOURCES = [
   { id: 'Punch', name: 'Punch', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
 ];
 
-const NEWS_REFRESH_INTERVAL = 30 * 60 * 1000;
+const NEWS_REFRESH_INTERVAL = 10 * 60 * 1000;
 
 export default function BlogPage() {
   const [stocks, setStocks] = useState<Stock[]>([]);
@@ -184,7 +184,7 @@ export default function BlogPage() {
                 </div>
               )}
               <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
-                Auto-refresh: every 30 min
+                Auto-refresh: every 10 min
               </p>
             </div>
           </div>

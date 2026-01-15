@@ -38,3 +38,20 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
 - **OpenAI (GPT-4o-mini)**: Used for AI-powered newsletter composition.
 - **Replit Auth**: Integration for Google OAuth.
 - **Nairametrics, BusinessDay, Punch**: News sources for web scraping.
+
+## Recent Updates (January 2026)
+- **Stock Recommendations Engine**: AI-powered stock suggestions based on user profile
+  - Recommendations API at /api/recommendations
+  - Matches stocks based on user's investment goals, risk tolerance, and interested sectors
+  - Suggests dividend stocks for passive income seekers, blue-chip for beginners, growth stocks for aggressive investors
+- **Auto-generated Profile Pictures**: Avatar component with initials and consistent colors
+  - Generates colorful avatar based on user's name or email
+  - Hash-based color assignment for consistency
+- **Cleaned Up Dashboard**: Simplified authenticated user experience
+  - Removed banner/hero section, hidden refresh button and stock count
+  - Clean "Market Overview" header with live status badge
+  - Background auto-refresh (5 minutes for authenticated users)
+- **Profile Page Improvements**: 
+  - Portfolio summary reflects actual holdings from database
+  - Replaced news section with personalized stock recommendations
+  - Added Avatar component for auto-generated profile pictures

@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
-  User, Settings, Share2, Copy, Check, TrendingUp, TrendingDown, 
-  Briefcase, Target, Shield, Clock, Building2, Newspaper, 
-  ChevronRight, ExternalLink, Users, Gift
+  Settings, Share2, Copy, Check, TrendingUp, TrendingDown, 
+  Briefcase, Target, Shield, Clock, Building2, Lightbulb, 
+  ChevronRight, Users, Gift, Sparkles
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import Avatar from '@/components/Avatar';
 
 interface ProfileData {
   user: {
@@ -48,6 +49,12 @@ interface StockData {
   price: number;
   change: number;
   changePercent: number;
+  sector?: string;
+}
+
+interface Recommendation {
+  stocks: StockData[];
+  reason: string;
 }
 
 const goalLabels: Record<string, string> = {
@@ -84,7 +91,10 @@ export default function ProfilePage() {
   const { user: authUser, isLoading: authLoading } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [stocks, setStocks] = useState<StockData[]>([]);
-  const [news, setNews] = useState<any[]>([]);
+  const [stocksError, setStocksError] = useState(false);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [recommendationsError, setRecommendationsError] = useState(false);
+  const [hasProfile, setHasProfile] = useState(true);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [referralCopied, setReferralCopied] = useState(false);
@@ -98,7 +108,7 @@ export default function ProfilePage() {
     if (authUser) {
       fetchProfile();
       fetchStocks();
-      fetchNews();
+      fetchRecommendations();
     }
   }, [authUser, authLoading, router]);
 
@@ -130,21 +140,32 @@ export default function ProfilePage() {
       if (response.ok) {
         const data = await response.json();
         setStocks(data.stocks || []);
+        setStocksError(false);
+      } else {
+        console.error('Failed to fetch stocks:', response.status);
+        setStocksError(true);
       }
     } catch (error) {
       console.error('Failed to fetch stocks:', error);
+      setStocksError(true);
     }
   };
 
-  const fetchNews = async () => {
+  const fetchRecommendations = async () => {
     try {
-      const response = await fetch('/api/news?limit=5');
+      const response = await fetch('/api/recommendations');
       if (response.ok) {
         const data = await response.json();
-        setNews(data.articles || []);
+        setRecommendations(data.recommendations || []);
+        setHasProfile(data.hasProfile !== false);
+        setRecommendationsError(data.error === true);
+      } else {
+        console.error('Failed to fetch recommendations:', response.status);
+        setRecommendationsError(true);
       }
     } catch (error) {
-      console.error('Failed to fetch news:', error);
+      console.error('Failed to fetch recommendations:', error);
+      setRecommendationsError(true);
     }
   };
 
@@ -180,7 +201,11 @@ export default function ProfilePage() {
     }> = {};
 
     profile.holdings.forEach(holding => {
-      const stock = stocks.find(s => s.symbol === holding.symbol || s.symbol === `NGX:${holding.symbol}`);
+      const stock = stocks.find(s => 
+        s.symbol === holding.symbol || 
+        s.symbol === `NGX:${holding.symbol}` ||
+        s.symbol.replace('NGX:', '') === holding.symbol
+      );
       const currentPrice = stock?.price || 0;
       
       if (!groupedHoldings[holding.symbol]) {
@@ -234,9 +259,14 @@ export default function ProfilePage() {
       <div className="bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 text-white">
         <div className="max-w-7xl mx-auto px-4 py-12">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-3xl font-bold">
-              {profile.user.firstName?.[0] || profile.user.email?.[0]?.toUpperCase() || 'U'}
-            </div>
+            <Avatar 
+              firstName={profile.user.firstName}
+              lastName={profile.user.lastName}
+              email={profile.user.email}
+              profileImageUrl={profile.user.profileImageUrl}
+              size="xl"
+              className="ring-4 ring-white/20"
+            />
             <div className="flex-1">
               <h1 className="text-3xl font-bold">
                 {profile.user.firstName} {profile.user.lastName}
@@ -321,7 +351,20 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {holdingsWithPrices.length > 0 ? (
+              {stocksError && profile?.holdings && profile.holdings.length > 0 ? (
+                <div className="text-center py-6">
+                  <p className="text-amber-600 dark:text-amber-400 mb-2">Unable to load current prices</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    You have {profile.holdings.length} holding(s). Prices will update when connection is restored.
+                  </p>
+                  <Link
+                    href="/portfolio"
+                    className="inline-block mt-3 text-green-600 dark:text-green-400 hover:underline"
+                  >
+                    View holdings in portfolio
+                  </Link>
+                </div>
+              ) : holdingsWithPrices.length > 0 ? (
                 <div className="space-y-3">
                   {holdingsWithPrices.slice(0, 5).map((holding) => (
                     <div
@@ -359,10 +402,10 @@ export default function ProfilePage() {
                   <Briefcase className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
                   <p className="text-gray-500 dark:text-gray-400">No holdings yet</p>
                   <Link
-                    href="/stocks"
+                    href="/portfolio"
                     className="inline-block mt-3 text-green-600 dark:text-green-400 hover:underline"
                   >
-                    Browse stocks to add
+                    Add your first holding
                   </Link>
                 </div>
               )}
@@ -371,50 +414,93 @@ export default function ProfilePage() {
             <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Newspaper className="w-5 h-5 text-blue-500" />
-                  Latest News
+                  <Sparkles className="w-5 h-5 text-amber-500" />
+                  Stock Recommendations
                 </h2>
                 <Link
-                  href="/blog"
+                  href="/stocks"
                   className="text-sm text-green-600 dark:text-green-400 hover:underline flex items-center gap-1"
                 >
-                  View all <ChevronRight className="w-4 h-4" />
+                  Browse all <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
 
-              {news.length > 0 ? (
-                <div className="space-y-4">
-                  {news.map((article: any) => (
-                    <a
-                      key={article._id}
-                      href={article.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <p className="font-medium text-gray-900 dark:text-white line-clamp-2">
-                            {article.title}
-                          </p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="text-xs px-2 py-0.5 bg-gray-200 dark:bg-gray-600 rounded text-gray-600 dark:text-gray-300">
-                              {article.source}
-                            </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {new Date(article.publishedAt).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </div>
-                        <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              {recommendationsError ? (
+                <div className="text-center py-8">
+                  <Sparkles className="w-12 h-12 text-amber-400 mx-auto mb-3" />
+                  <p className="text-amber-600 dark:text-amber-400 mb-2">
+                    Unable to load recommendations
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">
+                    Please try again later or browse all stocks.
+                  </p>
+                  <Link
+                    href="/stocks"
+                    className="inline-block mt-3 text-green-600 dark:text-green-400 hover:underline"
+                  >
+                    Browse all stocks
+                  </Link>
+                </div>
+              ) : !hasProfile ? (
+                <div className="text-center py-8">
+                  <Lightbulb className="w-12 h-12 text-amber-400 mx-auto mb-3" />
+                  <p className="text-gray-600 dark:text-gray-300 font-medium mb-2">
+                    Complete your investment profile
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 max-w-md mx-auto">
+                    Answer a few questions about your investment goals and preferences to get personalized stock recommendations.
+                  </p>
+                  <Link
+                    href="/onboarding"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold rounded-xl transition-all"
+                  >
+                    <Target className="w-4 h-4" />
+                    Complete Profile
+                  </Link>
+                </div>
+              ) : recommendations.length > 0 ? (
+                <div className="space-y-6">
+                  {recommendations.map((rec, index) => (
+                    <div key={index}>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3 flex items-center gap-2">
+                        <Lightbulb className="w-4 h-4 text-amber-500" />
+                        {rec.reason}
+                      </p>
+                      <div className="space-y-2">
+                        {rec.stocks.map((stock: StockData) => (
+                          <Link
+                            key={stock.symbol}
+                            href={`/stocks/${stock.symbol.replace('NGX:', '')}`}
+                            className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                          >
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">
+                                {stock.symbol.replace('NGX:', '')}
+                              </p>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                {stock.name}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium text-gray-900 dark:text-white">
+                                ₦{stock.price?.toFixed(2) || '0.00'}
+                              </p>
+                              <p className={`text-sm flex items-center justify-end gap-1 ${(stock.changePercent || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                {(stock.changePercent || 0) >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                                {(stock.changePercent || 0) >= 0 ? '+' : ''}{(stock.changePercent || 0).toFixed(2)}%
+                              </p>
+                            </div>
+                          </Link>
+                        ))}
                       </div>
-                    </a>
+                    </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  No news available
-                </p>
+                <div className="text-center py-8">
+                  <Sparkles className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+                  <p className="text-gray-500 dark:text-gray-400">Loading recommendations...</p>
+                </div>
               )}
             </div>
           </div>

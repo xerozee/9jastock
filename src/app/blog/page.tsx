@@ -67,7 +67,7 @@ export default function BlogPage() {
   const fetchNews = useCallback(async (forceRefresh = false) => {
     try {
       setIsNewsLoading(true);
-      const url = forceRefresh ? '/api/news?limit=50&refresh=true' : '/api/news?limit=50';
+      const url = forceRefresh ? '/api/news?limit=100&hours=720&refresh=true' : '/api/news?limit=100&hours=720';
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();

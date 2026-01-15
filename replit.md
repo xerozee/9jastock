@@ -19,6 +19,28 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 - **Database**: MongoDB Atlas (migrated from PostgreSQL)
 
 ## Recent Changes (January 2026)
+- **User Profile System**: Comprehensive profile management for authenticated users
+  - Profile page at /profile showing user summary, holdings, and investment profile
+  - Profile API at /api/profile for GET and PUT operations
+  - Clickable profile link in header for authenticated users
+  - Portfolio summary with total value, gain/loss, and position count
+  - Latest news section showing 5 recent market news articles
+  - Investment profile section displaying goals, experience, risk tolerance, time horizon, and interested sectors
+- **Onboarding Questionnaire**: 5-step wizard for new users after signup
+  - Step 1: Investment goal selection (wealth-building, retirement, passive-income, short-term-gains, learning)
+  - Step 2: Experience level (beginner, intermediate, advanced, expert)
+  - Step 3: Risk tolerance (conservative, moderate, aggressive)
+  - Step 4: Investment time horizon (less-than-1-year to 10-plus-years)
+  - Step 5: Interested sectors and bio (optional)
+  - Progress bar showing completion percentage
+  - Skip option for users who want to complete later
+  - Error handling with user-friendly messages
+- **Referral System**: Invite friends and track referrals
+  - Auto-generated 8-character referral codes on profile creation
+  - Referral links in format /signup?ref=CODE
+  - Signup page captures referral code from URL parameters
+  - referredBy field tracks who referred each user
+  - Referral count displayed on profile page
 - **MongoDB Migration**: Migrated from PostgreSQL/Drizzle to MongoDB Atlas/Mongoose
   - All data models converted to MongoDB schemas
   - Connection pooling with global caching for serverless

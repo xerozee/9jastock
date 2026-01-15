@@ -4,21 +4,12 @@ import {
   getActiveSubscribers, 
   saveNewsletterRecord 
 } from '@/lib/newsletterComposer';
+import { sendEmail } from '@/lib/resendClient';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST() {
   try {
-    const resendApiKey = process.env.RESEND_API_KEY;
-    
-    if (!resendApiKey) {
-      return NextResponse.json({
-        success: false,
-        error: 'Email service not configured. Please set up Resend API key.',
-        message: 'To enable email dispatch, configure the Resend integration.',
-      }, { status: 503 });
-    }
-    
     const newsletter = await generateAndSaveNewsletter();
     const subscribers = await getActiveSubscribers();
     
@@ -38,28 +29,13 @@ export async function POST() {
     
     for (const email of subscribers) {
       try {
-        const response = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${resendApiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            from: '9jaStock <newsletter@9jastock.com>',
-            to: [email],
-            subject: newsletter.subject,
-            html: newsletter.htmlContent,
-            text: newsletter.textContent,
-          }),
+        await sendEmail({
+          to: email,
+          subject: newsletter.subject,
+          html: newsletter.htmlContent,
+          text: newsletter.textContent,
         });
-        
-        if (response.ok) {
-          results.sent++;
-        } else {
-          results.failed++;
-          const errorData = await response.json();
-          results.errors.push(`${email}: ${errorData.message || 'Unknown error'}`);
-        }
+        results.sent++;
       } catch (error) {
         results.failed++;
         results.errors.push(`${email}: ${error instanceof Error ? error.message : 'Send failed'}`);

@@ -18,6 +18,17 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 - **Email Dispatch**: Resend integration for automated newsletter delivery to subscribers
 
 ## Recent Changes (January 2026)
+- **Landing Page**: Beautiful landing page for unauthenticated users
+  - Hero section with gradient background and grid pattern
+  - Feature showcase with 6 key features (Real-time data, Technical Analysis, etc.)
+  - Benefits section with checkmarks
+  - Mock portfolio preview card
+  - Multiple CTA buttons encouraging sign-up
+  - Stats display (145+ stocks, 5min refresh, 10+ indicators, 24/7 access)
+- **Route Protection**: Protected routes require authentication
+  - AuthGuard component wraps stocks, portfolio, watchlist, and blog pages
+  - Shows attractive sign-in prompt with benefits when not authenticated
+  - Home page shows landing page for guests, dashboard for authenticated users
 - **Added Authentication**: Replit Auth OIDC integration
   - Login/Logout buttons in header
   - Session-based authentication with cookies
@@ -47,6 +58,8 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 ## Project Architecture
 
 ### Key Files
+- `src/components/LandingPage.tsx` - Beautiful landing page for unauthenticated users
+- `src/components/AuthGuard.tsx` - Route protection component with sign-in prompts
 - `src/lib/auth.ts` - Replit Auth OIDC configuration and session management
 - `src/hooks/useAuth.ts` - React hook for authentication state
 - `src/app/api/auth/login/route.ts` - OAuth login redirect

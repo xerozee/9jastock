@@ -2,14 +2,16 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { TrendingUp, BarChart3, Star, Menu, X, Briefcase, Newspaper, Moon, Sun } from 'lucide-react';
+import { TrendingUp, BarChart3, Star, Menu, X, Briefcase, Newspaper, Moon, Sun, LogIn, LogOut, User } from 'lucide-react';
 import { useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Header() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isDark, toggleTheme } = useTheme();
+  const { user, isLoading, isAuthenticated, login, logout } = useAuth();
 
   const navLinks = [
     { href: '/', label: 'Dashboard', icon: BarChart3 },
@@ -54,7 +56,7 @@ export default function Header() {
             })}
           </nav>
 
-          <div className="hidden md:flex items-center">
+          <div className="hidden md:flex items-center space-x-2">
             <button
               onClick={toggleTheme}
               className="p-2 rounded-xl bg-white/10 hover:bg-white/20 dark:bg-slate-700 dark:hover:bg-slate-600 transition-all"
@@ -62,6 +64,42 @@ export default function Header() {
             >
               {isDark ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} />}
             </button>
+
+            {isLoading ? (
+              <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse" />
+            ) : isAuthenticated && user ? (
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-white/10">
+                  {user.profileImageUrl ? (
+                    <img
+                      src={user.profileImageUrl}
+                      alt={user.firstName || 'User'}
+                      className="w-6 h-6 rounded-full"
+                    />
+                  ) : (
+                    <User size={18} />
+                  )}
+                  <span className="text-sm font-medium">
+                    {user.firstName || user.email?.split('@')[0] || 'User'}
+                  </span>
+                </div>
+                <button
+                  onClick={logout}
+                  className="flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-100 transition-all"
+                >
+                  <LogOut size={16} />
+                  <span className="text-sm">Logout</span>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={login}
+                className="flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 transition-all"
+              >
+                <LogIn size={16} />
+                <span className="text-sm">Login</span>
+              </button>
+            )}
           </div>
 
           <div className="md:hidden flex items-center space-x-2">
@@ -102,6 +140,52 @@ export default function Header() {
                 </Link>
               );
             })}
+
+            <div className="mt-4 pt-4 border-t border-white/10">
+              {isLoading ? (
+                <div className="px-4 py-3">
+                  <div className="w-full h-10 rounded-xl bg-white/10 animate-pulse" />
+                </div>
+              ) : isAuthenticated && user ? (
+                <div className="px-4 space-y-2">
+                  <div className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-white/10">
+                    {user.profileImageUrl ? (
+                      <img
+                        src={user.profileImageUrl}
+                        alt={user.firstName || 'User'}
+                        className="w-6 h-6 rounded-full"
+                      />
+                    ) : (
+                      <User size={18} />
+                    )}
+                    <span className="text-sm font-medium">
+                      {user.firstName || user.email?.split('@')[0] || 'User'}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      logout();
+                    }}
+                    className="w-full flex items-center justify-center space-x-2 px-3 py-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-100 transition-all"
+                  >
+                    <LogOut size={16} />
+                    <span className="text-sm">Logout</span>
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    login();
+                  }}
+                  className="mx-4 w-[calc(100%-2rem)] flex items-center justify-center space-x-2 px-3 py-2 rounded-xl bg-white/20 hover:bg-white/30 transition-all"
+                >
+                  <LogIn size={16} />
+                  <span className="text-sm">Login</span>
+                </button>
+              )}
+            </div>
           </nav>
         )}
       </div>

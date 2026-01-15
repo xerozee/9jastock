@@ -52,7 +52,7 @@ export function useAuth() {
   }, []);
 
   const login = useCallback(() => {
-    window.location.href = "/api/auth/login";
+    window.location.href = "/login";
   }, []);
 
   return {

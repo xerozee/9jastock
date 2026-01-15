@@ -87,13 +87,21 @@ export default function Header() {
                 </button>
               </div>
             ) : (
-              <button
-                onClick={login}
-                className="flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 transition-all"
-              >
-                <LogIn size={16} />
-                <span className="text-sm">Login</span>
-              </button>
+              <div className="flex items-center space-x-2">
+                <Link
+                  href="/login"
+                  className="flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-all"
+                >
+                  <LogIn size={16} />
+                  <span className="text-sm">Login</span>
+                </Link>
+                <Link
+                  href="/signup"
+                  className="flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 transition-all font-medium"
+                >
+                  <span className="text-sm">Sign Up</span>
+                </Link>
+              </div>
             )}
           </div>
 
@@ -169,16 +177,23 @@ export default function Header() {
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    login();
-                  }}
-                  className="mx-4 w-[calc(100%-2rem)] flex items-center justify-center space-x-2 px-3 py-2 rounded-xl bg-white/20 hover:bg-white/30 transition-all"
-                >
-                  <LogIn size={16} />
-                  <span className="text-sm">Login</span>
-                </button>
+                <div className="px-4 space-y-2">
+                  <Link
+                    href="/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="w-full flex items-center justify-center space-x-2 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all"
+                  >
+                    <LogIn size={16} />
+                    <span className="text-sm">Login</span>
+                  </Link>
+                  <Link
+                    href="/signup"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="w-full flex items-center justify-center space-x-2 px-3 py-2 rounded-xl bg-white/20 hover:bg-white/30 transition-all font-medium"
+                  >
+                    <span className="text-sm">Sign Up</span>
+                  </Link>
+                </div>
               )}
             </div>
           </nav>

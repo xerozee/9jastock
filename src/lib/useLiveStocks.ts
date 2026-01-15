@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Stock } from '@/types/stock';
 
 interface LiveStockData extends Stock {
@@ -15,6 +15,7 @@ interface UseLiveStocksReturn {
   liveCount: number;
   refresh: () => void;
   lastRefresh: number | null;
+  isRefreshing: boolean;
 }
 
 interface UseLiveStockReturn {
@@ -23,23 +24,32 @@ interface UseLiveStockReturn {
   error: string | null;
   refresh: () => void;
   lastRefresh: number | null;
+  isRefreshing: boolean;
 }
 
 /**
  * Hook to fetch all live stock data
+ * Background refresh happens without showing loading state
  */
 export function useLiveStocks(
-  refreshInterval: number = 30000 // 30 seconds default
+  refreshInterval: number = 30000
 ): UseLiveStocksReturn {
   const [stocks, setStocks] = useState<LiveStockData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [liveCount, setLiveCount] = useState(0);
   const [lastRefresh, setLastRefresh] = useState<number | null>(null);
+  const isInitialLoad = useRef(true);
 
-  const fetchStocks = useCallback(async () => {
+  const fetchStocks = useCallback(async (showLoading: boolean = false) => {
     try {
-      setIsLoading(true);
+      if (showLoading || isInitialLoad.current) {
+        setIsLoading(true);
+      } else {
+        setIsRefreshing(true);
+      }
+      
       const response = await fetch('/api/stocks');
       const result = await response.json();
 
@@ -52,19 +62,21 @@ export function useLiveStocks(
         setError(result.error || 'Failed to fetch live data');
       }
       setLastRefresh(Date.now());
+      isInitialLoad.current = false;
     } catch (err) {
       setError('Network error fetching stocks');
       console.error('Error fetching stocks:', err);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchStocks();
+    fetchStocks(true);
 
     if (refreshInterval > 0) {
-      const interval = setInterval(fetchStocks, refreshInterval);
+      const interval = setInterval(() => fetchStocks(false), refreshInterval);
       return () => clearInterval(interval);
     }
   }, [fetchStocks, refreshInterval]);
@@ -74,13 +86,15 @@ export function useLiveStocks(
     isLoading,
     error,
     liveCount,
-    refresh: fetchStocks,
+    refresh: () => fetchStocks(false),
     lastRefresh,
+    isRefreshing,
   };
 }
 
 /**
  * Hook to fetch a single stock's live data
+ * Background refresh happens without showing loading state
  */
 export function useLiveStock(
   symbol: string,
@@ -88,14 +102,21 @@ export function useLiveStock(
 ): UseLiveStockReturn {
   const [stock, setStock] = useState<LiveStockData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<number | null>(null);
+  const isInitialLoad = useRef(true);
 
-  const fetchStock = useCallback(async () => {
+  const fetchStock = useCallback(async (showLoading: boolean = false) => {
     if (!symbol) return;
 
     try {
-      setIsLoading(true);
+      if (showLoading || isInitialLoad.current) {
+        setIsLoading(true);
+      } else {
+        setIsRefreshing(true);
+      }
+      
       const response = await fetch(`/api/stocks/${symbol}`);
       const result = await response.json();
 
@@ -107,19 +128,22 @@ export function useLiveStock(
         setError(result.error || 'Failed to fetch live data');
       }
       setLastRefresh(Date.now());
+      isInitialLoad.current = false;
     } catch (err) {
       setError('Network error fetching stock');
       console.error('Error fetching stock:', err);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   }, [symbol]);
 
   useEffect(() => {
-    fetchStock();
+    isInitialLoad.current = true;
+    fetchStock(true);
 
     if (refreshInterval > 0) {
-      const interval = setInterval(fetchStock, refreshInterval);
+      const interval = setInterval(() => fetchStock(false), refreshInterval);
       return () => clearInterval(interval);
     }
   }, [fetchStock, refreshInterval]);
@@ -128,8 +152,9 @@ export function useLiveStock(
     stock,
     isLoading,
     error,
-    refresh: fetchStock,
+    refresh: () => fetchStock(false),
     lastRefresh,
+    isRefreshing,
   };
 }
 

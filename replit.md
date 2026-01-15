@@ -60,6 +60,10 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
   - Grouped view showing total shares, avg cost basis, current value, and gain/loss per stock
   - Expandable transaction history for each stock position
   - Portfolio summary with total value, total gain/loss, cost basis, and position count
+  - **Portfolio Sharing**: Share your portfolio with anyone via unique URL
+    - Share button generates a unique shareable link
+    - Public portfolio page shows holdings and performance
+    - Copy-to-clipboard functionality for easy sharing
 - **Modern Theme & Dark Mode**: Complete UI redesign with dark mode support
   - ThemeContext with localStorage persistence for user preference
   - Dark mode toggle button in header (moon/sun icon)

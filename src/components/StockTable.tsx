@@ -15,7 +15,7 @@ export default function StockTable({ stocks, title }: StockTableProps) {
   const { isInWatchlist, toggleWatchlist } = useWatchlist();
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
       {title && (
         <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>

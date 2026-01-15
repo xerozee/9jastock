@@ -57,8 +57,15 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 - **Modern Theme & Dark Mode**: Complete UI redesign with dark mode support
   - ThemeContext with localStorage persistence for user preference
   - Dark mode toggle button in header (moon/sun icon)
-  - Gradient hero section with grid pattern overlay
-  - Modern cards with colored icon badges
+  - Gradient hero sections with grid pattern overlay on all pages
+  - Modern cards with rounded-2xl corners and colored icon badges
+  - Consistent design language across all pages:
+    - Stocks page: Green/emerald gradient header
+    - Portfolio page: Purple/indigo gradient header
+    - Watchlist page: Amber/orange gradient header
+    - News page: Clean card-based layout with source badges
+  - Hover effects and smooth transitions throughout
+  - Shadow effects and backdrop blur for modals
 - **News/Blog Feature**: Comprehensive market news page
   - Main blog page with news from NGX Official, BusinessDay, Nairametrics, ThisDay, Punch
   - Filterable news by source with tab navigation

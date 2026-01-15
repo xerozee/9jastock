@@ -11,7 +11,8 @@ import {
   RefreshCw,
   Loader2,
   ArrowUpRight,
-  Search
+  Search,
+  Clock
 } from "lucide-react";
 import AuthGuard from "@/components/AuthGuard";
 
@@ -127,62 +128,66 @@ export default function PortfolioPage() {
 
   return (
     <AuthGuard pageName="your portfolio">
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 py-6 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
-              <Briefcase className="text-green-600" />
-              My Portfolio
-            </h1>
-            <p className="text-gray-600 dark:text-slate-400 mt-1">
-              Track your favorite stocks
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              <Plus size={18} />
-              <span>Add Stock</span>
-            </button>
-            <button
-              onClick={fetchStocksData}
-              disabled={isLoadingStocks}
-              className="flex items-center space-x-2 px-4 py-2 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors disabled:opacity-50"
-            >
-              <RefreshCw size={18} className={isLoadingStocks ? "animate-spin" : ""} />
-              <span>Refresh</span>
-            </button>
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="relative bg-gradient-to-br from-purple-700 via-indigo-600 to-blue-600 dark:from-slate-800 dark:via-purple-900 dark:to-slate-800 rounded-3xl p-8 mb-8 text-white overflow-hidden">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-50" />
+          <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-sm mb-4">
+                <Briefcase size={16} />
+                <span>Personal Portfolio</span>
+              </div>
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">My Portfolio</h1>
+              <p className="text-purple-100 dark:text-slate-300 text-lg">
+                Track your favorite Nigerian stocks in one place
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="flex items-center gap-2 px-5 py-3 bg-white text-purple-700 font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+              >
+                <Plus size={18} />
+                <span>Add Stock</span>
+              </button>
+              <button
+                onClick={fetchStocksData}
+                disabled={isLoadingStocks}
+                className="flex items-center gap-2 px-4 py-3 bg-white/10 backdrop-blur-sm text-white rounded-xl hover:bg-white/20 transition-all disabled:opacity-50"
+              >
+                <RefreshCw size={18} className={isLoadingStocks ? "animate-spin" : ""} />
+              </button>
+            </div>
           </div>
         </div>
 
         {lastUpdated && (
-          <p className="text-sm text-gray-500 dark:text-slate-500 mb-4">
-            Last updated: {lastUpdated.toLocaleTimeString()}
-          </p>
+          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-500 mb-6">
+            <Clock size={14} />
+            <span>Last updated: {lastUpdated.toLocaleTimeString()}</span>
+          </div>
         )}
 
         {portfolioSymbols.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm">
-              <p className="text-sm text-gray-500 dark:text-slate-400">Stocks Tracked</p>
-              <p className="text-2xl font-bold text-gray-800 dark:text-white">{portfolioSymbols.length}</p>
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-700">
+              <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">Stocks Tracked</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">{portfolioSymbols.length}</p>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm">
-              <p className="text-sm text-gray-500 dark:text-slate-400">Avg. Daily Change</p>
-              <p className={`text-2xl font-bold ${stats.avgChange >= 0 ? "text-green-600" : "text-red-600"}`}>
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-700">
+              <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">Avg. Daily Change</p>
+              <p className={`text-3xl font-bold ${stats.avgChange >= 0 ? "text-green-600" : "text-red-600"}`}>
                 {stats.avgChange >= 0 ? "+" : ""}{isNaN(stats.avgChange) ? "0.00" : stats.avgChange.toFixed(2)}%
               </p>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm">
-              <p className="text-sm text-gray-500 dark:text-slate-400">Gainers Today</p>
-              <p className="text-2xl font-bold text-green-600">{stats.gainers}</p>
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-700">
+              <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">Gainers Today</p>
+              <p className="text-3xl font-bold text-green-600">{stats.gainers}</p>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm">
-              <p className="text-sm text-gray-500 dark:text-slate-400">Decliners Today</p>
-              <p className="text-2xl font-bold text-red-600">{stats.losers}</p>
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-700">
+              <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">Decliners Today</p>
+              <p className="text-3xl font-bold text-red-600">{stats.losers}</p>
             </div>
           </div>
         )}
@@ -192,25 +197,27 @@ export default function PortfolioPage() {
             <Loader2 className="w-8 h-8 animate-spin text-green-600" />
           </div>
         ) : portfolioSymbols.length === 0 ? (
-          <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-2xl shadow-sm">
-            <Briefcase className="w-16 h-16 text-gray-300 dark:text-slate-600 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">Your portfolio is empty</h2>
-            <p className="text-gray-600 dark:text-slate-400 mb-6">
-              Start adding stocks to track their performance
+          <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700">
+            <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Briefcase className="w-10 h-10 text-purple-600 dark:text-purple-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Your portfolio is empty</h2>
+            <p className="text-gray-600 dark:text-slate-400 mb-8 max-w-md mx-auto">
+              Start adding stocks to track their performance and build your investment watchlist
             </p>
             <button
               onClick={() => setShowAddModal(true)}
-              className="inline-flex items-center space-x-2 px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
             >
               <Plus size={20} />
               <span>Add Your First Stock</span>
             </button>
           </div>
         ) : (
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-slate-700 border-b dark:border-slate-600">
+                <thead className="bg-gray-50 dark:bg-slate-700/50 border-b border-gray-100 dark:border-slate-700">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase">Stock</th>
                     <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase">Price</th>
@@ -226,17 +233,17 @@ export default function PortfolioPage() {
                     const isPositive = (stock?.changePercent || 0) >= 0;
 
                     return (
-                      <tr key={symbol} className="hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
+                      <tr key={symbol} className="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
                         <td className="px-6 py-4">
                           <Link href={`/stocks/${symbol}`} className="group">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                                <span className="text-green-700 dark:text-green-400 font-bold text-sm">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/40 dark:to-indigo-900/40 rounded-xl flex items-center justify-center">
+                                <span className="text-purple-700 dark:text-purple-400 font-bold text-sm">
                                   {symbol.slice(0, 2)}
                                 </span>
                               </div>
                               <div>
-                                <p className="font-semibold text-gray-800 dark:text-white group-hover:text-green-600 flex items-center gap-1">
+                                <p className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 flex items-center gap-1 transition-colors">
                                   {symbol}
                                   <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                                 </p>
@@ -248,12 +255,12 @@ export default function PortfolioPage() {
                           </Link>
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <span className="font-semibold text-gray-800 dark:text-white">
+                          <span className="font-semibold text-gray-900 dark:text-white">
                             ₦{stock?.price?.toFixed(2) || "—"}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-lg ${
+                          <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg ${
                             isPositive ? "bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400" : "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400"
                           }`}>
                             {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
@@ -271,7 +278,7 @@ export default function PortfolioPage() {
                         <td className="px-6 py-4 text-center">
                           <button
                             onClick={() => removeFromPortfolio(symbol)}
-                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-colors"
                             title="Remove from portfolio"
                           >
                             <X size={18} />
@@ -288,26 +295,26 @@ export default function PortfolioPage() {
       </div>
 
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full max-h-[80vh] overflow-hidden">
-            <div className="p-4 border-b dark:border-slate-700 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Add Stock to Portfolio</h2>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden border border-gray-100 dark:border-slate-700">
+            <div className="p-5 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Add Stock to Portfolio</h2>
               <button
                 onClick={() => { setShowAddModal(false); setSearchQuery(""); }}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
               >
                 <X size={20} className="text-gray-500 dark:text-slate-400" />
               </button>
             </div>
             <div className="p-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search stocks..."
-                  className="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-slate-700 border-none rounded-xl text-gray-800 dark:text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full pl-12 pr-4 py-3.5 bg-gray-100 dark:bg-slate-700 border-none rounded-xl text-gray-900 dark:text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   autoFocus
                 />
               </div>
@@ -317,22 +324,22 @@ export default function PortfolioPage() {
                 <button
                   key={stock.symbol}
                   onClick={() => addToPortfolio(stock.symbol)}
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                  className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
                 >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                      <span className="text-green-700 dark:text-green-400 font-bold text-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/40 dark:to-indigo-900/40 rounded-xl flex items-center justify-center">
+                      <span className="text-purple-700 dark:text-purple-400 font-bold text-sm">
                         {stock.symbol.slice(0, 2)}
                       </span>
                     </div>
                     <div className="text-left">
-                      <p className="font-semibold text-gray-800 dark:text-white">{stock.symbol}</p>
-                      <p className="text-sm text-gray-500 dark:text-slate-400 truncate max-w-[200px]">{stock.name}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">{stock.symbol}</p>
+                      <p className="text-sm text-gray-500 dark:text-slate-400 truncate max-w-[180px]">{stock.name}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-gray-800 dark:text-white">₦{stock.price?.toFixed(2)}</p>
-                    <p className={`text-sm ${stock.changePercent >= 0 ? "text-green-600" : "text-red-600"}`}>
+                    <p className="font-semibold text-gray-900 dark:text-white">₦{stock.price?.toFixed(2)}</p>
+                    <p className={`text-sm font-medium ${stock.changePercent >= 0 ? "text-green-600" : "text-red-600"}`}>
                       {stock.changePercent >= 0 ? "+" : ""}{stock.changePercent?.toFixed(2)}%
                     </p>
                   </div>

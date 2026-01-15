@@ -18,7 +18,10 @@ import {
   Hash,
   Trash2,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Share2,
+  Copy,
+  Check
 } from "lucide-react";
 import AuthGuard from "@/components/AuthGuard";
 
@@ -76,6 +79,10 @@ export default function PortfolioPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareId, setShareId] = useState<string | null>(null);
+  const [isLoadingShare, setIsLoadingShare] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!hasFetched) {
@@ -118,6 +125,38 @@ export default function PortfolioPage() {
       console.error("Failed to fetch stocks data:", error);
     } finally {
       setIsLoadingStocks(false);
+    }
+  };
+
+  const handleShare = async () => {
+    setIsLoadingShare(true);
+    setShowShareModal(true);
+    try {
+      const response = await fetch("/api/portfolio/share");
+      if (response.ok) {
+        const data = await response.json();
+        setShareId(data.shareId);
+      }
+    } catch (error) {
+      console.error("Failed to get share link:", error);
+    } finally {
+      setIsLoadingShare(false);
+    }
+  };
+
+  const getShareUrl = () => {
+    if (typeof window !== "undefined" && shareId) {
+      return `${window.location.origin}/portfolio/share/${shareId}`;
+    }
+    return "";
+  };
+
+  const copyShareLink = async () => {
+    const url = getShareUrl();
+    if (url) {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
@@ -281,6 +320,13 @@ export default function PortfolioPage() {
               >
                 <Plus size={18} />
                 <span>Add Position</span>
+              </button>
+              <button
+                onClick={handleShare}
+                className="flex items-center gap-2 px-4 py-3 bg-white/10 backdrop-blur-sm text-white rounded-xl hover:bg-white/20 transition-all"
+                title="Share Portfolio"
+              >
+                <Share2 size={18} />
               </button>
               <button
                 onClick={() => { fetchHoldings(false); fetchStocksData(false); }}
@@ -624,6 +670,64 @@ export default function PortfolioPage() {
                 </>
               )}
             </form>
+          </div>
+        </div>
+      )}
+
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-md w-full border border-gray-100 dark:border-slate-700">
+            <div className="p-5 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-purple-500" />
+                Share Portfolio
+              </h2>
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
+              >
+                <X size={20} className="text-gray-500" />
+              </button>
+            </div>
+            <div className="p-6">
+              {isLoadingShare ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+                </div>
+              ) : shareId ? (
+                <div className="space-y-4">
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Anyone with this link can view your portfolio holdings and performance.
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={getShareUrl()}
+                      className="flex-1 px-4 py-3 bg-gray-100 dark:bg-slate-700 border-none rounded-xl text-gray-900 dark:text-white text-sm"
+                    />
+                    <button
+                      onClick={copyShareLink}
+                      className={`px-4 py-3 rounded-xl font-medium transition-all flex items-center gap-2 ${
+                        copied
+                          ? "bg-green-500 text-white"
+                          : "bg-purple-500 hover:bg-purple-600 text-white"
+                      }`}
+                    >
+                      {copied ? <Check size={18} /> : <Copy size={18} />}
+                      {copied ? "Copied!" : "Copy"}
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-500">
+                    This link will remain active until you generate a new one.
+                  </p>
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-gray-600 dark:text-gray-400">Failed to generate share link. Please try again.</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

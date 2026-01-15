@@ -65,7 +65,7 @@ export default function SharedPortfolioPage({ params }: { params: Promise<{ shar
 
         setOwner(portfolioData.owner);
         setHoldings(portfolioData.holdings || []);
-        setStocks(stocksData.stocks || []);
+        setStocks(stocksData.data || []);
       } catch (err) {
         setError("Failed to load portfolio.");
       } finally {

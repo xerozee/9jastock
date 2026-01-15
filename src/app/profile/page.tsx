@@ -139,7 +139,7 @@ export default function ProfilePage() {
       const response = await fetch('/api/stocks');
       if (response.ok) {
         const data = await response.json();
-        setStocks(data.stocks || []);
+        setStocks(data.data || []);
         setStocksError(false);
       } else {
         console.error('Failed to fetch stocks:', response.status);

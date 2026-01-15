@@ -48,10 +48,12 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 - **Custom Email/Password Authentication**: Secure authentication system
   - Custom signup page at /signup with email, password, and name fields
   - Custom login page at /login with email and password
+  - **Google Sign-In**: Alternative OAuth login via Replit Auth integration
   - Passwords hashed with bcrypt (cost factor 12)
   - Session-based authentication with 7-day expiry
   - Session expiration enforced on each request
   - Login/Logout/Signup buttons in header
+  - Modern split-screen design on login/signup pages
 - **Database-backed Portfolio & Holdings Tracker**: Portfolio tracking for authenticated users
   - Holdings table for tracking individual stock purchases with shares, price, and date
   - POST /api/holdings to add stock positions with purchase details

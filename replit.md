@@ -18,13 +18,17 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 - **Email Dispatch**: Resend integration for automated newsletter delivery to subscribers
 
 ## Recent Changes (January 2026)
-- **Landing Page**: Beautiful landing page for unauthenticated users
-  - Hero section with gradient background and grid pattern
-  - Feature showcase with 6 key features (Real-time data, Technical Analysis, etc.)
-  - Benefits section with checkmarks
-  - Mock portfolio preview card
-  - Multiple CTA buttons encouraging sign-up
-  - Stats display (145+ stocks, 5min refresh, 10+ indicators, 24/7 access)
+- **Landing Page**: Premium landing page with strong brand identity
+  - Custom SVG logo with chart lines, gradient colors, and live indicator
+  - Dark hero section with animated glow effects and gradient overlays
+  - Interactive stock ticker preview showing real NGX stocks
+  - Floating notification badges with bounce animations
+  - Scrolling ticker bar with live stock prices
+  - Feature cards with hover effects and gradient icons
+  - Stats grid with emoji icons (145+ stocks, 5min refresh, 10+ indicators, 24/7)
+  - Benefits section with card-style checkmarks
+  - Full-width gradient CTA section
+  - Professional footer with logo
 - **Route Protection**: Protected routes require authentication
   - AuthGuard component wraps stocks, portfolio, watchlist, and blog pages
   - Shows attractive sign-in prompt with benefits when not authenticated

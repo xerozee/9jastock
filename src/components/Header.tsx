@@ -6,6 +6,7 @@ import { TrendingUp, BarChart3, Star, Menu, X, Briefcase, Newspaper, Moon, Sun, 
 import { useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/hooks/useAuth';
+import Logo from './Logo';
 
 export default function Header() {
   const pathname = usePathname();
@@ -25,14 +26,8 @@ export default function Header() {
     <header className="bg-gradient-to-r from-green-800 via-green-700 to-emerald-700 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-white shadow-lg sticky top-0 z-50 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center space-x-2 group">
-            <div className="w-10 h-10 bg-white dark:bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-              <span className="text-green-800 dark:text-white font-bold text-xl">9J</span>
-            </div>
-            <div className="hidden sm:block">
-              <h1 className="text-xl font-bold">9jaStock</h1>
-              <p className="text-xs text-green-200 dark:text-slate-400">NGX Market Tracker</p>
-            </div>
+          <Link href="/" className="group hover:scale-105 transition-transform">
+            <Logo size="md" variant="full" />
           </Link>
 
           <nav className="hidden md:flex items-center space-x-1">

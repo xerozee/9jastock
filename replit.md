@@ -1,7 +1,7 @@
 # 9jaStock - Nigerian Stock Exchange (NGX) Tracker
 
 ## Overview
-A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in real-time. The app displays market cap, stock prices, volume, and other financial metrics with live data from TradingView. **No authentication required** - the app is fully public and accessible to everyone.
+A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in real-time. The app displays market cap, stock prices, volume, and other financial metrics with live data from TradingView. **User authentication via Replit Auth** - supports email/password, Google, Apple, and other OAuth providers.
 
 ## Current State
 - **LIVE DATA ACTIVE**: Fetches real-time data from TradingView's scanner API
@@ -9,7 +9,8 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 - Dynamic stock list - automatically includes new listings from TradingView
 - Market overview shows computed totals from live stock data
 - Auto-refreshes every 5 minutes
-- **Portfolio Tracking**: Browser localStorage-based portfolio (no login required)
+- **User Authentication**: Replit Auth OIDC integration (email/password, Google, Apple)
+- **Portfolio Tracking**: Database-backed portfolio for authenticated users
 - **Watchlist**: Browser localStorage-based watchlist
 - **News & Blog**: Market news page with real scraped news from multiple sources
 - **Automated News Scraping**: Hourly scraping from TradingView, Nairametrics, BusinessDay, Punch
@@ -17,14 +18,15 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 - **Email Dispatch**: Resend integration for automated newsletter delivery to subscribers
 
 ## Recent Changes (January 2026)
-- **Removed Authentication**: App is now fully public with no login required
-  - Removed Replit OIDC authentication
-  - Removed all protected routes
-  - All pages accessible without login
-- **localStorage-based Portfolio**: Portfolio tracking now works without authentication
-  - Add/remove stocks from portfolio via + button
-  - Portfolio data stored in browser localStorage
-  - Performance stats (avg change, gainers/losers count)
+- **Added Authentication**: Replit Auth OIDC integration
+  - Login/Logout buttons in header
+  - Session-based authentication with cookies
+  - User profile display with avatar
+  - Supports email/password, Google, Apple sign-in
+- **Database-backed Portfolio**: Portfolio tracking for authenticated users
+  - POST /api/portfolio to add stocks
+  - DELETE /api/portfolio to remove stocks
+  - GET /api/portfolio to list user's stocks
 - **Modern Theme & Dark Mode**: Complete UI redesign with dark mode support
   - ThemeContext with localStorage persistence for user preference
   - Dark mode toggle button in header (moon/sun icon)
@@ -45,13 +47,20 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 ## Project Architecture
 
 ### Key Files
+- `src/lib/auth.ts` - Replit Auth OIDC configuration and session management
+- `src/hooks/useAuth.ts` - React hook for authentication state
+- `src/app/api/auth/login/route.ts` - OAuth login redirect
+- `src/app/api/auth/callback/route.ts` - OAuth callback handler
+- `src/app/api/auth/logout/route.ts` - Logout and session cleanup
+- `src/app/api/auth/user/route.ts` - Get current user info
+- `src/app/api/portfolio/route.ts` - Portfolio CRUD API
 - `src/contexts/ThemeContext.tsx` - Dark mode context with localStorage persistence
 - `src/components/Providers.tsx` - Client-side providers wrapper (Theme, Watchlist)
 - `src/lib/tradingviewClient.ts` - TradingView WebSocket client using @mathieuc/tradingview
 - `src/lib/stockData.ts` - Static stock data for 129 NGX stocks
 - `src/lib/watchlistContext.tsx` - Browser localStorage-based watchlist management
 - `src/lib/db.ts` - Drizzle ORM database connection
-- `src/lib/schema.ts` - Database schema (news_articles, sent_newsletters, newsletter_subscribers)
+- `src/lib/schema.ts` - Database schema (users, sessions, portfolio_items, news_articles, sent_newsletters, newsletter_subscribers)
 - `src/lib/newsScraper.ts` - Web scraper for Nigerian stock news from multiple sources
 - `src/lib/newsletterComposer.ts` - AI-powered newsletter composition using GPT-4o-mini
 - `src/lib/resendClient.ts` - Resend email client for newsletter dispatch
@@ -63,7 +72,7 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 - `src/app/api/newsletter/dispatch/route.ts` - Send newsletter to all subscribers
 - `src/app/page.tsx` - Dashboard with market overview
 - `src/app/stocks/page.tsx` - All stocks listing with live data and filters
-- `src/app/portfolio/page.tsx` - Personal portfolio page (localStorage-based)
+- `src/app/portfolio/page.tsx` - Personal portfolio page (database-backed for auth users)
 - `src/app/watchlist/page.tsx` - Watchlist page (localStorage-based)
 - `src/app/blog/page.tsx` - Market news page with real scraped news
 - `src/app/blog/[symbol]/page.tsx` - Individual stock news with annual reports
@@ -76,10 +85,19 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 5. Returns combined data with live prices and computed market metrics
 6. Cache refreshes automatically every 5 minutes
 
-### Portfolio Flow (localStorage)
-1. User clicks "+" on a stock
-2. Stock symbol added to localStorage portfolio array
-3. My Portfolio page reads localStorage and fetches live data for those stocks
+### Authentication Flow
+1. User clicks "Login" button in header
+2. Redirects to `/api/auth/login` which initiates Replit OIDC flow
+3. User authenticates with Replit (email/password, Google, Apple, etc.)
+4. Callback at `/api/auth/callback` exchanges code for tokens
+5. User info saved to `users` table, session created in `sessions` table
+6. Session cookie set for 7 days
+7. `useAuth` hook checks `/api/auth/user` for current session
+
+### Portfolio Flow (Database-backed)
+1. Authenticated user clicks "+" on a stock
+2. POST to /api/portfolio adds stock to `portfolio_items` table
+3. My Portfolio page fetches from /api/portfolio
 4. Performance stats calculated from live stock data
 
 ### News & Newsletter Flow
@@ -109,4 +127,4 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 ## User Preferences
 - Real-time data preferred over mock data
 - Clean, responsive UI
-- No authentication - app is publicly accessible
+- Authentication via Replit Auth (email/password, Google, Apple)

@@ -11,7 +11,9 @@ export async function GET(request: NextRequest) {
     const nonce = generateSessionId();
     
     const host = request.headers.get("host") || "";
-    const protocol = host.includes("localhost") ? "http" : "https";
+    const forwardedProto = request.headers.get("x-forwarded-proto");
+    const isSecure = forwardedProto === "https" || process.env.NODE_ENV === "production";
+    const protocol = isSecure ? "https" : "http";
     const callbackUrl = `${protocol}://${host}/api/auth/callback`;
     
     const codeVerifier = client.randomPKCECodeVerifier();
@@ -32,21 +34,21 @@ export async function GET(request: NextRequest) {
     const cookieStore = await cookies();
     cookieStore.set("auth_state", state, {
       httpOnly: true,
-      secure: true,
+      secure: isSecure,
       sameSite: "lax",
       maxAge: 60 * 10,
       path: "/",
     });
     cookieStore.set("auth_nonce", nonce, {
       httpOnly: true,
-      secure: true,
+      secure: isSecure,
       sameSite: "lax",
       maxAge: 60 * 10,
       path: "/",
     });
     cookieStore.set("auth_code_verifier", codeVerifier, {
       httpOnly: true,
-      secure: true,
+      secure: isSecure,
       sameSite: "lax",
       maxAge: 60 * 10,
       path: "/",

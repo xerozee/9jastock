@@ -11,13 +11,15 @@ export async function GET(request: NextRequest) {
     const codeVerifier = cookieStore.get("auth_code_verifier")?.value;
 
     if (!state || !nonce || !codeVerifier) {
-      console.error("Missing auth cookies");
-      return NextResponse.redirect(new URL("/api/auth/login", request.url));
+      console.error("Missing auth cookies - state:", !!state, "nonce:", !!nonce, "codeVerifier:", !!codeVerifier);
+      return NextResponse.redirect(new URL("/?auth_error=missing_cookies", request.url));
     }
 
     const config = await getOidcConfig();
     const host = request.headers.get("host") || "";
-    const protocol = host.includes("localhost") ? "http" : "https";
+    const forwardedProto = request.headers.get("x-forwarded-proto");
+    const isSecure = forwardedProto === "https" || process.env.NODE_ENV === "production";
+    const protocol = isSecure ? "https" : "http";
     const callbackUrl = `${protocol}://${host}/api/auth/callback`;
 
     const tokens = await client.authorizationCodeGrant(config, new URL(request.url), {
@@ -49,7 +51,7 @@ export async function GET(request: NextRequest) {
     
     cookieStore.set("session_id", sessionId, {
       httpOnly: true,
-      secure: true,
+      secure: isSecure,
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60,
       path: "/",

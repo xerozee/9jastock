@@ -1,25 +1,12 @@
-import * as client from "openid-client";
 import { db } from "./db";
 import { users, sessions, type User, type UpsertUser } from "./schema";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 
-const ISSUER_URL = process.env.ISSUER_URL ?? "https://replit.com/oidc";
+const ISSUER_URL = "https://replit.com/oidc";
 const SESSION_COOKIE = "session_id";
 const STATE_COOKIE = "oauth_state";
 const SESSION_TTL = 7 * 24 * 60 * 60 * 1000;
-
-let oidcConfig: Awaited<ReturnType<typeof client.discovery>> | null = null;
-
-async function getOidcConfig() {
-  if (!oidcConfig) {
-    oidcConfig = await client.discovery(
-      new URL(ISSUER_URL),
-      process.env.REPL_ID!
-    );
-  }
-  return oidcConfig;
-}
 
 export async function getSession(): Promise<{ user: User; claims: any } | null> {
   const cookieStore = await cookies();
@@ -88,16 +75,16 @@ function generateState(): string {
 export function getLoginUrl(origin: string): { url: string; state: string } {
   const state = generateState();
   const callbackUrl = `${origin}/api/auth/callback`;
-  const config = {
+  const params = new URLSearchParams({
     client_id: process.env.REPL_ID!,
     redirect_uri: callbackUrl,
     response_type: "code",
     scope: "openid email profile",
     state,
-  };
+  });
   
   return {
-    url: `${ISSUER_URL}/authorize?${new URLSearchParams(config).toString()}`,
+    url: `${ISSUER_URL}/authorize?${params.toString()}`,
     state,
   };
 }
@@ -107,25 +94,51 @@ export async function handleCallback(code: string, state: string, expectedState:
     throw new Error("Invalid state parameter - possible CSRF attack");
   }
   
-  const oidcConfig = await getOidcConfig();
   const callbackUrl = `${origin}/api/auth/callback`;
   
-  const tokens = await client.authorizationCodeGrant(oidcConfig, new URL(`${callbackUrl}?code=${code}&state=${state}`), {
-    expectedState: state,
+  const tokenResponse = await fetch(`${ISSUER_URL}/token`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: callbackUrl,
+      client_id: process.env.REPL_ID!,
+    }),
   });
   
-  const claims = tokens.claims();
+  if (!tokenResponse.ok) {
+    const errorText = await tokenResponse.text();
+    console.error('Token exchange failed:', errorText);
+    throw new Error(`Token exchange failed: ${tokenResponse.status}`);
+  }
   
-  if (!claims) {
-    throw new Error("No claims in token response");
+  const tokens = await tokenResponse.json();
+  
+  const userInfoResponse = await fetch(`${ISSUER_URL}/userinfo`, {
+    headers: {
+      'Authorization': `Bearer ${tokens.access_token}`,
+    },
+  });
+  
+  if (!userInfoResponse.ok) {
+    throw new Error('Failed to fetch user info');
+  }
+  
+  const claims = await userInfoResponse.json();
+  
+  if (!claims.sub) {
+    throw new Error("No user ID in claims");
   }
   
   const user = await upsertUser({
     id: claims.sub,
-    email: (claims as any).email as string | undefined,
-    firstName: (claims as any).first_name as string | undefined,
-    lastName: (claims as any).last_name as string | undefined,
-    profileImageUrl: (claims as any).profile_image_url as string | undefined,
+    email: claims.email,
+    firstName: claims.first_name,
+    lastName: claims.last_name,
+    profileImageUrl: claims.profile_image_url,
   });
   
   const sessionId = await createSession(user.id, claims);
@@ -133,12 +146,12 @@ export async function handleCallback(code: string, state: string, expectedState:
   return { sessionId, user };
 }
 
-export async function getLogoutUrl(origin: string): Promise<string> {
-  const config = await getOidcConfig();
-  return client.buildEndSessionUrl(config, {
+export function getLogoutUrl(origin: string): string {
+  const params = new URLSearchParams({
     client_id: process.env.REPL_ID!,
     post_logout_redirect_uri: origin,
-  }).href;
+  });
+  return `${ISSUER_URL}/logout?${params.toString()}`;
 }
 
 export function isSecureOrigin(origin: string): boolean {

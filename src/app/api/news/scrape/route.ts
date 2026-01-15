@@ -9,7 +9,11 @@ export async function POST(request: Request) {
     const cronSecret = process.env.CRON_SECRET;
     
     if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      console.log('Unauthorized scrape attempt');
+      console.log('Unauthorized scrape attempt - invalid or missing authorization');
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
     
     console.log('Starting scheduled news scrape...');

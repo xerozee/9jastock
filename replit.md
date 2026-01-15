@@ -11,7 +11,10 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 - Auto-refreshes every 5 minutes
 - **User Authentication**: Replit OIDC authentication with session management
 - **Portfolio Tracking**: Authenticated users can add stocks to their personal portfolio
-- **News & Blog**: Market news page with multiple sources and top performers sidebar
+- **News & Blog**: Market news page with real scraped news from multiple sources
+- **Automated News Scraping**: Hourly scraping from TradingView, Nairametrics, BusinessDay, Punch
+- **AI Newsletter System**: GPT-4o-mini powered newsletter composition from scraped news
+- **Email Dispatch**: Resend integration for automated newsletter delivery to subscribers
 
 ## Recent Changes (January 2026)
 - **Modern Theme & Dark Mode**: Complete UI redesign with dark mode support
@@ -57,15 +60,22 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 - `src/lib/stockData.ts` - Static stock data for 129 NGX stocks
 - `src/lib/auth.ts` - Replit OIDC authentication logic
 - `src/lib/db.ts` - Drizzle ORM database connection
-- `src/lib/schema.ts` - Database schema (users, sessions, portfolio_items)
+- `src/lib/schema.ts` - Database schema (users, sessions, portfolio_items, news_articles, sent_newsletters, newsletter_subscribers)
+- `src/lib/newsScraper.ts` - Web scraper for Nigerian stock news from multiple sources
+- `src/lib/newsletterComposer.ts` - AI-powered newsletter composition using GPT-4o-mini
+- `src/lib/resendClient.ts` - Resend email client for newsletter dispatch
 - `src/app/api/stocks/route.ts` - API endpoint returning stocks (cached + live)
 - `src/app/api/stocks/[symbol]/route.ts` - Individual stock API
 - `src/app/api/auth/*/route.ts` - Authentication API routes
 - `src/app/api/portfolio/route.ts` - Portfolio API (add/remove/list stocks)
+- `src/app/api/news/route.ts` - API endpoint for scraped news articles
+- `src/app/api/news/scrape/route.ts` - Trigger news scraping (call hourly via cron)
+- `src/app/api/newsletter/compose/route.ts` - AI newsletter composition endpoint
+- `src/app/api/newsletter/dispatch/route.ts` - Send newsletter to all subscribers
 - `src/app/page.tsx` - Dashboard with market overview
 - `src/app/stocks/page.tsx` - All stocks listing with live data and filters
 - `src/app/portfolio/page.tsx` - Personal portfolio page
-- `src/app/blog/page.tsx` - Market news page with source filters
+- `src/app/blog/page.tsx` - Market news page with real scraped news
 - `src/app/blog/[symbol]/page.tsx` - Individual stock news with annual reports
 - `src/hooks/useAuth.ts` - React hook for authentication state
 - `src/hooks/usePortfolio.ts` - React hook for portfolio management
@@ -93,6 +103,14 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 4. My Portfolio page fetches user's stocks and displays with live data
 5. Performance stats calculated from live stock data
 
+### News & Newsletter Flow
+1. Scraper runs hourly via POST to `/api/news/scrape`
+2. Fetches articles from TradingView, Nairametrics, BusinessDay, Punch
+3. Articles stored in `news_articles` table (deduplicated by URL)
+4. Blog page fetches news from `/api/news` endpoint
+5. Daily newsletter: POST to `/api/newsletter/compose` uses GPT-4o-mini
+6. Dispatch: POST to `/api/newsletter/dispatch` sends to all active subscribers via Resend
+
 ## Configuration
 - **Port**: 5000 (required for Replit)
 - **Database**: PostgreSQL via Neon (DATABASE_URL)
@@ -100,6 +118,9 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
   - `TRADINGVIEW_SESSION`: TradingView session ID for live data
   - `DATABASE_URL`: PostgreSQL connection string
   - `REPL_ID`: Replit project ID (auto-set)
+  - `AI_INTEGRATIONS_OPENAI_API_KEY`: OpenAI API key (managed by Replit AI Integrations)
+  - `AI_INTEGRATIONS_OPENAI_BASE_URL`: OpenAI base URL (managed by Replit AI Integrations)
+  - Resend integration configured via Replit connectors
 
 ## Deployment
 - Configured for autoscale deployment

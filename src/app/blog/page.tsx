@@ -59,7 +59,7 @@ export default function BlogPage() {
       const response = await fetch('/api/news?limit=50');
       if (response.ok) {
         const data = await response.json();
-        setNews(data.articles || []);
+        setNews(data.data || []);
       }
     } catch (error) {
       console.error('Failed to fetch news:', error);

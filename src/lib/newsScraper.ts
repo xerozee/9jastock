@@ -6,26 +6,26 @@ import { eq } from 'drizzle-orm';
 
 const NEWS_SOURCES = [
   {
-    id: 'tradingview',
+    id: 'TradingView',
     name: 'TradingView',
     url: 'https://www.tradingview.com/markets/stocks-nigeria/news/',
     type: 'tradingview'
   },
   {
-    id: 'nairametrics',
+    id: 'Nairametrics',
     name: 'Nairametrics',
     url: 'https://nairametrics.com/category/stock-market/',
     type: 'general'
   },
   {
-    id: 'businessday',
+    id: 'BusinessDay',
     name: 'BusinessDay',
     url: 'https://businessday.ng/markets/',
     type: 'general'
   },
   {
-    id: 'punchng',
-    name: 'Punch Nigeria',
+    id: 'Punch',
+    name: 'Punch',
     url: 'https://punchng.com/topics/business/',
     type: 'general'
   }
@@ -195,7 +195,7 @@ async function scrapeTradingView(): Promise<InsertNewsArticle[]> {
           title,
           summary: summary || title.substring(0, 200),
           url: fullUrl,
-          source: 'tradingview',
+          source: 'TradingView',
           category: categorizeNews(title, summary),
           symbol,
           publishedAt: timeText ? new Date(timeText) : new Date(),
@@ -236,7 +236,7 @@ async function scrapeNairametrics(): Promise<InsertNewsArticle[]> {
           title,
           summary: summary || title.substring(0, 200),
           url: link,
-          source: 'nairametrics',
+          source: 'Nairametrics',
           category: categorizeNews(title, summary),
           symbol,
           imageUrl: imageUrl || null,
@@ -277,7 +277,7 @@ async function scrapeBusinessDay(): Promise<InsertNewsArticle[]> {
           title,
           summary: summary || title.substring(0, 200),
           url: link,
-          source: 'businessday',
+          source: 'BusinessDay',
           category: categorizeNews(title, summary),
           symbol,
           imageUrl: imageUrl || null,
@@ -318,7 +318,7 @@ async function scrapePunchNG(): Promise<InsertNewsArticle[]> {
           title,
           summary: summary || title.substring(0, 200),
           url: link,
-          source: 'punchng',
+          source: 'Punch',
           category: categorizeNews(title, summary),
           symbol,
           imageUrl: imageUrl || null,
@@ -381,7 +381,7 @@ export async function runNewsScraper(): Promise<{
   const sourceCounts: { [key: string]: number } = {};
   
   results.forEach((result, index) => {
-    const sourceName = ['tradingview', 'nairametrics', 'businessday', 'punchng'][index];
+    const sourceName = ['TradingView', 'Nairametrics', 'BusinessDay', 'Punch'][index];
     if (result.status === 'fulfilled') {
       sourceCounts[sourceName] = result.value.length;
       allArticles.push(...result.value);

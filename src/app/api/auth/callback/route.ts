@@ -2,10 +2,26 @@ import { NextRequest, NextResponse } from "next/server";
 import { handleCallback, SESSION_COOKIE, STATE_COOKIE, isSecureOrigin } from "@/lib/auth";
 import { cookies } from "next/headers";
 
+function getOrigin(request: NextRequest): string {
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
+  
+  if (forwardedHost) {
+    return `${forwardedProto}://${forwardedHost}`;
+  }
+  
+  const replitDevDomain = process.env.REPLIT_DEV_DOMAIN;
+  if (replitDevDomain) {
+    return `https://${replitDevDomain}`;
+  }
+  
+  return request.nextUrl.origin;
+}
+
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
   const state = request.nextUrl.searchParams.get("state");
-  const origin = request.nextUrl.origin;
+  const origin = getOrigin(request);
   
   const cookieStore = await cookies();
   const expectedState = cookieStore.get(STATE_COOKIE)?.value;

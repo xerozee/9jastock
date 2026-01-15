@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       throw new Error("No claims in token response");
     }
 
-    await upsertUser({
+    const user = await upsertUser({
       id: claims.sub,
       email: claims.email as string | undefined,
       firstName: claims.first_name as string | undefined,
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     });
 
     const sessionId = generateSessionId();
-    await createSession(sessionId, claims.sub, claims as Record<string, unknown>);
+    await createSession(sessionId, user._id.toString(), claims as Record<string, unknown>);
 
     cookieStore.delete("auth_state");
     cookieStore.delete("auth_nonce");
@@ -59,6 +59,10 @@ export async function GET(request: NextRequest) {
       maxAge: 7 * 24 * 60 * 60,
       path: "/",
     });
+
+    if (!user.onboardingCompleted) {
+      return NextResponse.redirect(`${baseUrl}/onboarding`);
+    }
 
     return NextResponse.redirect(baseUrl);
   } catch (error) {

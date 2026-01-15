@@ -37,24 +37,60 @@ export async function upsertUser(userData: UpsertUserData): Promise<IUser> {
   await connectToDatabase();
   
   if (userData.id) {
-    const user = await User.findByIdAndUpdate(
-      userData.id,
-      {
-        $set: {
-          email: userData.email,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          profileImageUrl: userData.profileImageUrl,
-          updatedAt: new Date(),
+    let user = await User.findOne({ oauthId: userData.id }).lean();
+    
+    if (user) {
+      const updatedUser = await User.findOneAndUpdate(
+        { oauthId: userData.id },
+        {
+          $set: {
+            email: userData.email,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            profileImageUrl: userData.profileImageUrl,
+            updatedAt: new Date(),
+          },
         },
-      },
-      { new: true, upsert: true }
-    ).lean();
-    return user as IUser;
+        { new: true }
+      ).lean();
+      return updatedUser as IUser;
+    }
+    
+    const existingByEmail = userData.email 
+      ? await User.findOne({ email: userData.email.toLowerCase() }).lean()
+      : null;
+    
+    if (existingByEmail) {
+      const updatedUser = await User.findByIdAndUpdate(
+        existingByEmail._id,
+        {
+          $set: {
+            oauthId: userData.id,
+            oauthProvider: 'replit',
+            firstName: userData.firstName || existingByEmail.firstName,
+            lastName: userData.lastName || existingByEmail.lastName,
+            profileImageUrl: userData.profileImageUrl || existingByEmail.profileImageUrl,
+            updatedAt: new Date(),
+          },
+        },
+        { new: true }
+      ).lean();
+      return updatedUser as IUser;
+    }
+    
+    const newUser = await User.create({
+      oauthId: userData.id,
+      oauthProvider: 'replit',
+      email: userData.email?.toLowerCase(),
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      profileImageUrl: userData.profileImageUrl,
+    });
+    return newUser.toObject() as IUser;
   }
   
   const newUser = await User.create({
-    email: userData.email,
+    email: userData.email?.toLowerCase(),
     firstName: userData.firstName,
     lastName: userData.lastName,
     profileImageUrl: userData.profileImageUrl,

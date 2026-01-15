@@ -52,6 +52,8 @@ const userSchema = new mongoose.Schema({
   firstName: { type: String },
   lastName: { type: String },
   profileImageUrl: { type: String },
+  oauthId: { type: String, unique: true, sparse: true },
+  oauthProvider: { type: String },
   emailVerified: { type: Date },
   shareId: { type: String, unique: true, sparse: true },
   referralCode: { type: String, unique: true, sparse: true },
@@ -146,6 +148,8 @@ export type IUser = {
   firstName?: string;
   lastName?: string;
   profileImageUrl?: string;
+  oauthId?: string;
+  oauthProvider?: string;
   emailVerified?: Date;
   shareId?: string;
   referralCode?: string;

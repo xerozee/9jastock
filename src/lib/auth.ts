@@ -41,6 +41,11 @@ export async function getSession(sid: string): Promise<{ userId: string } | null
   const [session] = await db.select().from(sessions).where(eq(sessions.sid, sid));
   if (!session || !session.sess) return null;
   
+  if (session.expire && new Date(session.expire) < new Date()) {
+    await db.delete(sessions).where(eq(sessions.sid, sid));
+    return null;
+  }
+  
   const sessData = session.sess as { userId?: string; passport?: { user?: { claims?: { sub?: string } } } };
   const userId = sessData.userId || sessData.passport?.user?.claims?.sub;
   

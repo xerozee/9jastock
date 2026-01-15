@@ -75,14 +75,18 @@ export default function PortfolioPage() {
     notes: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
 
   useEffect(() => {
-    fetchHoldings();
-    fetchStocksData();
-  }, []);
+    if (!hasFetched) {
+      fetchHoldings();
+      fetchStocksData();
+      setHasFetched(true);
+    }
+  }, [hasFetched]);
 
-  const fetchHoldings = async () => {
-    setIsLoadingHoldings(true);
+  const fetchHoldings = async (showLoading = true) => {
+    if (showLoading) setIsLoadingHoldings(true);
     try {
       const response = await fetch("/api/holdings");
       if (response.ok) {
@@ -96,8 +100,8 @@ export default function PortfolioPage() {
     }
   };
 
-  const fetchStocksData = async () => {
-    setIsLoadingStocks(true);
+  const fetchStocksData = async (showLoading = true) => {
+    if (showLoading) setIsLoadingStocks(true);
     try {
       const response = await fetch("/api/stocks");
       if (response.ok) {
@@ -279,7 +283,7 @@ export default function PortfolioPage() {
                 <span>Add Position</span>
               </button>
               <button
-                onClick={() => { fetchHoldings(); fetchStocksData(); }}
+                onClick={() => { fetchHoldings(false); fetchStocksData(false); }}
                 disabled={isLoading}
                 className="flex items-center gap-2 px-4 py-3 bg-white/10 backdrop-blur-sm text-white rounded-xl hover:bg-white/20 transition-all disabled:opacity-50"
               >

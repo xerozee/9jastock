@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, jsonb, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
+import { index, jsonb, pgTable, timestamp, varchar, integer, decimal } from "drizzle-orm/pg-core";
 
 export const sessions = pgTable(
   "sessions",
@@ -92,3 +92,24 @@ export const sentNewsletters = pgTable(
 
 export type SentNewsletter = typeof sentNewsletters.$inferSelect;
 export type InsertSentNewsletter = typeof sentNewsletters.$inferInsert;
+
+export const holdings = pgTable(
+  "holdings",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    symbol: varchar("symbol").notNull(),
+    shares: decimal("shares", { precision: 18, scale: 6 }).notNull(),
+    purchasePrice: decimal("purchase_price", { precision: 18, scale: 4 }).notNull(),
+    purchaseDate: timestamp("purchase_date").notNull(),
+    notes: varchar("notes"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("IDX_holdings_user").on(table.userId),
+    index("IDX_holdings_symbol").on(table.symbol),
+  ]
+);
+
+export type Holding = typeof holdings.$inferSelect;
+export type InsertHolding = typeof holdings.$inferInsert;

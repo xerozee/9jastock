@@ -1,7 +1,5 @@
 import OpenAI from 'openai';
-import { db } from './db';
-import { newsArticles, newsletterSubscribers, sentNewsletters, NewsArticle } from './schema';
-import { desc, gte, eq } from 'drizzle-orm';
+import { connectToDatabase, NewsArticle, NewsletterSubscriber, SentNewsletter, INewsArticle } from './mongodb';
 
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
@@ -15,19 +13,21 @@ interface NewsletterContent {
   articleCount: number;
 }
 
-export async function getTopNews(hours = 24, limit = 10): Promise<NewsArticle[]> {
+export async function getTopNews(hours = 24, limit = 10): Promise<INewsArticle[]> {
+  await connectToDatabase();
   const cutoffDate = new Date(Date.now() - hours * 60 * 60 * 1000);
   
-  const articles = await db.select()
-    .from(newsArticles)
-    .where(gte(newsArticles.scrapedAt, cutoffDate))
-    .orderBy(desc(newsArticles.scrapedAt))
-    .limit(limit);
+  const articles = await NewsArticle.find({
+    scrapedAt: { $gte: cutoffDate }
+  })
+    .sort({ scrapedAt: -1 })
+    .limit(limit)
+    .lean();
   
-  return articles;
+  return articles as INewsArticle[];
 }
 
-export async function composeNewsletter(articles: NewsArticle[]): Promise<NewsletterContent> {
+export async function composeNewsletter(articles: INewsArticle[]): Promise<NewsletterContent> {
   if (articles.length === 0) {
     return {
       subject: '9jaStock Daily: No New Market Updates',
@@ -156,10 +156,8 @@ function wrapInEmailTemplate(content: string): string {
 }
 
 export async function getActiveSubscribers(): Promise<string[]> {
-  const subscribers = await db.select()
-    .from(newsletterSubscribers)
-    .where(eq(newsletterSubscribers.isActive, 'true'));
-  
+  await connectToDatabase();
+  const subscribers = await NewsletterSubscriber.find({ isActive: true }).lean();
   return subscribers.map(s => s.email);
 }
 
@@ -168,10 +166,11 @@ export async function saveNewsletterRecord(
   content: string,
   recipientCount: number
 ): Promise<void> {
-  await db.insert(sentNewsletters).values({
+  await connectToDatabase();
+  await SentNewsletter.create({
     subject,
     content,
-    recipientCount: recipientCount.toString(),
+    recipientCount,
     status: 'sent',
   });
 }

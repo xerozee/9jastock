@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Target, TrendingUp, Shield, Clock, Building2, ChevronRight, ChevronLeft, Check } from 'lucide-react';
+import { Target, TrendingUp, Shield, Clock, Building2, ChevronRight, ChevronLeft, Check, AlertCircle } from 'lucide-react';
 
 const investmentGoals = [
   { value: 'wealth-building', label: 'Build Long-term Wealth', icon: TrendingUp, description: 'Grow my money steadily over time' },
@@ -42,6 +42,7 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     investmentGoal: '',
     experienceLevel: '',
@@ -76,6 +77,7 @@ export default function OnboardingPage() {
 
   const handleComplete = async () => {
     setLoading(true);
+    setError('');
     try {
       const response = await fetch('/api/profile', {
         method: 'PUT',
@@ -89,10 +91,11 @@ export default function OnboardingPage() {
       if (response.ok) {
         router.push('/profile');
       } else {
-        console.error('Failed to save onboarding data');
+        const data = await response.json();
+        setError(data.error || 'Failed to save your preferences. Please try again.');
       }
-    } catch (error) {
-      console.error('Onboarding error:', error);
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -280,6 +283,13 @@ export default function OnboardingPage() {
                   rows={3}
                 />
               </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400">
+              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <span>{error}</span>
             </div>
           )}
 

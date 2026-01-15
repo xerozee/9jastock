@@ -100,7 +100,7 @@ export async function PUT(request: NextRequest) {
     const updatedUser = await User.findByIdAndUpdate(
       session.userId,
       { $set: updateData },
-      { new: true }
+      { new: true, runValidators: true }
     ).lean();
 
     const { password, ...userWithoutPassword } = updatedUser as any;

@@ -105,6 +105,10 @@ export default function ProfilePage() {
   const fetchProfile = async () => {
     try {
       const response = await fetch('/api/profile');
+      if (response.status === 401) {
+        router.push('/login');
+        return;
+      }
       if (response.ok) {
         const data = await response.json();
         setProfile(data);

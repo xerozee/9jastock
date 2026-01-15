@@ -29,6 +29,12 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
   - AuthGuard component wraps stocks, portfolio, watchlist, and blog pages
   - Shows attractive sign-in prompt with benefits when not authenticated
   - Home page shows landing page for guests, dashboard for authenticated users
+- **Live News System**: Real-time news data with 30-minute auto-refresh
+  - News API with in-memory caching for fast responses (5-min cache)
+  - Background news scraping triggered automatically every 30 minutes
+  - Live status indicator showing connection status and last update time
+  - Stats display showing articles from last 24 hours and total count
+  - Sources: TradingView, BusinessDay, Punch
 - **Added Authentication**: Replit Auth OIDC integration
   - Login/Logout buttons in header
   - Session-based authentication with cookies

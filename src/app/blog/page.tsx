@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { 
   TrendingUp, TrendingDown, Newspaper, ExternalLink, Clock, 
-  Building2, BarChart3, FileText, RefreshCw, ChevronRight
+  Building2, BarChart3, FileText, RefreshCw, ChevronRight, Wifi, WifiOff
 } from 'lucide-react';
 import AuthGuard from '@/components/AuthGuard';
 import { Stock } from '@/types/stock';
@@ -29,6 +29,8 @@ const NEWS_SOURCES = [
   { id: 'Punch', name: 'Punch', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
 ];
 
+const NEWS_REFRESH_INTERVAL = 30 * 60 * 1000;
+
 export default function BlogPage() {
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -36,8 +38,12 @@ export default function BlogPage() {
   const [isNewsLoading, setIsNewsLoading] = useState(true);
   const [activeSource, setActiveSource] = useState<string>('all');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [newsLastUpdated, setNewsLastUpdated] = useState<Date | null>(null);
+  const [newsStats, setNewsStats] = useState<{ total: number; last24h: number; lastHour: number } | null>(null);
+  const [nextRefresh, setNextRefresh] = useState<number>(0);
+  const [isLive, setIsLive] = useState(false);
 
-  const fetchStocks = async () => {
+  const fetchStocks = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await fetch('/api/stocks');
@@ -51,33 +57,39 @@ export default function BlogPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const fetchNews = async () => {
+  const fetchNews = useCallback(async (forceRefresh = false) => {
     try {
       setIsNewsLoading(true);
-      const response = await fetch('/api/news?limit=50');
+      const url = forceRefresh ? '/api/news?limit=50&refresh=true' : '/api/news?limit=50';
+      const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
         setNews(data.data || []);
+        setNewsStats(data.stats || null);
+        setNextRefresh(data.nextRefresh || 0);
+        setNewsLastUpdated(new Date());
+        setIsLive(true);
       }
     } catch (error) {
       console.error('Failed to fetch news:', error);
+      setIsLive(false);
     } finally {
       setIsNewsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchStocks();
     fetchNews();
     const stockInterval = setInterval(fetchStocks, 5 * 60 * 1000);
-    const newsInterval = setInterval(fetchNews, 15 * 60 * 1000);
+    const newsInterval = setInterval(() => fetchNews(), NEWS_REFRESH_INTERVAL);
     return () => {
       clearInterval(stockInterval);
       clearInterval(newsInterval);
     };
-  }, []);
+  }, [fetchStocks, fetchNews]);
 
   const topPerformers = [...stocks]
     .filter(s => s.changePercent !== undefined)
@@ -102,13 +114,58 @@ export default function BlogPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
-            <Newspaper className="text-green-600" />
-            Market News & Insights
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Stay informed with the latest Nigerian stock market news, analysis, and corporate updates
-          </p>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
+                <Newspaper className="text-green-600" />
+                Market News & Insights
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Stay informed with the latest Nigerian stock market news, analysis, and corporate updates
+              </p>
+            </div>
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
+              <div className="flex items-center gap-3">
+                {isLive ? (
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-green-100 dark:bg-green-900/40 rounded-lg">
+                      <Wifi className="text-green-500" size={18} />
+                    </div>
+                    <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                      Live News Feed
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-orange-100 dark:bg-orange-900/40 rounded-lg">
+                      <WifiOff className="text-orange-500" size={18} />
+                    </div>
+                    <span className="text-sm font-medium text-orange-600 dark:text-orange-400">
+                      Connecting...
+                    </span>
+                  </div>
+                )}
+              </div>
+              {newsLastUpdated && (
+                <p className="text-xs text-gray-500 dark:text-slate-400 mt-2">
+                  Updated: {newsLastUpdated.toLocaleTimeString()}
+                </p>
+              )}
+              {newsStats && (
+                <div className="flex gap-3 mt-2 text-xs">
+                  <span className="text-gray-500 dark:text-slate-400">
+                    <span className="font-semibold text-green-600 dark:text-green-400">{newsStats.last24h}</span> today
+                  </span>
+                  <span className="text-gray-500 dark:text-slate-400">
+                    <span className="font-semibold">{newsStats.total}</span> total
+                  </span>
+                </div>
+              )}
+              <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
+                Auto-refresh: every 30 min
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
@@ -131,7 +188,7 @@ export default function BlogPage() {
                   </button>
                 ))}
                 <button
-                  onClick={fetchNews}
+                  onClick={() => fetchNews(true)}
                   disabled={isNewsLoading}
                   className="ml-auto px-4 py-2 rounded-lg font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 flex items-center gap-2"
                 >
@@ -154,7 +211,7 @@ export default function BlogPage() {
                   News articles are being scraped from multiple sources. Check back soon!
                 </p>
                 <button
-                  onClick={fetchNews}
+                  onClick={() => fetchNews(true)}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                 >
                   Refresh News

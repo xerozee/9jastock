@@ -95,7 +95,7 @@ export default function LoginPage() {
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-slate-900/50 backdrop-blur-xl py-8 px-4 shadow-2xl rounded-2xl sm:px-10 border border-slate-800">
             <a
-              href="/api/login"
+              href="/api/auth/login"
               className="w-full flex items-center justify-center gap-3 py-3.5 px-4 border border-slate-700 rounded-xl shadow-sm text-sm font-semibold text-white bg-slate-800 hover:bg-slate-700 transition-all mb-6"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">

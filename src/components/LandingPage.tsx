@@ -473,7 +473,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
             </Link>
             
             <a
-              href="/api/login"
+              href="/api/auth/login"
               className="inline-flex items-center gap-3 px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold rounded-2xl border border-white/20 transition-all"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">

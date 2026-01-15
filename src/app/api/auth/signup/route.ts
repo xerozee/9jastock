@@ -3,10 +3,14 @@ import { connectToDatabase, User, Session } from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
+function generateReferralCode(): string {
+  return crypto.randomBytes(4).toString('hex').toUpperCase();
+}
+
 export async function POST(request: NextRequest) {
   try {
     await connectToDatabase();
-    const { email, password, firstName, lastName } = await request.json();
+    const { email, password, firstName, lastName, referralCode } = await request.json();
 
     if (!email || !password) {
       return NextResponse.json(
@@ -41,11 +45,23 @@ export async function POST(request: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    let referredBy = null;
+    if (referralCode) {
+      const referrer = await User.findOne({ referralCode: referralCode.toUpperCase() });
+      if (referrer) {
+        referredBy = referrer._id;
+      }
+    }
+
     const newUser = await User.create({
       email: email.toLowerCase(),
       password: hashedPassword,
       firstName: firstName || null,
       lastName: lastName || null,
+      referralCode: generateReferralCode(),
+      shareId: crypto.randomBytes(8).toString('hex'),
+      referredBy: referredBy,
+      onboardingCompleted: false,
     });
 
     const sessionId = crypto.randomBytes(32).toString("hex");

@@ -1,19 +1,28 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Mail, Lock, User, ArrowRight, AlertCircle, CheckCircle } from "lucide-react";
 import Logo from "@/components/Logo";
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [referralCode, setReferralCode] = useState("");
+
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (ref) {
+      setReferralCode(ref);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +33,7 @@ export default function SignupPage() {
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, firstName, lastName }),
+        body: JSON.stringify({ email, password, firstName, lastName, referralCode }),
       });
 
       const data = await response.json();
@@ -33,7 +42,7 @@ export default function SignupPage() {
         throw new Error(data.error || "Failed to create account");
       }
 
-      router.push("/");
+      router.push("/onboarding");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

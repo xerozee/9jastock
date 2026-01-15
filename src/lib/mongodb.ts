@@ -54,6 +54,15 @@ const userSchema = new mongoose.Schema({
   profileImageUrl: { type: String },
   emailVerified: { type: Date },
   shareId: { type: String, unique: true, sparse: true },
+  referralCode: { type: String, unique: true, sparse: true },
+  referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  bio: { type: String },
+  investmentGoal: { type: String, enum: ['wealth-building', 'retirement', 'passive-income', 'short-term-gains', 'learning'] },
+  experienceLevel: { type: String, enum: ['beginner', 'intermediate', 'advanced', 'expert'] },
+  riskTolerance: { type: String, enum: ['conservative', 'moderate', 'aggressive'] },
+  investmentHorizon: { type: String, enum: ['less-than-1-year', '1-3-years', '3-5-years', '5-10-years', '10-plus-years'] },
+  interestedSectors: [{ type: String }],
+  onboardingCompleted: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
@@ -139,6 +148,15 @@ export type IUser = {
   profileImageUrl?: string;
   emailVerified?: Date;
   shareId?: string;
+  referralCode?: string;
+  referredBy?: mongoose.Types.ObjectId;
+  bio?: string;
+  investmentGoal?: 'wealth-building' | 'retirement' | 'passive-income' | 'short-term-gains' | 'learning';
+  experienceLevel?: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  riskTolerance?: 'conservative' | 'moderate' | 'aggressive';
+  investmentHorizon?: 'less-than-1-year' | '1-3-years' | '3-5-years' | '5-10-years' | '10-plus-years';
+  interestedSectors?: string[];
+  onboardingCompleted?: boolean;
   createdAt: Date;
   updatedAt: Date;
 };

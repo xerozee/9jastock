@@ -64,7 +64,10 @@ export default function Header() {
               <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse" />
             ) : isAuthenticated && user ? (
               <div className="flex items-center space-x-2">
-                <div className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-white/10">
+                <Link
+                  href="/profile"
+                  className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-all"
+                >
                   {user.profileImageUrl ? (
                     <img
                       src={user.profileImageUrl}
@@ -77,7 +80,7 @@ export default function Header() {
                   <span className="text-sm font-medium">
                     {user.firstName || user.email?.split('@')[0] || 'User'}
                   </span>
-                </div>
+                </Link>
                 <button
                   onClick={logout}
                   className="flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-100 transition-all"
@@ -151,7 +154,11 @@ export default function Header() {
                 </div>
               ) : isAuthenticated && user ? (
                 <div className="px-4 space-y-2">
-                  <div className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-white/10">
+                  <Link
+                    href="/profile"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all"
+                  >
                     {user.profileImageUrl ? (
                       <img
                         src={user.profileImageUrl}
@@ -164,7 +171,7 @@ export default function Header() {
                     <span className="text-sm font-medium">
                       {user.firstName || user.email?.split('@')[0] || 'User'}
                     </span>
-                  </div>
+                  </Link>
                   <button
                     onClick={() => {
                       setIsMenuOpen(false);

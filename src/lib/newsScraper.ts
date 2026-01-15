@@ -1,8 +1,18 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import { db } from './db';
-import { newsArticles, InsertNewsArticle } from './schema';
-import { eq } from 'drizzle-orm';
+import { connectToDatabase, NewsArticle } from './mongodb';
+
+interface InsertNewsArticle {
+  title: string;
+  summary?: string;
+  content?: string;
+  url: string;
+  source: string;
+  category?: string;
+  symbol?: string | null;
+  imageUrl?: string | null;
+  publishedAt?: Date;
+}
 
 const NEWS_SOURCES = [
   {
@@ -341,17 +351,15 @@ function isNigerianStockRelated(text: string): boolean {
 }
 
 async function saveArticles(articles: InsertNewsArticle[]): Promise<number> {
+  await connectToDatabase();
   let savedCount = 0;
   
   for (const article of articles) {
     try {
-      const existing = await db.select()
-        .from(newsArticles)
-        .where(eq(newsArticles.url, article.url))
-        .limit(1);
+      const existing = await NewsArticle.findOne({ url: article.url });
       
-      if (existing.length === 0) {
-        await db.insert(newsArticles).values(article);
+      if (!existing) {
+        await NewsArticle.create(article);
         savedCount++;
       }
     } catch (error) {
@@ -404,10 +412,11 @@ export async function runNewsScraper(): Promise<{
 }
 
 export async function getLatestNews(limit = 50): Promise<InsertNewsArticle[]> {
-  const articles = await db.select()
-    .from(newsArticles)
-    .orderBy(newsArticles.scrapedAt)
-    .limit(limit);
+  await connectToDatabase();
+  const articles = await NewsArticle.find()
+    .sort({ scrapedAt: -1 })
+    .limit(limit)
+    .lean();
   
-  return articles;
+  return articles as InsertNewsArticle[];
 }

@@ -1,7 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { User } from "@/lib/schema";
+
+interface User {
+  id: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  profileImageUrl?: string;
+  shareId?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
 interface AuthState {
   user: User | null;

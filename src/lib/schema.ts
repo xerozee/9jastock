@@ -51,3 +51,44 @@ export const newsletterSubscribers = pgTable(
 
 export type NewsletterSubscriber = typeof newsletterSubscribers.$inferSelect;
 export type InsertNewsletterSubscriber = typeof newsletterSubscribers.$inferInsert;
+
+export const newsArticles = pgTable(
+  "news_articles",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    title: varchar("title").notNull(),
+    summary: varchar("summary"),
+    content: varchar("content"),
+    url: varchar("url").notNull().unique(),
+    source: varchar("source").notNull(),
+    category: varchar("category"),
+    symbol: varchar("symbol"),
+    imageUrl: varchar("image_url"),
+    publishedAt: timestamp("published_at"),
+    scrapedAt: timestamp("scraped_at").defaultNow(),
+  },
+  (table) => [
+    index("IDX_news_source").on(table.source),
+    index("IDX_news_published").on(table.publishedAt),
+    index("IDX_news_symbol").on(table.symbol),
+  ]
+);
+
+export type NewsArticle = typeof newsArticles.$inferSelect;
+export type InsertNewsArticle = typeof newsArticles.$inferInsert;
+
+export const sentNewsletters = pgTable(
+  "sent_newsletters",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    subject: varchar("subject").notNull(),
+    content: varchar("content").notNull(),
+    recipientCount: varchar("recipient_count"),
+    sentAt: timestamp("sent_at").defaultNow(),
+    status: varchar("status").default("sent"),
+  },
+  (table) => [index("IDX_newsletter_sent").on(table.sentAt)]
+);
+
+export type SentNewsletter = typeof sentNewsletters.$inferSelect;
+export type InsertSentNewsletter = typeof sentNewsletters.$inferInsert;

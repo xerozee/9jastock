@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/auth";
-import { db } from "@/lib/db";
-import { holdings } from "@/lib/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { connectToDatabase, Holding } from "@/lib/mongodb";
+import mongoose from "mongoose";
 
 export async function GET() {
   try {
@@ -19,19 +18,25 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userHoldings = await db
-      .select()
-      .from(holdings)
-      .where(eq(holdings.userId, session.userId))
-      .orderBy(desc(holdings.purchaseDate));
+    await connectToDatabase();
+    const userHoldings = await Holding.find({
+      userId: new mongoose.Types.ObjectId(session.userId),
+    })
+      .sort({ purchaseDate: -1 })
+      .lean();
 
-    const holdingsWithNumbers = userHoldings.map(h => ({
-      ...h,
-      shares: parseFloat(h.shares),
-      purchasePrice: parseFloat(h.purchasePrice),
+    const holdingsWithIds = userHoldings.map(h => ({
+      id: h._id.toString(),
+      userId: h.userId.toString(),
+      symbol: h.symbol,
+      shares: h.shares,
+      purchasePrice: h.purchasePrice,
+      purchaseDate: h.purchaseDate,
+      notes: h.notes,
+      createdAt: h.createdAt,
     }));
 
-    return NextResponse.json({ data: holdingsWithNumbers });
+    return NextResponse.json({ data: holdingsWithIds });
   } catch (error) {
     console.error("Failed to fetch holdings:", error);
     return NextResponse.json({ error: "Failed to fetch holdings" }, { status: 500 });
@@ -69,23 +74,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const [newHolding] = await db
-      .insert(holdings)
-      .values({
-        userId: session.userId,
-        symbol: symbol.toUpperCase(),
-        shares: shares.toString(),
-        purchasePrice: purchasePrice.toString(),
-        purchaseDate: new Date(purchaseDate),
-        notes: notes || null,
-      })
-      .returning();
+    await connectToDatabase();
+    const newHolding = await Holding.create({
+      userId: new mongoose.Types.ObjectId(session.userId),
+      symbol: symbol.toUpperCase(),
+      shares,
+      purchasePrice,
+      purchaseDate: new Date(purchaseDate),
+      notes: notes || null,
+    });
 
     return NextResponse.json({
       data: {
-        ...newHolding,
-        shares: parseFloat(newHolding.shares),
-        purchasePrice: parseFloat(newHolding.purchasePrice),
+        id: newHolding._id.toString(),
+        userId: newHolding.userId.toString(),
+        symbol: newHolding.symbol,
+        shares: newHolding.shares,
+        purchasePrice: newHolding.purchasePrice,
+        purchaseDate: newHolding.purchaseDate,
+        notes: newHolding.notes,
+        createdAt: newHolding.createdAt,
       },
     });
   } catch (error) {
@@ -115,12 +123,13 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Missing holding ID" }, { status: 400 });
     }
 
-    const deleted = await db
-      .delete(holdings)
-      .where(and(eq(holdings.id, holdingId), eq(holdings.userId, session.userId)))
-      .returning();
+    await connectToDatabase();
+    const result = await Holding.deleteOne({
+      _id: new mongoose.Types.ObjectId(holdingId),
+      userId: new mongoose.Types.ObjectId(session.userId),
+    });
 
-    if (deleted.length === 0) {
+    if (result.deletedCount === 0) {
       return NextResponse.json({ error: "Holding not found" }, { status: 404 });
     }
 

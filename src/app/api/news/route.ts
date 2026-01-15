@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { newsArticles } from '@/lib/schema';
-import { desc, eq, and, gte, sql } from 'drizzle-orm';
+import { connectToDatabase, NewsArticle } from '@/lib/mongodb';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,37 +65,55 @@ export async function GET(request: Request) {
       });
     }
     
+    await connectToDatabase();
     const cutoffDate = new Date(Date.now() - hours * 60 * 60 * 1000);
     
-    const conditions = [];
+    const query: any = {
+      scrapedAt: { $gte: cutoffDate },
+    };
     
     if (source) {
-      conditions.push(eq(newsArticles.source, source));
+      query.source = source;
     }
     
     if (symbol) {
-      conditions.push(eq(newsArticles.symbol, symbol));
+      query.symbol = symbol;
     }
     
-    conditions.push(gte(newsArticles.scrapedAt, cutoffDate));
+    const articles = await NewsArticle.find(query)
+      .sort({ scrapedAt: -1 })
+      .limit(limit)
+      .lean();
+
+    const formattedArticles = articles.map(a => ({
+      id: a._id.toString(),
+      title: a.title,
+      summary: a.summary,
+      content: a.content,
+      url: a.url,
+      source: a.source,
+      category: a.category,
+      symbol: a.symbol,
+      imageUrl: a.imageUrl,
+      publishedAt: a.publishedAt,
+      scrapedAt: a.scrapedAt,
+    }));
     
-    const articles = await db.select()
-      .from(newsArticles)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(desc(newsArticles.scrapedAt))
-      .limit(limit);
+    const now = new Date();
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
     
-    const stats = await db.select({
-      total: sql<number>`count(*)`,
-      last24h: sql<number>`count(*) filter (where scraped_at > now() - interval '24 hours')`,
-      lastHour: sql<number>`count(*) filter (where scraped_at > now() - interval '1 hour')`,
-    }).from(newsArticles);
+    const [total, last24h, lastHour] = await Promise.all([
+      NewsArticle.countDocuments(),
+      NewsArticle.countDocuments({ scrapedAt: { $gte: oneDayAgo } }),
+      NewsArticle.countDocuments({ scrapedAt: { $gte: oneHourAgo } }),
+    ]);
     
-    const statsResult = stats[0] || { total: 0, last24h: 0, lastHour: 0 };
+    const statsResult = { total, last24h, lastHour };
     
     if (!hasFilters) {
       newsCache = {
-        data: articles,
+        data: formattedArticles,
         stats: statsResult,
         timestamp: Date.now(),
       };
@@ -105,7 +121,7 @@ export async function GET(request: Request) {
     
     return NextResponse.json({
       success: true,
-      data: articles,
+      data: formattedArticles,
       stats: statsResult,
       filters: { source, symbol, limit, hours },
       cached: false,

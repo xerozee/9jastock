@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/auth";
-import { db } from "@/lib/db";
-import { portfolioItems } from "@/lib/schema";
-import { eq, and } from "drizzle-orm";
+import { connectToDatabase, PortfolioItem } from "@/lib/mongodb";
+import mongoose from "mongoose";
 
 export async function GET() {
   try {
@@ -19,12 +18,19 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const items = await db
-      .select()
-      .from(portfolioItems)
-      .where(eq(portfolioItems.userId, session.userId));
+    await connectToDatabase();
+    const items = await PortfolioItem.find({ 
+      userId: new mongoose.Types.ObjectId(session.userId) 
+    }).lean();
 
-    return NextResponse.json(items);
+    const formattedItems = items.map(item => ({
+      id: item._id.toString(),
+      userId: item.userId.toString(),
+      symbol: item.symbol,
+      addedAt: item.addedAt,
+    }));
+
+    return NextResponse.json(formattedItems);
   } catch (error) {
     console.error("Error fetching portfolio:", error);
     return NextResponse.json({ error: "Failed to fetch portfolio" }, { status: 500 });
@@ -51,29 +57,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Symbol is required" }, { status: 400 });
     }
 
-    const existing = await db
-      .select()
-      .from(portfolioItems)
-      .where(
-        and(
-          eq(portfolioItems.userId, session.userId),
-          eq(portfolioItems.symbol, symbol)
-        )
-      );
+    await connectToDatabase();
+    const userId = new mongoose.Types.ObjectId(session.userId);
 
-    if (existing.length > 0) {
+    const existing = await PortfolioItem.findOne({ userId, symbol });
+
+    if (existing) {
       return NextResponse.json({ message: "Already in portfolio" }, { status: 200 });
     }
 
-    const [item] = await db
-      .insert(portfolioItems)
-      .values({
-        userId: session.userId,
-        symbol,
-      })
-      .returning();
+    const item = await PortfolioItem.create({
+      userId,
+      symbol,
+    });
 
-    return NextResponse.json(item, { status: 201 });
+    return NextResponse.json({
+      id: item._id.toString(),
+      userId: item.userId.toString(),
+      symbol: item.symbol,
+      addedAt: item.addedAt,
+    }, { status: 201 });
   } catch (error) {
     console.error("Error adding to portfolio:", error);
     return NextResponse.json({ error: "Failed to add to portfolio" }, { status: 500 });
@@ -100,14 +103,11 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Symbol is required" }, { status: 400 });
     }
 
-    await db
-      .delete(portfolioItems)
-      .where(
-        and(
-          eq(portfolioItems.userId, session.userId),
-          eq(portfolioItems.symbol, symbol)
-        )
-      );
+    await connectToDatabase();
+    await PortfolioItem.deleteOne({
+      userId: new mongoose.Types.ObjectId(session.userId),
+      symbol,
+    });
 
     return NextResponse.json({ message: "Removed from portfolio" });
   } catch (error) {

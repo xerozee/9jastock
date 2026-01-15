@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { users, sessions } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { connectToDatabase, User, Session } from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
 export async function POST(request: NextRequest) {
   try {
+    await connectToDatabase();
     const { email, password } = await request.json();
 
     if (!email || !password) {
@@ -16,7 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase())).limit(1);
+    const user = await User.findOne({ email: email.toLowerCase() }).lean();
 
     if (!user) {
       return NextResponse.json(
@@ -44,22 +43,16 @@ export async function POST(request: NextRequest) {
     const sessionId = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-    await db.insert(sessions).values({
+    await Session.create({
       sid: sessionId,
-      sess: {
-        userId: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        profileImageUrl: user.profileImageUrl,
-      },
-      expire: expiresAt,
+      userId: user._id,
+      expiresAt,
     });
 
     const response = NextResponse.json({
       success: true,
       user: {
-        id: user.id,
+        id: user._id.toString(),
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,

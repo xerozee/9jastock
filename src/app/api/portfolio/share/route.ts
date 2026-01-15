@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { users, holdings } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { connectToDatabase, User } from "@/lib/mongodb";
 import { getSession } from "@/lib/auth";
 import { cookies } from "next/headers";
 import crypto from "crypto";
+import mongoose from "mongoose";
 
 function generateShareId(): string {
   return crypto.randomBytes(8).toString("hex");
@@ -24,7 +23,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const [user] = await db.select().from(users).where(eq(users.id, session.userId));
+    await connectToDatabase();
+    const user = await User.findById(session.userId).lean();
     
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -34,7 +34,10 @@ export async function GET(request: NextRequest) {
     
     if (!shareId) {
       shareId = generateShareId();
-      await db.update(users).set({ shareId }).where(eq(users.id, session.userId));
+      await User.updateOne(
+        { _id: new mongoose.Types.ObjectId(session.userId) },
+        { $set: { shareId } }
+      );
     }
 
     return NextResponse.json({ shareId });
@@ -58,8 +61,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    await connectToDatabase();
     const shareId = generateShareId();
-    await db.update(users).set({ shareId }).where(eq(users.id, session.userId));
+    await User.updateOne(
+      { _id: new mongoose.Types.ObjectId(session.userId) },
+      { $set: { shareId } }
+    );
 
     return NextResponse.json({ shareId });
   } catch (error) {

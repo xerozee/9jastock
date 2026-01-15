@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { newsletterSubscribers } from '@/lib/schema';
-import { eq } from 'drizzle-orm';
+import { connectToDatabase, NewsletterSubscriber } from '@/lib/mongodb';
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,19 +14,17 @@ export async function POST(req: NextRequest) {
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    const existing = await db
-      .select()
-      .from(newsletterSubscribers)
-      .where(eq(newsletterSubscribers.email, normalizedEmail))
-      .limit(1);
+    await connectToDatabase();
+    
+    const existing = await NewsletterSubscriber.findOne({ email: normalizedEmail });
 
-    if (existing.length > 0) {
+    if (existing) {
       return NextResponse.json(
         { success: true, message: 'You are already subscribed!' }
       );
     }
 
-    await db.insert(newsletterSubscribers).values({
+    await NewsletterSubscriber.create({
       email: normalizedEmail,
     });
 

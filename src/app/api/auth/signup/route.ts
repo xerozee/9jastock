@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { users, sessions } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { connectToDatabase, User, Session } from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
 export async function POST(request: NextRequest) {
   try {
+    await connectToDatabase();
     const { email, password, firstName, lastName } = await request.json();
 
     if (!email || !password) {
@@ -31,9 +30,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const existingUser = await db.select().from(users).where(eq(users.email, email.toLowerCase())).limit(1);
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
     
-    if (existingUser.length > 0) {
+    if (existingUser) {
       return NextResponse.json(
         { error: "An account with this email already exists" },
         { status: 409 }
@@ -42,31 +41,26 @@ export async function POST(request: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const [newUser] = await db.insert(users).values({
+    const newUser = await User.create({
       email: email.toLowerCase(),
       password: hashedPassword,
       firstName: firstName || null,
       lastName: lastName || null,
-    }).returning();
+    });
 
     const sessionId = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-    await db.insert(sessions).values({
+    await Session.create({
       sid: sessionId,
-      sess: {
-        userId: newUser.id,
-        email: newUser.email,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-      },
-      expire: expiresAt,
+      userId: newUser._id,
+      expiresAt,
     });
 
     const response = NextResponse.json({
       success: true,
       user: {
-        id: newUser.id,
+        id: newUser._id.toString(),
         email: newUser.email,
         firstName: newUser.firstName,
         lastName: newUser.lastName,

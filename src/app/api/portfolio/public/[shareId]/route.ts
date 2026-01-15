@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { users, holdings } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { connectToDatabase, User, Holding } from "@/lib/mongodb";
 
 export async function GET(
   request: NextRequest,
@@ -14,23 +12,32 @@ export async function GET(
       return NextResponse.json({ error: "Share ID required" }, { status: 400 });
     }
 
-    const [user] = await db.select().from(users).where(eq(users.shareId, shareId));
+    await connectToDatabase();
+    const user = await User.findOne({ shareId }).lean();
 
     if (!user) {
       return NextResponse.json({ error: "Portfolio not found" }, { status: 404 });
     }
 
-    const userHoldings = await db
-      .select()
-      .from(holdings)
-      .where(eq(holdings.userId, user.id));
+    const userHoldings = await Holding.find({ userId: user._id }).lean();
+
+    const formattedHoldings = userHoldings.map(h => ({
+      id: h._id.toString(),
+      userId: h.userId.toString(),
+      symbol: h.symbol,
+      shares: h.shares,
+      purchasePrice: h.purchasePrice,
+      purchaseDate: h.purchaseDate,
+      notes: h.notes,
+      createdAt: h.createdAt,
+    }));
 
     return NextResponse.json({
       owner: {
         firstName: user.firstName,
         lastName: user.lastName,
       },
-      holdings: userHoldings,
+      holdings: formattedHoldings,
     });
   } catch (error) {
     console.error("Error fetching public portfolio:", error);

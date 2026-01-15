@@ -1,7 +1,7 @@
 # 9jaStock - Nigerian Stock Exchange (NGX) Tracker
 
 ## Overview
-A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in real-time. The app displays market cap, stock prices, volume, and other financial metrics with live data from TradingView.
+A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in real-time. The app displays market cap, stock prices, volume, and other financial metrics with live data from TradingView. **No authentication required** - the app is fully public and accessible to everyone.
 
 ## Current State
 - **LIVE DATA ACTIVE**: Fetches real-time data from TradingView's scanner API
@@ -9,76 +9,64 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 - Dynamic stock list - automatically includes new listings from TradingView
 - Market overview shows computed totals from live stock data
 - Auto-refreshes every 5 minutes
-- **User Authentication**: Replit OIDC authentication with session management
-- **Portfolio Tracking**: Authenticated users can add stocks to their personal portfolio
+- **Portfolio Tracking**: Browser localStorage-based portfolio (no login required)
+- **Watchlist**: Browser localStorage-based watchlist
 - **News & Blog**: Market news page with real scraped news from multiple sources
 - **Automated News Scraping**: Hourly scraping from TradingView, Nairametrics, BusinessDay, Punch
 - **AI Newsletter System**: GPT-4o-mini powered newsletter composition from scraped news
 - **Email Dispatch**: Resend integration for automated newsletter delivery to subscribers
 
 ## Recent Changes (January 2026)
+- **Removed Authentication**: App is now fully public with no login required
+  - Removed Replit OIDC authentication
+  - Removed all protected routes
+  - All pages accessible without login
+- **localStorage-based Portfolio**: Portfolio tracking now works without authentication
+  - Add/remove stocks from portfolio via + button
+  - Portfolio data stored in browser localStorage
+  - Performance stats (avg change, gainers/losers count)
 - **Modern Theme & Dark Mode**: Complete UI redesign with dark mode support
   - ThemeContext with localStorage persistence for user preference
   - Dark mode toggle button in header (moon/sun icon)
   - Gradient hero section with grid pattern overlay
-  - Modern cards with colored icon badges (blue for Market Cap, purple for Volume, green for Gainers, red for Losers)
-  - Animated progress bars and pulsing live data indicator
-  - CSS custom properties for consistent theming
-- **News/Blog Feature**: Added comprehensive market news page
+  - Modern cards with colored icon badges
+- **News/Blog Feature**: Comprehensive market news page
   - Main blog page with news from NGX Official, BusinessDay, Nairametrics, ThisDay, Punch
   - Filterable news by source with tab navigation
-  - Top 10 performing stocks sidebar with live data (auto-refreshes)
-  - Individual stock news pages with annual reports and financial links
-  - Links to NGX document library, corporate actions, and company profiles
-- **Stocks Page Live Data**: Updated to fetch live prices from API instead of static data
-- **Portfolio Feature**: Added personal portfolio tracking for authenticated users
-  - Add/remove stocks from portfolio via + button on stock cards and detail pages
-  - My Portfolio page with performance stats (avg change, gainers/losers count)
-  - Portfolio data stored in PostgreSQL with user foreign key
-  - Real-time stock data displayed in portfolio table
-- Added user authentication via Replit OpenID Connect
-  - Login/logout via Replit accounts (supports Google, GitHub, Apple, email)
-  - Session management with PostgreSQL
-  - User profile display in header
-- Implemented TradingView Scanner API for bulk data fetching
-- Expanded to 76 comprehensive data fields for in-depth stock analysis
-- **Technical Indicators**: RSI (14-day, 7-day), MACD (line, signal, histogram), SMA/EMA (20, 50, 200), Bollinger Bands, Stochastic K/D, ATR, ADX, CCI, Williams %R
+  - Top 10 performing stocks sidebar with live data
+- **Technical Indicators**: RSI, MACD, Bollinger Bands, SMA/EMA, Stochastic K/D, ATR, ADX, CCI, Williams %R
 - **Fundamental Data**: P/E ratio, EPS, dividend yield, P/B ratio, P/S ratio, ROE, ROA
 - **Financial Metrics**: Revenue, Net Income, EBITDA, Total Assets, Total Debt, Debt-to-Equity, Current Ratio, Quick Ratio
 - **Performance**: Week, Month, 3M, 6M, YTD, 1Y, 5Y, All-time returns
 - **Volume Analysis**: 10d/30d/90d averages, relative volume
 - **Recommendations**: TradingView buy/sell/neutral signals
-- **Volatility**: Weekly and monthly volatility metrics
 - 5-minute cache TTL with automatic refresh
 
 ## Project Architecture
 
 ### Key Files
 - `src/contexts/ThemeContext.tsx` - Dark mode context with localStorage persistence
-- `src/components/Providers.tsx` - Client-side providers wrapper (Theme, Auth)
+- `src/components/Providers.tsx` - Client-side providers wrapper (Theme, Watchlist)
 - `src/lib/tradingviewClient.ts` - TradingView WebSocket client using @mathieuc/tradingview
 - `src/lib/stockData.ts` - Static stock data for 129 NGX stocks
-- `src/lib/auth.ts` - Replit OIDC authentication logic
+- `src/lib/watchlistContext.tsx` - Browser localStorage-based watchlist management
 - `src/lib/db.ts` - Drizzle ORM database connection
-- `src/lib/schema.ts` - Database schema (users, sessions, portfolio_items, news_articles, sent_newsletters, newsletter_subscribers)
+- `src/lib/schema.ts` - Database schema (news_articles, sent_newsletters, newsletter_subscribers)
 - `src/lib/newsScraper.ts` - Web scraper for Nigerian stock news from multiple sources
 - `src/lib/newsletterComposer.ts` - AI-powered newsletter composition using GPT-4o-mini
 - `src/lib/resendClient.ts` - Resend email client for newsletter dispatch
 - `src/app/api/stocks/route.ts` - API endpoint returning stocks (cached + live)
 - `src/app/api/stocks/[symbol]/route.ts` - Individual stock API
-- `src/app/api/auth/*/route.ts` - Authentication API routes
-- `src/app/api/portfolio/route.ts` - Portfolio API (add/remove/list stocks)
 - `src/app/api/news/route.ts` - API endpoint for scraped news articles
 - `src/app/api/news/scrape/route.ts` - Trigger news scraping (call hourly via cron)
 - `src/app/api/newsletter/compose/route.ts` - AI newsletter composition endpoint
 - `src/app/api/newsletter/dispatch/route.ts` - Send newsletter to all subscribers
 - `src/app/page.tsx` - Dashboard with market overview
 - `src/app/stocks/page.tsx` - All stocks listing with live data and filters
-- `src/app/portfolio/page.tsx` - Personal portfolio page
+- `src/app/portfolio/page.tsx` - Personal portfolio page (localStorage-based)
+- `src/app/watchlist/page.tsx` - Watchlist page (localStorage-based)
 - `src/app/blog/page.tsx` - Market news page with real scraped news
 - `src/app/blog/[symbol]/page.tsx` - Individual stock news with annual reports
-- `src/hooks/useAuth.ts` - React hook for authentication state
-- `src/hooks/usePortfolio.ts` - React hook for portfolio management
 
 ### Data Flow
 1. Frontend calls `/api/stocks`
@@ -88,23 +76,14 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 5. Returns combined data with live prices and computed market metrics
 6. Cache refreshes automatically every 5 minutes
 
-### Authentication Flow
-1. User clicks "Sign In" → redirects to `/api/auth/login`
-2. Login route generates state token, redirects to Replit OIDC
-3. User authenticates via Replit (Google/GitHub/Apple/email)
-4. Callback route validates state, creates session in PostgreSQL
-5. Session cookie set, user redirected to home
-6. Logout clears session and redirects to Replit logout
-
-### Portfolio Flow
-1. Authenticated user clicks "+" on a stock
-2. POST to `/api/portfolio` adds stock to user's portfolio
-3. Portfolio data stored in `portfolio_items` table
-4. My Portfolio page fetches user's stocks and displays with live data
-5. Performance stats calculated from live stock data
+### Portfolio Flow (localStorage)
+1. User clicks "+" on a stock
+2. Stock symbol added to localStorage portfolio array
+3. My Portfolio page reads localStorage and fetches live data for those stocks
+4. Performance stats calculated from live stock data
 
 ### News & Newsletter Flow
-1. Scraper runs hourly via POST to `/api/news/scrape`
+1. Scraper runs hourly via POST to `/api/news/scrape` (requires CRON_SECRET)
 2. Fetches articles from TradingView, Nairametrics, BusinessDay, Punch
 3. Articles stored in `news_articles` table (deduplicated by URL)
 4. Blog page fetches news from `/api/news` endpoint
@@ -117,7 +96,7 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 - **Environment Variables**:
   - `TRADINGVIEW_SESSION`: TradingView session ID for live data
   - `DATABASE_URL`: PostgreSQL connection string
-  - `REPL_ID`: Replit project ID (auto-set)
+  - `CRON_SECRET`: Secret for securing the scrape endpoint
   - `AI_INTEGRATIONS_OPENAI_API_KEY`: OpenAI API key (managed by Replit AI Integrations)
   - `AI_INTEGRATIONS_OPENAI_BASE_URL`: OpenAI base URL (managed by Replit AI Integrations)
   - Resend integration configured via Replit connectors
@@ -130,3 +109,4 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 ## User Preferences
 - Real-time data preferred over mock data
 - Clean, responsive UI
+- No authentication - app is publicly accessible

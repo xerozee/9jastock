@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { Star, TrendingUp, ArrowRight } from 'lucide-react';
 import StockTable from '@/components/StockTable';
 import StockCard from '@/components/StockCard';
-import ProtectedRoute from '@/components/ProtectedRoute';
 import { useWatchlist } from '@/lib/watchlistContext';
 import { getStocksBySymbols } from '@/lib/stockData';
 
@@ -13,7 +12,6 @@ export default function WatchlistPage() {
   const watchlistStocks = getStocksBySymbols(watchlist);
 
   return (
-    <ProtectedRoute>
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <div className="flex items-center space-x-3 mb-2">
@@ -86,6 +84,5 @@ export default function WatchlistPage() {
         </div>
       )}
     </div>
-    </ProtectedRoute>
   );
 }

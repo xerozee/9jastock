@@ -6,9 +6,7 @@ import { ArrowRight, RefreshCw, Wifi, WifiOff, Clock } from 'lucide-react';
 import SearchBar from '@/components/SearchBar';
 import MarketOverview from '@/components/MarketOverview';
 import StockCard from '@/components/StockCard';
-import LandingPage from '@/components/LandingPage';
 import { useLiveStocks, formatLastUpdate } from '@/lib/useLiveStocks';
-import { useAuth } from '@/hooks/useAuth';
 import { Stock, MarketSummary } from '@/types/stock';
 
 const REFRESH_INTERVAL = 30 * 60 * 1000;
@@ -88,13 +86,9 @@ function computeMarketSummary(stocks: Stock[]): MarketSummary {
 }
 
 export default function HomePage() {
-  const { user, isLoading: authLoading } = useAuth();
   const { stocks, isLoading, error, liveCount, refresh, lastRefresh } = useLiveStocks(REFRESH_INTERVAL);
 
   const marketSummary = useMemo(() => computeMarketSummary(stocks), [stocks]);
-
-  const gainersCount = stocks.filter(s => s.changePercent > 0).length;
-  const losersCount = stocks.filter(s => s.changePercent < 0).length;
 
   const topGainers = [...stocks]
     .sort((a, b) => b.changePercent - a.changePercent)
@@ -108,25 +102,6 @@ export default function HomePage() {
     .sort((a, b) => b.volume - a.volume)
     .slice(0, 4);
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <LandingPage
-        stockCount={stocks.length || 145}
-        gainersCount={gainersCount}
-        losersCount={losersCount}
-        marketCap={formatMarketCap(marketSummary.totalMarketCap)}
-      />
-    );
-  }
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="relative bg-gradient-to-br from-green-700 via-emerald-600 to-teal-600 dark:from-slate-800 dark:via-slate-900 dark:to-emerald-900 rounded-3xl p-8 md:p-10 mb-8 text-white overflow-hidden">
@@ -137,10 +112,10 @@ export default function HomePage() {
             <span>Live Market Data</span>
           </div>
           <h1 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">
-            Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-200 to-emerald-100">{user.firstName || 'Investor'}</span>
+            Nigerian Stock Exchange <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-200 to-emerald-100">Tracker</span>
           </h1>
           <p className="text-green-100 dark:text-slate-300 text-lg mb-6 leading-relaxed">
-            Track Nigerian Stock Exchange (NGX) stocks in real-time. Monitor market performance,
+            Track NGX stocks in real-time. Monitor market performance,
             discover opportunities, and build your portfolio.
           </p>
           <SearchBar />

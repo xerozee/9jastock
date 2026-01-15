@@ -2,26 +2,22 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { TrendingUp, BarChart3, Star, Menu, X, User, LogIn, LogOut, Briefcase, Newspaper, Moon, Sun } from 'lucide-react';
+import { TrendingUp, BarChart3, Star, Menu, X, Briefcase, Newspaper, Moon, Sun } from 'lucide-react';
 import { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/contexts/ThemeContext';
 
 export default function Header() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, isLoading, isAuthenticated } = useAuth();
   const { isDark, toggleTheme } = useTheme();
 
   const navLinks = [
-    { href: '/', label: 'Dashboard', icon: BarChart3, requiresAuth: false },
-    { href: '/stocks', label: 'Stocks', icon: TrendingUp, requiresAuth: true },
-    { href: '/blog', label: 'News', icon: Newspaper, requiresAuth: true },
-    { href: '/portfolio', label: 'My Portfolio', icon: Briefcase, requiresAuth: true },
-    { href: '/watchlist', label: 'Watchlist', icon: Star, requiresAuth: true },
+    { href: '/', label: 'Dashboard', icon: BarChart3 },
+    { href: '/stocks', label: 'Stocks', icon: TrendingUp },
+    { href: '/blog', label: 'News', icon: Newspaper },
+    { href: '/portfolio', label: 'Portfolio', icon: Briefcase },
+    { href: '/watchlist', label: 'Watchlist', icon: Star },
   ];
-
-  const visibleNavLinks = navLinks.filter(link => !link.requiresAuth || isAuthenticated);
 
   return (
     <header className="bg-gradient-to-r from-green-800 via-green-700 to-emerald-700 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-white shadow-lg sticky top-0 z-50 backdrop-blur-sm">
@@ -38,7 +34,7 @@ export default function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center space-x-1">
-            {visibleNavLinks.map((link) => {
+            {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = pathname === link.href;
               return (
@@ -58,7 +54,7 @@ export default function Header() {
             })}
           </nav>
 
-          <div className="hidden md:flex items-center space-x-3">
+          <div className="hidden md:flex items-center">
             <button
               onClick={toggleTheme}
               className="p-2 rounded-xl bg-white/10 hover:bg-white/20 dark:bg-slate-700 dark:hover:bg-slate-600 transition-all"
@@ -66,44 +62,6 @@ export default function Header() {
             >
               {isDark ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} />}
             </button>
-
-            {isLoading ? (
-              <div className="w-8 h-8 rounded-full bg-green-700 dark:bg-slate-700 animate-pulse" />
-            ) : isAuthenticated && user ? (
-              <div className="flex items-center space-x-3">
-                <div className="flex items-center space-x-2">
-                  {user.profileImageUrl ? (
-                    <img
-                      src={user.profileImageUrl}
-                      alt={user.firstName || 'User'}
-                      className="w-8 h-8 rounded-full border-2 border-green-200 dark:border-emerald-500"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-green-600 dark:bg-emerald-600 flex items-center justify-center">
-                      <User size={16} />
-                    </div>
-                  )}
-                  <span className="text-sm font-medium">
-                    {user.firstName || user.email?.split('@')[0] || 'User'}
-                  </span>
-                </div>
-                <a
-                  href="/api/logout"
-                  className="flex items-center space-x-1 px-3 py-1.5 bg-white/10 hover:bg-white/20 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-xl text-sm transition-all"
-                >
-                  <LogOut size={16} />
-                  <span>Logout</span>
-                </a>
-              </div>
-            ) : (
-              <a
-                href="/api/login"
-                className="flex items-center space-x-2 px-4 py-2 bg-white text-green-800 dark:bg-emerald-500 dark:text-white hover:bg-green-100 dark:hover:bg-emerald-400 rounded-xl font-medium transition-all shadow-lg hover:shadow-xl"
-              >
-                <LogIn size={18} />
-                <span>Sign In</span>
-              </a>
-            )}
           </div>
 
           <div className="md:hidden flex items-center space-x-2">
@@ -125,7 +83,7 @@ export default function Header() {
 
         {isMenuOpen && (
           <nav className="md:hidden py-4 border-t border-white/10">
-            {visibleNavLinks.map((link) => {
+            {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = pathname === link.href;
               return (
@@ -144,57 +102,6 @@ export default function Header() {
                 </Link>
               );
             })}
-            
-            <div className="mt-4 pt-4 border-t border-white/10">
-              {isLoading ? (
-                <div className="px-4 py-3">
-                  <div className="w-full h-10 bg-green-700 dark:bg-slate-700 rounded-xl animate-pulse" />
-                </div>
-              ) : isAuthenticated && user ? (
-                <div className="px-4 space-y-3">
-                  <div className="flex items-center space-x-3">
-                    {user.profileImageUrl ? (
-                      <img
-                        src={user.profileImageUrl}
-                        alt={user.firstName || 'User'}
-                        className="w-10 h-10 rounded-full border-2 border-green-200 dark:border-emerald-500"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-green-600 dark:bg-emerald-600 flex items-center justify-center">
-                        <User size={20} />
-                      </div>
-                    )}
-                    <div>
-                      <p className="font-medium">
-                        {user.firstName || user.email?.split('@')[0] || 'User'}
-                      </p>
-                      {user.email && (
-                        <p className="text-xs text-green-200 dark:text-slate-400">{user.email}</p>
-                      )}
-                    </div>
-                  </div>
-                  <a
-                    href="/api/logout"
-                    className="flex items-center justify-center space-x-2 w-full px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <LogOut size={18} />
-                    <span>Logout</span>
-                  </a>
-                </div>
-              ) : (
-                <div className="px-4">
-                  <a
-                    href="/api/login"
-                    className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-white text-green-800 dark:bg-emerald-500 dark:text-white hover:bg-green-100 dark:hover:bg-emerald-400 rounded-xl font-medium transition-all"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <LogIn size={18} />
-                    <span>Sign In</span>
-                  </a>
-                </div>
-              )}
-            </div>
           </nav>
         )}
       </div>

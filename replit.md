@@ -1,7 +1,7 @@
 # 9jaStock - Nigerian Stock Exchange (NGX) Tracker
 
 ## Overview
-A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in real-time. The app displays market cap, stock prices, volume, and other financial metrics with live data from TradingView. **User authentication via Replit Auth** - supports email/password, Google, Apple, and other OAuth providers.
+A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in real-time. The app displays market cap, stock prices, volume, and other financial metrics with live data from TradingView. **Custom email/password authentication** with secure session-based login.
 
 ## Current State
 - **LIVE DATA ACTIVE**: Fetches real-time data from TradingView's scanner API
@@ -9,7 +9,7 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 - Dynamic stock list - automatically includes new listings from TradingView
 - Market overview shows computed totals from live stock data
 - Auto-refreshes every 5 minutes
-- **User Authentication**: Replit Auth OIDC integration (email/password, Google, Apple)
+- **User Authentication**: Custom email/password authentication with bcrypt password hashing
 - **Portfolio Tracking**: Database-backed portfolio for authenticated users
 - **Watchlist**: Browser localStorage-based watchlist
 - **News & Blog**: Market news page with real scraped news from multiple sources
@@ -45,11 +45,13 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
   - Live status indicator showing connection status and last update time
   - Stats display showing articles from last 24 hours and total count
   - Sources: TradingView, BusinessDay, Punch
-- **Added Authentication**: Replit Auth OIDC integration
-  - Login/Logout buttons in header
-  - Session-based authentication with cookies
-  - User profile display with avatar
-  - Supports email/password, Google, Apple sign-in
+- **Custom Email/Password Authentication**: Secure authentication system
+  - Custom signup page at /signup with email, password, and name fields
+  - Custom login page at /login with email and password
+  - Passwords hashed with bcrypt (cost factor 12)
+  - Session-based authentication with 7-day expiry
+  - Session expiration enforced on each request
+  - Login/Logout/Signup buttons in header
 - **Database-backed Portfolio & Holdings Tracker**: Portfolio tracking for authenticated users
   - Holdings table for tracking individual stock purchases with shares, price, and date
   - POST /api/holdings to add stock positions with purchase details
@@ -126,13 +128,14 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
 6. Cache refreshes automatically every 5 minutes
 
 ### Authentication Flow
-1. User clicks "Login" button in header
-2. Redirects to `/api/auth/login` which initiates Replit OIDC flow
-3. User authenticates with Replit (email/password, Google, Apple, etc.)
-4. Callback at `/api/auth/callback` exchanges code for tokens
-5. User info saved to `users` table, session created in `sessions` table
-6. Session cookie set for 7 days
-7. `useAuth` hook checks `/api/auth/user` for current session
+1. User clicks "Login" or "Sign Up" button in header
+2. Navigates to `/login` or `/signup` page
+3. User enters email/password credentials
+4. API validates credentials, hashes password with bcrypt
+5. User saved to `users` table, session created in `sessions` table
+6. Session cookie set for 7 days with httpOnly flag
+7. Session expiration checked on each request
+8. `useAuth` hook checks `/api/auth/user` for current session
 
 ### Portfolio Flow (Database-backed)
 1. Authenticated user clicks "+" on a stock

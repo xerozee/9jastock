@@ -16,13 +16,15 @@ export async function GET(request: NextRequest) {
     }
 
     const config = await getOidcConfig();
-    const host = request.headers.get("host") || "";
-    const forwardedProto = request.headers.get("x-forwarded-proto");
+    const forwardedHost = request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
+    const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
     const isSecure = forwardedProto === "https" || process.env.NODE_ENV === "production";
     const protocol = isSecure ? "https" : "http";
-    const callbackUrl = `${protocol}://${host}/api/auth/callback`;
+    
+    const originalUrl = new URL(request.url);
+    const correctedUrl = new URL(`${protocol}://${forwardedHost}${originalUrl.pathname}${originalUrl.search}`);
 
-    const tokens = await client.authorizationCodeGrant(config, new URL(request.url), {
+    const tokens = await client.authorizationCodeGrant(config, correctedUrl, {
       pkceCodeVerifier: codeVerifier,
       expectedState: state,
       expectedNonce: nonce,

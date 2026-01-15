@@ -10,11 +10,11 @@ export async function GET(request: NextRequest) {
     const state = generateSessionId();
     const nonce = generateSessionId();
     
-    const host = request.headers.get("host") || "";
-    const forwardedProto = request.headers.get("x-forwarded-proto");
+    const forwardedHost = request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
+    const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
     const isSecure = forwardedProto === "https" || process.env.NODE_ENV === "production";
     const protocol = isSecure ? "https" : "http";
-    const callbackUrl = `${protocol}://${host}/api/auth/callback`;
+    const callbackUrl = `${protocol}://${forwardedHost}/api/auth/callback`;
     
     const codeVerifier = client.randomPKCECodeVerifier();
     const codeChallenge = await client.calculatePKCECodeChallenge(codeVerifier);

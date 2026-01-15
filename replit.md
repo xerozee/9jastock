@@ -29,10 +29,16 @@ A Next.js 16 application for tracking Nigerian Stock Exchange (NGX) stocks in re
   - Benefits section with card-style checkmarks
   - Full-width gradient CTA section
   - Professional footer with logo
-- **Route Protection**: Protected routes require authentication
-  - AuthGuard component wraps stocks, portfolio, watchlist, and blog pages
-  - Shows attractive sign-in prompt with benefits when not authenticated
-  - Home page shows landing page for guests, dashboard for authenticated users
+- **Tiered Access Control**: Different access levels for guests vs authenticated users
+  - **Guest users (not signed in)**:
+    - Dashboard: Full access with 6-hour data refresh
+    - News: Limited to 5 articles, no filtering, 6-hour refresh
+    - Stocks, Portfolio, Watchlist: Requires sign-in
+  - **Authenticated users**:
+    - Dashboard: Full access with 5-minute data refresh
+    - News: Full access with source filtering, 10-minute refresh
+    - All features: Portfolio tracking, watchlist, detailed stock views
+  - Prominent banners on Dashboard and News prompting guests to sign in for full access
 - **Live News System**: Real-time news data with 10-minute auto-refresh
   - News API with in-memory caching for fast responses (2-min cache)
   - Background news scraping triggered automatically every 10 minutes

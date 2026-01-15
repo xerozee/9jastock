@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { 
   TrendingUp, TrendingDown, Newspaper, ExternalLink, Clock, 
-  Building2, BarChart3, FileText, RefreshCw, ChevronRight, Wifi, WifiOff
+  Building2, BarChart3, FileText, RefreshCw, ChevronRight, Wifi, WifiOff, Lock, LogIn
 } from 'lucide-react';
-import AuthGuard from '@/components/AuthGuard';
+import { useAuth } from '@/hooks/useAuth';
 import { Stock } from '@/types/stock';
 
 interface NewsItem {
@@ -29,9 +29,12 @@ const NEWS_SOURCES = [
   { id: 'Punch', name: 'Punch', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
 ];
 
-const NEWS_REFRESH_INTERVAL = 10 * 60 * 1000;
+const NEWS_REFRESH_AUTHENTICATED = 10 * 60 * 1000;
+const NEWS_REFRESH_GUEST = 6 * 60 * 60 * 1000;
+const GUEST_ARTICLE_LIMIT = 5;
 
 export default function BlogPage() {
+  const { isAuthenticated, isLoading: authLoading, login } = useAuth();
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,6 +45,8 @@ export default function BlogPage() {
   const [newsStats, setNewsStats] = useState<{ total: number; last24h: number; lastHour: number } | null>(null);
   const [nextRefresh, setNextRefresh] = useState<number>(0);
   const [isLive, setIsLive] = useState(false);
+
+  const refreshInterval = isAuthenticated ? NEWS_REFRESH_AUTHENTICATED : NEWS_REFRESH_GUEST;
 
   const fetchStocks = useCallback(async () => {
     try {
@@ -83,13 +88,13 @@ export default function BlogPage() {
   useEffect(() => {
     fetchStocks();
     fetchNews();
-    const stockInterval = setInterval(fetchStocks, 5 * 60 * 1000);
-    const newsInterval = setInterval(() => fetchNews(), NEWS_REFRESH_INTERVAL);
+    const stockInterval = setInterval(fetchStocks, isAuthenticated ? 5 * 60 * 1000 : 6 * 60 * 60 * 1000);
+    const newsInterval = setInterval(() => fetchNews(), refreshInterval);
     return () => {
       clearInterval(stockInterval);
       clearInterval(newsInterval);
     };
-  }, [fetchStocks, fetchNews]);
+  }, [fetchStocks, fetchNews, isAuthenticated, refreshInterval]);
 
   const topPerformers = [...stocks]
     .filter(s => s.changePercent !== undefined)
@@ -99,6 +104,8 @@ export default function BlogPage() {
   const filteredNews = activeSource === 'all'
     ? news
     : news.filter(n => n.source === activeSource);
+
+  const displayedNews = isAuthenticated ? filteredNews.slice(0, 10) : filteredNews.slice(0, GUEST_ARTICLE_LIMIT);
 
   const getSourceInfo = (sourceId: string) => 
     NEWS_SOURCES.find(s => s.id === sourceId) || NEWS_SOURCES[0];
@@ -131,10 +138,45 @@ export default function BlogPage() {
     return text.substring(0, maxLength).trim() + '...';
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-500 dark:text-slate-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <AuthGuard pageName="market news">
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {!isAuthenticated && (
+          <div className="mb-6 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl">
+                <Clock className="text-amber-600 dark:text-amber-400" size={20} />
+              </div>
+              <div>
+                <p className="font-medium text-amber-800 dark:text-amber-200">
+                  Limited News Access
+                </p>
+                <p className="text-sm text-amber-600 dark:text-amber-400">
+                  Showing {GUEST_ARTICLE_LIMIT} articles. Sign in for full access and real-time updates.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={login}
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all whitespace-nowrap"
+            >
+              <LogIn size={18} />
+              Sign In Free
+            </button>
+          </div>
+        )}
+
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
@@ -154,7 +196,7 @@ export default function BlogPage() {
                       <Wifi className="text-green-500" size={18} />
                     </div>
                     <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                      Live News Feed
+                      {isAuthenticated ? 'Live News Feed' : 'News Feed'}
                     </span>
                   </div>
                 ) : (
@@ -173,7 +215,7 @@ export default function BlogPage() {
                   Updated: {newsLastUpdated.toLocaleTimeString()}
                 </p>
               )}
-              {newsStats && (
+              {newsStats && isAuthenticated && (
                 <div className="flex gap-3 mt-2 text-xs">
                   <span className="text-gray-500 dark:text-slate-400">
                     <span className="font-semibold text-green-600 dark:text-green-400">{newsStats.last24h}</span> today
@@ -184,64 +226,65 @@ export default function BlogPage() {
                 </div>
               )}
               <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
-                Auto-refresh: every 10 min
+                Auto-refresh: {isAuthenticated ? 'every 10 min' : 'every 6 hours'}
               </p>
             </div>
           </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Main Content */}
           <div className="flex-1">
-            {/* News Sources Tabs */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-4 mb-6">
-              <div className="flex flex-wrap gap-2">
-                {NEWS_SOURCES.map(source => (
+            {isAuthenticated && (
+              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-4 mb-6">
+                <div className="flex flex-wrap gap-2">
+                  {NEWS_SOURCES.map(source => (
+                    <button
+                      key={source.id}
+                      onClick={() => setActiveSource(source.id)}
+                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                        activeSource === source.id
+                          ? 'bg-green-600 text-white'
+                          : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+                      }`}
+                    >
+                      {source.name}
+                    </button>
+                  ))}
                   <button
-                    key={source.id}
-                    onClick={() => setActiveSource(source.id)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      activeSource === source.id
-                        ? 'bg-green-600 text-white'
-                        : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
-                    }`}
+                    onClick={() => fetchNews(true)}
+                    disabled={isNewsLoading}
+                    className="ml-auto px-4 py-2 rounded-lg font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 flex items-center gap-2"
                   >
-                    {source.name}
+                    <RefreshCw size={16} className={isNewsLoading ? 'animate-spin' : ''} />
+                    Refresh
                   </button>
-                ))}
-                <button
-                  onClick={() => fetchNews(true)}
-                  disabled={isNewsLoading}
-                  className="ml-auto px-4 py-2 rounded-lg font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 flex items-center gap-2"
-                >
-                  <RefreshCw size={16} className={isNewsLoading ? 'animate-spin' : ''} />
-                  Refresh
-                </button>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* News Grid */}
             {isNewsLoading && news.length === 0 ? (
               <div className="flex items-center justify-center py-16">
                 <RefreshCw size={32} className="animate-spin text-green-600" />
               </div>
-            ) : filteredNews.length === 0 ? (
+            ) : displayedNews.length === 0 ? (
               <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-12 text-center">
                 <Newspaper className="mx-auto text-gray-400 mb-4" size={48} />
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No News Available</h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
                   News articles are being scraped from multiple sources. Check back soon!
                 </p>
-                <button
-                  onClick={() => fetchNews(true)}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                >
-                  Refresh News
-                </button>
+                {isAuthenticated && (
+                  <button
+                    onClick={() => fetchNews(true)}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  >
+                    Refresh News
+                  </button>
+                )}
               </div>
             ) : (
               <div className="grid gap-6">
-                {filteredNews.slice(0, 10).map(item => {
+                {displayedNews.map(item => {
                   const sourceInfo = getSourceInfo(item.source);
                   const previewText = truncateSummary(item.summary) || truncateSummary(item.title, 100);
                   return (
@@ -261,7 +304,7 @@ export default function BlogPage() {
                                 {item.category}
                               </span>
                             )}
-                            {item.symbol && (
+                            {item.symbol && isAuthenticated && (
                               <Link 
                                 href={`/stocks/${item.symbol}`}
                                 className="px-2 py-1 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded-full text-xs font-medium hover:bg-blue-100 dark:hover:bg-blue-800"
@@ -296,7 +339,27 @@ export default function BlogPage() {
                     </article>
                   );
                 })}
-                {filteredNews.length > 10 && (
+                
+                {!isAuthenticated && filteredNews.length > GUEST_ARTICLE_LIMIT && (
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-xl p-6 text-center">
+                    <Lock className="mx-auto text-green-600 dark:text-green-400 mb-3" size={32} />
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                      {filteredNews.length - GUEST_ARTICLE_LIMIT} More Articles Available
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                      Sign in to access all news articles, source filtering, and real-time updates every 10 minutes.
+                    </p>
+                    <button
+                      onClick={login}
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                    >
+                      <LogIn size={18} />
+                      Sign In for Full Access
+                    </button>
+                  </div>
+                )}
+                
+                {isAuthenticated && filteredNews.length > 10 && (
                   <p className="text-center text-gray-500 dark:text-gray-400 text-sm">
                     Showing 10 of {filteredNews.length} articles
                   </p>
@@ -304,7 +367,6 @@ export default function BlogPage() {
               </div>
             )}
 
-            {/* News Sources Section */}
             <div className="mt-8 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">News Sources</h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -390,74 +452,74 @@ export default function BlogPage() {
             </div>
           </div>
 
-          {/* Sidebar - Top Performers */}
-          <div className="lg:w-80">
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-6 sticky top-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <TrendingUp className="text-green-600" size={20} />
-                  Top 10 Performers
-                </h2>
-                <button 
-                  onClick={fetchStocks}
-                  disabled={isLoading}
-                  className="p-2 text-gray-400 hover:text-green-600 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700"
-                >
-                  <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
-                </button>
-              </div>
-              
-              {lastUpdated && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-                  Updated: {lastUpdated.toLocaleTimeString()}
-                </p>
-              )}
-
-              {isLoading && topPerformers.length === 0 ? (
-                <div className="flex items-center justify-center py-8">
-                  <RefreshCw size={24} className="animate-spin text-green-600" />
+          {isAuthenticated && (
+            <div className="lg:w-80">
+              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-6 sticky top-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <TrendingUp className="text-green-600" size={20} />
+                    Top 10 Performers
+                  </h2>
+                  <button 
+                    onClick={fetchStocks}
+                    disabled={isLoading}
+                    className="p-2 text-gray-400 hover:text-green-600 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700"
+                  >
+                    <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
+                  </button>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {topPerformers.map((stock, index) => (
-                    <Link
-                      key={stock.symbol}
-                      href={`/blog/${stock.symbol}`}
-                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                          index < 3 ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-                        }`}>
-                          {index + 1}
-                        </span>
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400">{stock.symbol}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]">{stock.name}</p>
+                
+                {lastUpdated && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                    Updated: {lastUpdated.toLocaleTimeString()}
+                  </p>
+                )}
+
+                {isLoading && topPerformers.length === 0 ? (
+                  <div className="flex items-center justify-center py-8">
+                    <RefreshCw size={24} className="animate-spin text-green-600" />
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {topPerformers.map((stock, index) => (
+                      <Link
+                        key={stock.symbol}
+                        href={`/blog/${stock.symbol}`}
+                        className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                            index < 3 ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                          }`}>
+                            {index + 1}
+                          </span>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400">{stock.symbol}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]">{stock.name}</p>
+                          </div>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-green-600 font-semibold">
-                          +{stock.changePercent.toFixed(2)}%
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">₦{stock.price.toLocaleString()}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
+                        <div className="text-right">
+                          <p className="text-green-600 font-semibold">
+                            +{stock.changePercent.toFixed(2)}%
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">₦{stock.price.toLocaleString()}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
 
-              <Link
-                href="/stocks?sort=gainers"
-                className="flex items-center justify-center gap-2 mt-4 py-3 text-green-600 font-medium hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
-              >
-                View All Stocks <ChevronRight size={16} />
-              </Link>
+                <Link
+                  href="/stocks?sort=gainers"
+                  className="flex items-center justify-center gap-2 mt-4 py-3 text-green-600 font-medium hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
+                >
+                  View All Stocks <ChevronRight size={16} />
+                </Link>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
-    </AuthGuard>
   );
 }

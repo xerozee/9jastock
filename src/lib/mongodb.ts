@@ -58,9 +58,6 @@ const userSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-userSchema.index({ email: 1 });
-userSchema.index({ shareId: 1 });
-
 const sessionSchema = new mongoose.Schema({
   sid: { type: String, required: true, unique: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -114,8 +111,6 @@ const newsletterSubscriberSchema = new mongoose.Schema({
   subscribedAt: { type: Date, default: Date.now },
   isActive: { type: Boolean, default: true },
 });
-
-newsletterSubscriberSchema.index({ email: 1 });
 
 const sentNewsletterSchema = new mongoose.Schema({
   subject: { type: String, required: true },

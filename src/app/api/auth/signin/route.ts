@@ -6,7 +6,7 @@ import crypto from "crypto";
 export async function POST(request: NextRequest) {
   try {
     await connectToDatabase();
-    const { email, password } = await request.json();
+    const { email, password, rememberMe } = await request.json();
 
     if (!email || !password) {
       return NextResponse.json(
@@ -41,7 +41,8 @@ export async function POST(request: NextRequest) {
     }
 
     const sessionId = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const sessionDuration = rememberMe ? 24 * 60 * 60 * 1000 : 2 * 60 * 60 * 1000;
+    const expiresAt = new Date(Date.now() + sessionDuration);
 
     await Session.create({
       sid: sessionId,

@@ -27,17 +27,17 @@ export async function GET(request: NextRequest) {
   const expectedState = cookieStore.get(STATE_COOKIE)?.value;
   
   if (!code || !state) {
-    return NextResponse.redirect(new URL("/?error=missing_params", request.url));
+    return NextResponse.redirect(new URL("/?error=missing_params", origin));
   }
   
   if (!expectedState) {
-    return NextResponse.redirect(new URL("/?error=missing_state", request.url));
+    return NextResponse.redirect(new URL("/?error=missing_state", origin));
   }
   
   try {
     const { sessionId } = await handleCallback(code, state, expectedState, origin);
     
-    const response = NextResponse.redirect(new URL("/", request.url));
+    const response = NextResponse.redirect(new URL("/", origin));
     
     response.cookies.set(SESSION_COOKIE, sessionId, {
       httpOnly: true,
@@ -52,6 +52,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error("Auth callback error:", error);
-    return NextResponse.redirect(new URL("/?error=auth_failed", request.url));
+    return NextResponse.redirect(new URL("/?error=auth_failed", origin));
   }
 }

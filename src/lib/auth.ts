@@ -74,7 +74,7 @@ function generateState(): string {
 
 export function getLoginUrl(origin: string): { url: string; state: string } {
   const state = generateState();
-  const callbackUrl = `${origin}/api/auth/callback`;
+  const callbackUrl = `${origin}/api/callback`;
   const params = new URLSearchParams({
     client_id: process.env.REPL_ID!,
     redirect_uri: callbackUrl,
@@ -94,7 +94,7 @@ export async function handleCallback(code: string, state: string, expectedState:
     throw new Error("Invalid state parameter - possible CSRF attack");
   }
   
-  const callbackUrl = `${origin}/api/auth/callback`;
+  const callbackUrl = `${origin}/api/callback`;
   
   const tokenResponse = await fetch(`${ISSUER_URL}/token`, {
     method: 'POST',

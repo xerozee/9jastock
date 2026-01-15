@@ -34,7 +34,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
           </p>
           <div className="space-y-3">
             <Link
-              href="/api/auth/login"
+              href="/api/login"
               className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -46,7 +46,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
               Continue with Google
             </Link>
             <Link
-              href="/api/auth/login"
+              href="/api/login"
               className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-black hover:bg-gray-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -55,7 +55,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
               Continue with Apple
             </Link>
             <Link
-              href="/api/auth/login"
+              href="/api/login"
               className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-white font-semibold rounded-xl transition-all"
             >
               Sign in with Email

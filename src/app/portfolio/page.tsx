@@ -126,7 +126,7 @@ export default function PortfolioPage() {
             Sign in to create and track your personal stock portfolio
           </p>
           <a
-            href="/api/auth/login"
+            href="/api/login"
             className="inline-flex items-center space-x-2 px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
           >
             <LogIn size={20} />

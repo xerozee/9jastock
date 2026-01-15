@@ -88,7 +88,7 @@ export default function Header() {
                   </span>
                 </div>
                 <a
-                  href="/api/auth/logout"
+                  href="/api/logout"
                   className="flex items-center space-x-1 px-3 py-1.5 bg-white/10 hover:bg-white/20 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-xl text-sm transition-all"
                 >
                   <LogOut size={16} />
@@ -97,7 +97,7 @@ export default function Header() {
               </div>
             ) : (
               <a
-                href="/api/auth/login"
+                href="/api/login"
                 className="flex items-center space-x-2 px-4 py-2 bg-white text-green-800 dark:bg-emerald-500 dark:text-white hover:bg-green-100 dark:hover:bg-emerald-400 rounded-xl font-medium transition-all shadow-lg hover:shadow-xl"
               >
                 <LogIn size={18} />
@@ -174,7 +174,7 @@ export default function Header() {
                     </div>
                   </div>
                   <a
-                    href="/api/auth/logout"
+                    href="/api/logout"
                     className="flex items-center justify-center space-x-2 w-full px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all"
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -185,7 +185,7 @@ export default function Header() {
               ) : (
                 <div className="px-4">
                   <a
-                    href="/api/auth/login"
+                    href="/api/login"
                     className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-white text-green-800 dark:bg-emerald-500 dark:text-white hover:bg-green-100 dark:hover:bg-emerald-400 rounded-xl font-medium transition-all"
                     onClick={() => setIsMenuOpen(false)}
                   >

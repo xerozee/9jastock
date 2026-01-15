@@ -89,7 +89,7 @@ export default function LandingPage({ stockCount, gainersCount, losersCount, mar
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Link
-                href="/api/auth/login"
+                href="/api/login"
                 className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-white text-green-700 font-semibold rounded-2xl shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300"
               >
                 Get Started Free
@@ -253,7 +253,7 @@ export default function LandingPage({ stockCount, gainersCount, losersCount, mar
 
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Link
-                    href="/api/auth/login"
+                    href="/api/login"
                     className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
                   >
                     <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -265,7 +265,7 @@ export default function LandingPage({ stockCount, gainersCount, losersCount, mar
                     Continue with Google
                   </Link>
                   <Link
-                    href="/api/auth/login"
+                    href="/api/login"
                     className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-black hover:bg-gray-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
                   >
                     <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -276,7 +276,7 @@ export default function LandingPage({ stockCount, gainersCount, losersCount, mar
                 </div>
                 <div className="mt-4">
                   <Link
-                    href="/api/auth/login"
+                    href="/api/login"
                     className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-white font-semibold rounded-xl transition-all w-full sm:w-auto"
                   >
                     <Mail size={20} />
@@ -385,7 +385,7 @@ export default function LandingPage({ stockCount, gainersCount, losersCount, mar
             Join thousands of Nigerian investors tracking the market with 9jaStock.
           </p>
           <Link
-            href="/api/auth/login"
+            href="/api/login"
             className="inline-flex items-center justify-center gap-3 px-10 py-5 bg-white text-green-700 font-bold text-lg rounded-2xl shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300"
           >
             Create Free Account

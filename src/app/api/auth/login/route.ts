@@ -57,6 +57,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(redirectTo.href);
   } catch (error) {
     console.error("Login error:", error);
-    return NextResponse.redirect(new URL("/", request.url));
+    const forwardedHost = request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
+    const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
+    return NextResponse.redirect(`${forwardedProto}://${forwardedHost}/?auth_error=login_failed`);
   }
 }

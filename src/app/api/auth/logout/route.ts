@@ -13,9 +13,13 @@ export async function GET(request: NextRequest) {
 
     cookieStore.delete("session_id");
 
-    return NextResponse.redirect(new URL("/", request.url));
+    const forwardedHost = request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
+    const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
+    return NextResponse.redirect(`${forwardedProto}://${forwardedHost}/`);
   } catch (error) {
     console.error("Logout error:", error);
-    return NextResponse.redirect(new URL("/", request.url));
+    const forwardedHost = request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
+    const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
+    return NextResponse.redirect(`${forwardedProto}://${forwardedHost}/`);
   }
 }

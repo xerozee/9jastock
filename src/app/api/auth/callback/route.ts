@@ -10,19 +10,20 @@ export async function GET(request: NextRequest) {
     const nonce = cookieStore.get("auth_nonce")?.value;
     const codeVerifier = cookieStore.get("auth_code_verifier")?.value;
 
-    if (!state || !nonce || !codeVerifier) {
-      console.error("Missing auth cookies - state:", !!state, "nonce:", !!nonce, "codeVerifier:", !!codeVerifier);
-      return NextResponse.redirect(new URL("/?auth_error=missing_cookies", request.url));
-    }
-
-    const config = await getOidcConfig();
     const forwardedHost = request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
     const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
     const isSecure = forwardedProto === "https" || process.env.NODE_ENV === "production";
-    const protocol = isSecure ? "https" : "http";
+    const baseUrl = `${forwardedProto}://${forwardedHost}`;
+
+    if (!state || !nonce || !codeVerifier) {
+      console.error("Missing auth cookies - state:", !!state, "nonce:", !!nonce, "codeVerifier:", !!codeVerifier);
+      return NextResponse.redirect(`${baseUrl}/?auth_error=missing_cookies`);
+    }
+
+    const config = await getOidcConfig();
     
     const originalUrl = new URL(request.url);
-    const correctedUrl = new URL(`${protocol}://${forwardedHost}${originalUrl.pathname}${originalUrl.search}`);
+    const correctedUrl = new URL(`${baseUrl}${originalUrl.pathname}${originalUrl.search}`);
 
     const tokens = await client.authorizationCodeGrant(config, correctedUrl, {
       pkceCodeVerifier: codeVerifier,
@@ -59,9 +60,11 @@ export async function GET(request: NextRequest) {
       path: "/",
     });
 
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(baseUrl);
   } catch (error) {
     console.error("Callback error:", error);
-    return NextResponse.redirect(new URL("/", request.url));
+    const forwardedHost = request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
+    const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
+    return NextResponse.redirect(`${forwardedProto}://${forwardedHost}/?auth_error=callback_failed`);
   }
 }

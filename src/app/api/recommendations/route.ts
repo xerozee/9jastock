@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase, User } from '@/lib/mongodb';
 import { getSession } from '@/lib/auth';
 import { cookies } from 'next/headers';
+import { getAIStockRecommendations, StockData, UserProfile } from '@/lib/openai';
 
 interface Stock {
   symbol: string;
@@ -13,132 +14,9 @@ interface Stock {
   peRatio?: number;
   marketCap?: number;
   volume?: number;
-}
-
-const sectorMappings: Record<string, string[]> = {
-  'banking': ['Financial Services', 'Banking', 'Banks', 'Financial'],
-  'oil-gas': ['Oil & Gas', 'Oil', 'Gas', 'Energy', 'Petroleum'],
-  'consumer-goods': ['Consumer Goods', 'Consumer', 'FMCG', 'Food & Beverage'],
-  'industrial': ['Industrial Goods', 'Industrial', 'Manufacturing', 'Construction'],
-  'insurance': ['Insurance', 'Financial Services'],
-  'telecoms': ['Telecommunications', 'Telecom', 'ICT', 'Technology'],
-  'healthcare': ['Healthcare', 'Pharmaceutical', 'Medical', 'Health'],
-  'agriculture': ['Agriculture', 'Agribusiness', 'Farming'],
-  'real-estate': ['Real Estate', 'Property', 'REIT'],
-  'technology': ['Technology', 'ICT', 'Tech', 'Information Technology'],
-};
-
-function getRecommendations(stocks: Stock[], userProfile: any): { stocks: Stock[]; reason: string }[] {
-  const recommendations: { stocks: Stock[]; reason: string }[] = [];
-  const { investmentGoal, experienceLevel, riskTolerance, investmentHorizon, interestedSectors } = userProfile;
-
-  if (interestedSectors && interestedSectors.length > 0) {
-    const sectorStocks = stocks.filter(stock => {
-      if (!stock.sector) return false;
-      return interestedSectors.some((sector: string) => {
-        const mappedSectors = sectorMappings[sector] || [sector];
-        return mappedSectors.some(ms => 
-          stock.sector?.toLowerCase().includes(ms.toLowerCase())
-        );
-      });
-    });
-
-    if (sectorStocks.length > 0) {
-      recommendations.push({
-        stocks: sectorStocks.slice(0, 5),
-        reason: `Based on your interest in ${interestedSectors.slice(0, 3).join(', ')}`,
-      });
-    }
-  }
-
-  if (investmentGoal === 'passive-income' || investmentGoal === 'retirement') {
-    const dividendStocks = stocks
-      .filter(s => (s.dividendYield || 0) > 3)
-      .sort((a, b) => (b.dividendYield || 0) - (a.dividendYield || 0));
-    
-    if (dividendStocks.length > 0) {
-      recommendations.push({
-        stocks: dividendStocks.slice(0, 5),
-        reason: 'High dividend yield stocks for passive income',
-      });
-    }
-  }
-
-  if (riskTolerance === 'conservative') {
-    const stableStocks = stocks
-      .filter(s => Math.abs(s.changePercent) < 2 && (s.marketCap || 0) > 100000000000)
-      .sort((a, b) => (b.marketCap || 0) - (a.marketCap || 0));
-    
-    if (stableStocks.length > 0) {
-      recommendations.push({
-        stocks: stableStocks.slice(0, 5),
-        reason: 'Stable large-cap stocks with lower volatility',
-      });
-    }
-  } else if (riskTolerance === 'aggressive') {
-    const growthStocks = stocks
-      .filter(s => s.changePercent > 0)
-      .sort((a, b) => b.changePercent - a.changePercent);
-    
-    if (growthStocks.length > 0) {
-      recommendations.push({
-        stocks: growthStocks.slice(0, 5),
-        reason: 'High momentum stocks with strong recent performance',
-      });
-    }
-  }
-
-  if (investmentGoal === 'short-term-gains') {
-    const activeStocks = stocks
-      .filter(s => (s.volume || 0) > 1000000)
-      .sort((a, b) => (b.volume || 0) - (a.volume || 0));
-    
-    if (activeStocks.length > 0) {
-      recommendations.push({
-        stocks: activeStocks.slice(0, 5),
-        reason: 'High volume stocks for short-term trading',
-      });
-    }
-  }
-
-  if (investmentGoal === 'wealth-building' || investmentHorizon === '5-10-years' || investmentHorizon === '10-plus-years') {
-    const valueStocks = stocks
-      .filter(s => (s.peRatio || 0) > 0 && (s.peRatio || 0) < 15 && (s.marketCap || 0) > 50000000000)
-      .sort((a, b) => (a.peRatio || 999) - (b.peRatio || 999));
-    
-    if (valueStocks.length > 0) {
-      recommendations.push({
-        stocks: valueStocks.slice(0, 5),
-        reason: 'Undervalued stocks with growth potential for long-term wealth building',
-      });
-    }
-  }
-
-  if (experienceLevel === 'beginner') {
-    const blueChipStocks = stocks
-      .filter(s => (s.marketCap || 0) > 500000000000)
-      .sort((a, b) => (b.marketCap || 0) - (a.marketCap || 0));
-    
-    if (blueChipStocks.length > 0) {
-      recommendations.push({
-        stocks: blueChipStocks.slice(0, 5),
-        reason: 'Blue-chip stocks recommended for beginners',
-      });
-    }
-  }
-
-  if (recommendations.length === 0) {
-    const topStocks = stocks
-      .filter(s => (s.marketCap || 0) > 100000000000)
-      .sort((a, b) => (b.volume || 0) - (a.volume || 0));
-    
-    recommendations.push({
-      stocks: topStocks.slice(0, 5),
-      reason: 'Top traded stocks on NGX',
-    });
-  }
-
-  return recommendations.slice(0, 3);
+  rsi?: number;
+  high52Week?: number;
+  low52Week?: number;
 }
 
 export async function GET() {
@@ -204,24 +82,66 @@ export async function GET() {
       });
     }
 
-    const recommendations = getRecommendations(stocks, user);
-    
-    const seenSymbols = new Set<string>();
-    const deduplicatedRecommendations = recommendations.map(rec => ({
-      ...rec,
-      stocks: rec.stocks.filter(stock => {
-        if (seenSymbols.has(stock.symbol)) return false;
-        seenSymbols.add(stock.symbol);
-        return true;
-      }),
-    })).filter(rec => rec.stocks.length > 0);
+    const userProfile: UserProfile = {
+      investmentGoal: user.investmentGoal,
+      experienceLevel: user.experienceLevel,
+      riskTolerance: user.riskTolerance,
+      investmentHorizon: user.investmentHorizon,
+      interestedSectors: user.interestedSectors,
+    };
 
-    return NextResponse.json({
-      recommendations: deduplicatedRecommendations,
-      hasProfile: true,
-    });
+    try {
+      const aiRecommendations = await getAIStockRecommendations(
+        stocks as StockData[],
+        userProfile
+      );
+
+      return NextResponse.json({
+        recommendations: aiRecommendations,
+        hasProfile: true,
+        aiPowered: true,
+      });
+    } catch (aiError) {
+      console.error('AI recommendations failed, falling back to rule-based:', aiError);
+      
+      const fallbackRecs = getFallbackRecommendations(stocks, userProfile);
+      return NextResponse.json({
+        recommendations: fallbackRecs,
+        hasProfile: true,
+        aiPowered: false,
+      });
+    }
   } catch (error) {
     console.error('Recommendations fetch error:', error);
     return NextResponse.json({ error: 'Failed to fetch recommendations' }, { status: 500 });
   }
+}
+
+function getFallbackRecommendations(stocks: Stock[], profile: UserProfile) {
+  const { riskTolerance, investmentGoal } = profile;
+  let filtered = stocks.filter(s => s.marketCap && s.volume);
+
+  if (riskTolerance === 'conservative') {
+    filtered = filtered.filter(s => (s.marketCap || 0) > 100000000000);
+  } else if (riskTolerance === 'aggressive') {
+    filtered = filtered.filter(s => s.changePercent > 0);
+  }
+
+  if (investmentGoal === 'passive-income') {
+    filtered = filtered.filter(s => (s.dividendYield || 0) > 2);
+  }
+
+  return filtered
+    .sort((a, b) => (b.volume || 0) - (a.volume || 0))
+    .slice(0, 5)
+    .map(s => ({
+      symbol: s.symbol,
+      name: s.name,
+      price: s.price,
+      changePercent: s.changePercent,
+      sector: s.sector,
+      reason: 'Top traded stock matching your investment profile',
+      confidenceScore: 70,
+      riskLevel: 'medium' as const,
+    }));
 }

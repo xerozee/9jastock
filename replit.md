@@ -61,6 +61,12 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
   - iOS/Android "Add to Home Screen" compatible
   - Offline fallback page when no connection
   - Icon generation script at scripts/generate-icons.js
+- **AI-Powered Stock Analysis**: OpenAI integration for intelligent recommendations
+  - Personalized stock recommendations using GPT-4o-mini
+  - Individual stock analysis at /api/stocks/[symbol]/analysis
+  - Considers user's investment goals, risk tolerance, experience level
+  - Falls back to rule-based recommendations if AI unavailable
+  - Uses Replit AI Integrations (no separate API key needed)
 - **Stripe Subscription System**: Premium tier monetization
   - Free tier: 5-minute data refresh, 10 portfolio stocks
   - Premium tier: ₦2,999/month or ₦24,999/year (17% savings)

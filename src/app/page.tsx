@@ -174,12 +174,12 @@ export default function HomePage() {
         </div>
       )}
 
-      <section className="mb-8">
-        <MarketOverview summary={marketSummary} />
+      <section className="mb-6">
+        <MarketHours />
       </section>
 
       <section className="mb-8">
-        <MarketHours />
+        <MarketOverview summary={marketSummary} />
       </section>
 
       <section className="mb-8">

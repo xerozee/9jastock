@@ -56,14 +56,16 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
   - Uses NSENG: symbol format for Nigerian stocks
   - Dark mode support with theme switching
   - RSI and MACD indicators built-in
-- **Market Buzz Social Feed**: Placeholder for social media discussions
-  - Shows Reddit, TradingView, and Twitter/X post previews
-  - Filter by platform (All, Reddit, TradingView, X)
-  - Stock mention tags with $SYMBOL format
-  - Engagement metrics (likes, comments, shares)
-  - Author avatars with auto-generated colors
-  - Located below Most Active stocks on dashboard
-  - Placeholder data ready for API integration
+- **Market Buzz Social Feed with AI Crawler**: Real-time social media aggregation
+  - Custom crawler scrapes TradingView community, Twitter/X (via Nitter), Reddit, and Nigerian news
+  - OpenAI GPT-4o-mini sentiment analysis for each post (bullish/bearish/neutral/mixed)
+  - MongoDB storage with SocialPost schema for persistence
+  - Filter by platform (All, Reddit, TradingView, X, News)
+  - Stock mention detection with automatic symbol extraction
+  - Sentiment badges on each post showing AI analysis
+  - Rate-limited crawler endpoint with authentication required
+  - API endpoints: GET /api/social (feed), POST /api/social/crawl (trigger crawl)
+  - Nigerian finance Twitter accounts monitored: @Naborhood, @Afrinvestor, @NGXGroup, etc.
 
 - **Stock Recommendations Engine**: AI-powered stock suggestions based on user profile
   - Recommendations API at /api/recommendations

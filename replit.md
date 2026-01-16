@@ -56,6 +56,14 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
   - Uses NSENG: symbol format for Nigerian stocks
   - Dark mode support with theme switching
   - RSI and MACD indicators built-in
+- **Market Buzz Social Feed**: Placeholder for social media discussions
+  - Shows Reddit, TradingView, and Twitter/X post previews
+  - Filter by platform (All, Reddit, TradingView, X)
+  - Stock mention tags with $SYMBOL format
+  - Engagement metrics (likes, comments, shares)
+  - Author avatars with auto-generated colors
+  - Located below Most Active stocks on dashboard
+  - Placeholder data ready for API integration
 
 - **Stock Recommendations Engine**: AI-powered stock suggestions based on user profile
   - Recommendations API at /api/recommendations

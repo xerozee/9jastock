@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { 
-  TrendingUp, TrendingDown, Newspaper, ExternalLink, Clock, 
-  Building2, BarChart3, FileText, RefreshCw, ChevronRight, Wifi, WifiOff, Lock, LogIn
+import {
+  TrendingUp, TrendingDown, Newspaper, ExternalLink, Clock,
+  Building2, BarChart3, FileText, RefreshCw, ChevronRight, Wifi, WifiOff, Lock, LogIn,
+  Calendar, ChevronDown
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Stock } from '@/types/stock';
@@ -32,6 +33,15 @@ const NEWS_SOURCES = [
 const NEWS_REFRESH_AUTHENTICATED = 10 * 60 * 1000;
 const NEWS_REFRESH_GUEST = 6 * 60 * 60 * 1000;
 const GUEST_ARTICLE_LIMIT = 5;
+const AUTHENTICATED_ARTICLE_LIMIT = 20;
+
+const DATE_FILTERS = [
+  { id: 'all', name: 'All Time', days: null },
+  { id: 'today', name: 'Today', days: 0 },
+  { id: 'yesterday', name: 'Yesterday', days: 1 },
+  { id: '2days', name: '2 Days Ago', days: 2 },
+  { id: '3days', name: '3 Days Ago', days: 3 },
+];
 
 export default function BlogPage() {
   const { isAuthenticated, isLoading: authLoading, login } = useAuth();
@@ -40,7 +50,21 @@ export default function BlogPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isNewsLoading, setIsNewsLoading] = useState(true);
   const [activeSource, setActiveSource] = useState<string>('all');
+  const [activeDateFilter, setActiveDateFilter] = useState<string>('all');
+  const [showDateDropdown, setShowDateDropdown] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const dateDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dateDropdownRef.current && !dateDropdownRef.current.contains(event.target as Node)) {
+        setShowDateDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   const [newsLastUpdated, setNewsLastUpdated] = useState<Date | null>(null);
   const [newsStats, setNewsStats] = useState<{ total: number; last24h: number; lastHour: number } | null>(null);
   const [nextRefresh, setNextRefresh] = useState<number>(0);
@@ -101,11 +125,35 @@ export default function BlogPage() {
     .sort((a, b) => b.changePercent - a.changePercent)
     .slice(0, 10);
 
-  const filteredNews = activeSource === 'all'
+  // Filter by source
+  const sourceFilteredNews = activeSource === 'all'
     ? news
     : news.filter(n => n.source === activeSource);
 
-  const displayedNews = isAuthenticated ? filteredNews.slice(0, 10) : filteredNews.slice(0, GUEST_ARTICLE_LIMIT);
+  // Filter by date
+  const filteredNews = sourceFilteredNews.filter(item => {
+    if (activeDateFilter === 'all') return true;
+
+    const dateFilter = DATE_FILTERS.find(f => f.id === activeDateFilter);
+    if (!dateFilter || dateFilter.days === null) return true;
+
+    const itemDate = new Date(item.publishedAt || item.scrapedAt);
+    const now = new Date();
+
+    // Get start and end of the target day
+    const targetDate = new Date(now);
+    targetDate.setDate(targetDate.getDate() - dateFilter.days);
+    const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
+
+    return itemDate >= startOfDay && itemDate <= endOfDay;
+  });
+
+  const displayedNews = isAuthenticated ? filteredNews.slice(0, AUTHENTICATED_ARTICLE_LIMIT) : filteredNews.slice(0, GUEST_ARTICLE_LIMIT);
+
+  const getActiveDateFilterName = () => {
+    return DATE_FILTERS.find(f => f.id === activeDateFilter)?.name || 'All Time';
+  };
 
   const getSourceInfo = (sourceId: string) => 
     NEWS_SOURCES.find(s => s.id === sourceId) || NEWS_SOURCES[0];
@@ -236,28 +284,81 @@ export default function BlogPage() {
           <div className="flex-1">
             {isAuthenticated && (
               <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-4 mb-6">
-                <div className="flex flex-wrap gap-2">
-                  {NEWS_SOURCES.map(source => (
+                <div className="flex flex-col gap-4">
+                  {/* Source Filters */}
+                  <div className="flex flex-wrap gap-2">
+                    {NEWS_SOURCES.map(source => (
+                      <button
+                        key={source.id}
+                        onClick={() => setActiveSource(source.id)}
+                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                          activeSource === source.id
+                            ? 'bg-green-600 text-white'
+                            : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+                        }`}
+                      >
+                        {source.name}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Date Filter and Refresh */}
+                  <div className="flex flex-wrap items-center gap-3">
+                    {/* Date Filter Dropdown */}
+                    <div className="relative" ref={dateDropdownRef}>
+                      <button
+                        onClick={() => setShowDateDropdown(!showDateDropdown)}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
+                      >
+                        <Calendar size={16} />
+                        {getActiveDateFilterName()}
+                        <ChevronDown size={16} className={`transition-transform ${showDateDropdown ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {showDateDropdown && (
+                        <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700 py-2 z-50">
+                          {DATE_FILTERS.map(filter => (
+                            <button
+                              key={filter.id}
+                              onClick={() => {
+                                setActiveDateFilter(filter.id);
+                                setShowDateDropdown(false);
+                              }}
+                              className={`w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors ${
+                                activeDateFilter === filter.id
+                                  ? 'text-green-600 dark:text-green-400 font-medium bg-green-50 dark:bg-green-900/20'
+                                  : 'text-gray-700 dark:text-gray-300'
+                              }`}
+                            >
+                              {filter.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Active filters indicator */}
+                    {(activeDateFilter !== 'all' || activeSource !== 'all') && (
+                      <button
+                        onClick={() => {
+                          setActiveDateFilter('all');
+                          setActiveSource('all');
+                        }}
+                        className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                      >
+                        Clear Filters
+                      </button>
+                    )}
+
                     <button
-                      key={source.id}
-                      onClick={() => setActiveSource(source.id)}
-                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                        activeSource === source.id
-                          ? 'bg-green-600 text-white'
-                          : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
-                      }`}
+                      onClick={() => fetchNews(true)}
+                      disabled={isNewsLoading}
+                      className="ml-auto px-4 py-2 rounded-lg font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 flex items-center gap-2"
                     >
-                      {source.name}
+                      <RefreshCw size={16} className={isNewsLoading ? 'animate-spin' : ''} />
+                      Refresh
                     </button>
-                  ))}
-                  <button
-                    onClick={() => fetchNews(true)}
-                    disabled={isNewsLoading}
-                    className="ml-auto px-4 py-2 rounded-lg font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 flex items-center gap-2"
-                  >
-                    <RefreshCw size={16} className={isNewsLoading ? 'animate-spin' : ''} />
-                    Refresh
-                  </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -359,10 +460,26 @@ export default function BlogPage() {
                   </div>
                 )}
                 
-                {isAuthenticated && filteredNews.length > 10 && (
+                {isAuthenticated && filteredNews.length > AUTHENTICATED_ARTICLE_LIMIT && (
                   <p className="text-center text-gray-500 dark:text-gray-400 text-sm">
-                    Showing 10 of {filteredNews.length} articles
+                    Showing {AUTHENTICATED_ARTICLE_LIMIT} of {filteredNews.length} articles
+                    {activeDateFilter !== 'all' && ` for ${getActiveDateFilterName()}`}
                   </p>
+                )}
+
+                {isAuthenticated && filteredNews.length === 0 && activeDateFilter !== 'all' && (
+                  <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-6 text-center">
+                    <Calendar className="mx-auto text-gray-400 mb-3" size={32} />
+                    <p className="text-gray-600 dark:text-gray-400">
+                      No articles found for {getActiveDateFilterName().toLowerCase()}.
+                    </p>
+                    <button
+                      onClick={() => setActiveDateFilter('all')}
+                      className="mt-3 text-green-600 hover:text-green-700 dark:text-green-400 font-medium"
+                    >
+                      View all articles
+                    </button>
+                  </div>
                 )}
               </div>
             )}

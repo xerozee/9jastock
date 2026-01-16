@@ -4,6 +4,12 @@ export interface Stock {
   description?: string;
   sector: string;
   industry?: string;
+  country?: string;
+  employees?: number;
+  website?: string;
+  exchange?: string;
+  type?: string;
+  currency?: string;
   
   price: number;
   change: number;
@@ -107,6 +113,24 @@ export interface Stock {
   postMarketChange?: number;
   
   earningsDate?: string | null;
+  
+  operatingMargin?: number;
+  grossMargin?: number;
+  netMargin?: number;
+  freeCashFlow?: number;
+  operatingIncome?: number;
+  enterpriseValue?: number;
+  evToEbitda?: number;
+  evToRevenue?: number;
+  pegRatio?: number;
+  bookValue?: number;
+  tangibleBookValue?: number;
+  revenuePerShare?: number;
+  cashPerShare?: number;
+  basicSharesOutstanding?: number;
+  returnOnCapital?: number;
+  beta?: number;
+  prevClose?: number;
   
   isLive?: boolean;
   lastUpdated?: number;

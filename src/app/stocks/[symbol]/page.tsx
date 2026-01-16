@@ -382,50 +382,76 @@ export default function StockDetailPage() {
         <TradingViewWidget symbol={stock.symbol} height={500} />
       </div>
 
-      {/* Company Overview Section */}
-      {yahooData?.companyProfile && (
-        <SectionCard title="Company Overview" icon={Building2} iconColor="text-blue-600">
-          {yahooData.companyProfile.description ? (
-            <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-              {yahooData.companyProfile.description}
-            </p>
-          ) : (
-            <p className="text-gray-500 dark:text-gray-400 mb-4 italic">
-              {stock.name} is listed on the Nigerian Stock Exchange (NGX) in the {stock.sector || 'General'} sector.
-            </p>
-          )}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="flex items-center gap-2">
-              <Briefcase size={16} className="text-gray-400" />
-              <div>
-                <p className="text-xs text-gray-500">Industry</p>
-                <p className="font-medium dark:text-white">{yahooData.companyProfile.industry || stock.sector || 'N/A'}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <PieChart size={16} className="text-gray-400" />
-              <div>
-                <p className="text-xs text-gray-500">Sector</p>
-                <p className="font-medium dark:text-white">{yahooData.companyProfile.sector || stock.sector || 'N/A'}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users size={16} className="text-gray-400" />
-              <div>
-                <p className="text-xs text-gray-500">Employees</p>
-                <p className="font-medium dark:text-white">{yahooData.companyProfile.fullTimeEmployees?.toLocaleString() || 'N/A'}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <MapPin size={16} className="text-gray-400" />
-              <div>
-                <p className="text-xs text-gray-500">Location</p>
-                <p className="font-medium dark:text-white">{yahooData.companyProfile.city || 'Lagos'}, {yahooData.companyProfile.country || 'Nigeria'}</p>
-              </div>
+      {/* Company Overview Section - TradingView Primary */}
+      <SectionCard title="Company Overview" icon={Building2} iconColor="text-blue-600">
+        {yahooData?.companyProfile?.description ? (
+          <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+            {yahooData.companyProfile.description}
+          </p>
+        ) : (
+          <p className="text-gray-500 dark:text-gray-400 mb-4 italic">
+            {stock.name} is a company listed on the Nigerian Stock Exchange (NSENG) in the {extendedStock.industry || extendedStock.sector || stock.sector || 'General'} sector.
+          </p>
+        )}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="flex items-center gap-2">
+            <Briefcase size={16} className="text-gray-400" />
+            <div>
+              <p className="text-xs text-gray-500">Industry</p>
+              <p className="font-medium dark:text-white">{extendedStock.industry || yahooData?.companyProfile?.industry || stock.sector || 'N/A'}</p>
             </div>
           </div>
-        </SectionCard>
-      )}
+          <div className="flex items-center gap-2">
+            <PieChart size={16} className="text-gray-400" />
+            <div>
+              <p className="text-xs text-gray-500">Sector</p>
+              <p className="font-medium dark:text-white">{extendedStock.sector || yahooData?.companyProfile?.sector || stock.sector || 'N/A'}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Users size={16} className="text-gray-400" />
+            <div>
+              <p className="text-xs text-gray-500">Employees</p>
+              <p className="font-medium dark:text-white">{extendedStock.employees?.toLocaleString() || yahooData?.companyProfile?.fullTimeEmployees?.toLocaleString() || 'N/A'}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <MapPin size={16} className="text-gray-400" />
+            <div>
+              <p className="text-xs text-gray-500">Country</p>
+              <p className="font-medium dark:text-white">{extendedStock.country || yahooData?.companyProfile?.country || 'Nigeria'}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Globe size={16} className="text-gray-400" />
+            <div>
+              <p className="text-xs text-gray-500">Exchange</p>
+              <p className="font-medium dark:text-white">{extendedStock.exchange || 'NSENG'}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <DollarSign size={16} className="text-gray-400" />
+            <div>
+              <p className="text-xs text-gray-500">Currency</p>
+              <p className="font-medium dark:text-white">{extendedStock.currency || 'NGN'}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <BarChart3 size={16} className="text-gray-400" />
+            <div>
+              <p className="text-xs text-gray-500">Type</p>
+              <p className="font-medium dark:text-white capitalize">{extendedStock.type || 'Stock'}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Scale size={16} className="text-gray-400" />
+            <div>
+              <p className="text-xs text-gray-500">Beta (1Y)</p>
+              <p className="font-medium dark:text-white">{extendedStock.beta?.toFixed(2) || 'N/A'}</p>
+            </div>
+          </div>
+        </div>
+      </SectionCard>
 
       {/* Analyst Ratings Section */}
       <SectionCard title="Analyst Ratings & Price Targets" icon={Target} iconColor="text-purple-600">
@@ -682,6 +708,145 @@ export default function StockDetailPage() {
           <PerformanceBar label="1 Year" value={extendedStock.perfYear} />
           <PerformanceBar label="5 Years" value={extendedStock.perf5Year} />
           <PerformanceBar label="All Time" value={extendedStock.perfAllTime} />
+        </div>
+      </SectionCard>
+
+      {/* TradingView Financial Data - Primary Source */}
+      <SectionCard title="Income Statement (TTM)" icon={FileText} iconColor="text-emerald-600">
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Data sourced from TradingView</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard label="Total Revenue" value={extendedStock.revenue ? formatLargeNumber(extendedStock.revenue) : 'N/A'} icon={DollarSign} />
+          <StatCard label="Gross Profit" value={extendedStock.grossProfit ? formatLargeNumber(extendedStock.grossProfit) : 'N/A'} />
+          <StatCard label="Operating Income" value={extendedStock.operatingIncome ? formatLargeNumber(extendedStock.operatingIncome) : 'N/A'} />
+          <StatCard label="Net Income" value={extendedStock.netIncome ? formatLargeNumber(extendedStock.netIncome) : 'N/A'} />
+          <StatCard label="EBITDA" value={extendedStock.ebitda ? formatLargeNumber(extendedStock.ebitda) : 'N/A'} />
+          <StatCard label="EPS (Basic)" value={extendedStock.eps ? formatCurrency(extendedStock.eps) : 'N/A'} />
+          <StatCard label="EPS (Diluted)" value={extendedStock.epsDiluted ? formatCurrency(extendedStock.epsDiluted) : 'N/A'} />
+          <StatCard label="Revenue/Share" value={extendedStock.revenuePerShare ? formatCurrency(extendedStock.revenuePerShare) : 'N/A'} />
+        </div>
+        
+        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-6 mb-3">Margins</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard 
+            label="Gross Margin" 
+            value={extendedStock.grossMargin ? `${(extendedStock.grossMargin * 100).toFixed(2)}%` : 'N/A'}
+            trend={extendedStock.grossMargin && extendedStock.grossMargin > 0.2 ? 'up' : 'neutral'}
+          />
+          <StatCard 
+            label="Operating Margin" 
+            value={extendedStock.operatingMargin ? `${(extendedStock.operatingMargin * 100).toFixed(2)}%` : 'N/A'}
+            trend={extendedStock.operatingMargin && extendedStock.operatingMargin > 0.1 ? 'up' : 'neutral'}
+          />
+          <StatCard 
+            label="Net Margin" 
+            value={extendedStock.netMargin ? `${(extendedStock.netMargin * 100).toFixed(2)}%` : 'N/A'}
+            trend={extendedStock.netMargin && extendedStock.netMargin > 0 ? 'up' : 'down'}
+          />
+          <StatCard 
+            label="Return on Capital" 
+            value={extendedStock.returnOnCapital ? `${(extendedStock.returnOnCapital * 100).toFixed(2)}%` : 'N/A'}
+            trend={extendedStock.returnOnCapital && extendedStock.returnOnCapital > 0.1 ? 'up' : 'neutral'}
+          />
+        </div>
+      </SectionCard>
+
+      {/* TradingView Balance Sheet & Valuation */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <SectionCard title="Balance Sheet" icon={Building2} iconColor="text-slate-600">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Data sourced from TradingView</p>
+          <div className="grid grid-cols-2 gap-4">
+            <StatCard label="Total Assets" value={extendedStock.totalAssets ? formatLargeNumber(extendedStock.totalAssets) : 'N/A'} />
+            <StatCard label="Total Debt" value={extendedStock.totalDebt ? formatLargeNumber(extendedStock.totalDebt) : 'N/A'} />
+            <StatCard label="Total Cash" value={extendedStock.totalCash ? formatLargeNumber(extendedStock.totalCash) : 'N/A'} />
+            <StatCard label="Cash/Share" value={extendedStock.cashPerShare ? formatCurrency(extendedStock.cashPerShare) : 'N/A'} />
+            <StatCard label="Book Value/Share" value={extendedStock.bookValue ? formatCurrency(extendedStock.bookValue) : 'N/A'} />
+            <StatCard label="Tangible Book/Share" value={extendedStock.tangibleBookValue ? formatCurrency(extendedStock.tangibleBookValue) : 'N/A'} />
+          </div>
+          
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-4 mb-3">Liquidity Ratios</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <StatCard 
+              label="Debt/Equity" 
+              value={extendedStock.debtToEquity?.toFixed(2) || 'N/A'}
+              trend={extendedStock.debtToEquity && extendedStock.debtToEquity < 1 ? 'up' : 'down'}
+            />
+            <StatCard 
+              label="Current Ratio" 
+              value={extendedStock.currentRatio?.toFixed(2) || 'N/A'}
+              trend={extendedStock.currentRatio && extendedStock.currentRatio > 1.5 ? 'up' : 'neutral'}
+            />
+            <StatCard 
+              label="Quick Ratio" 
+              value={extendedStock.quickRatio?.toFixed(2) || 'N/A'}
+              trend={extendedStock.quickRatio && extendedStock.quickRatio > 1 ? 'up' : 'neutral'}
+            />
+            <StatCard label="Float Shares" value={extendedStock.floatShares ? formatLargeNumber(extendedStock.floatShares) : 'N/A'} />
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Valuation" icon={Scale} iconColor="text-amber-600">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Data sourced from TradingView</p>
+          <div className="grid grid-cols-2 gap-4">
+            <StatCard label="Market Cap" value={extendedStock.marketCap ? formatLargeNumber(extendedStock.marketCap) : 'N/A'} icon={DollarSign} />
+            <StatCard label="Enterprise Value" value={extendedStock.enterpriseValue ? formatLargeNumber(extendedStock.enterpriseValue) : 'N/A'} />
+            <StatCard label="P/E Ratio (TTM)" value={extendedStock.pe?.toFixed(2) || 'N/A'} />
+            <StatCard label="PEG Ratio" value={extendedStock.pegRatio?.toFixed(2) || 'N/A'} />
+            <StatCard label="Price/Book" value={extendedStock.priceToBook?.toFixed(2) || 'N/A'} />
+            <StatCard label="Price/Sales" value={extendedStock.priceToSales?.toFixed(2) || 'N/A'} />
+            <StatCard label="EV/EBITDA" value={extendedStock.evToEbitda?.toFixed(2) || 'N/A'} />
+            <StatCard label="EV/Revenue" value={extendedStock.evToRevenue?.toFixed(2) || 'N/A'} />
+          </div>
+        </SectionCard>
+      </div>
+
+      {/* Cash Flow */}
+      <SectionCard title="Cash Flow" icon={Wallet} iconColor="text-cyan-600">
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Data sourced from TradingView</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard 
+            label="Free Cash Flow" 
+            value={extendedStock.freeCashFlow ? formatLargeNumber(extendedStock.freeCashFlow) : yahooData?.financialRatios?.freeCashflow ? formatYahooLargeNumber(yahooData.financialRatios.freeCashflow) : 'N/A'} 
+            trend={extendedStock.freeCashFlow && extendedStock.freeCashFlow > 0 ? 'up' : 'down'}
+          />
+          <StatCard 
+            label="Operating Cash Flow" 
+            value={yahooData?.financialRatios?.operatingCashflow ? formatYahooLargeNumber(yahooData.financialRatios.operatingCashflow) : 'N/A'} 
+          />
+          <StatCard 
+            label="Cash Per Share" 
+            value={extendedStock.cashPerShare ? formatCurrency(extendedStock.cashPerShare) : 'N/A'} 
+          />
+          <StatCard 
+            label="Total Cash Position" 
+            value={extendedStock.totalCash ? formatLargeNumber(extendedStock.totalCash) : 'N/A'} 
+          />
+        </div>
+      </SectionCard>
+
+      {/* Profitability & Returns */}
+      <SectionCard title="Profitability & Returns" icon={TrendingUp} iconColor="text-green-600">
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Data sourced from TradingView</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard 
+            label="Return on Equity" 
+            value={extendedStock.roe ? `${extendedStock.roe.toFixed(2)}%` : 'N/A'}
+            trend={extendedStock.roe && extendedStock.roe > 15 ? 'up' : 'neutral'}
+          />
+          <StatCard 
+            label="Return on Assets" 
+            value={extendedStock.roa ? `${extendedStock.roa.toFixed(2)}%` : 'N/A'}
+            trend={extendedStock.roa && extendedStock.roa > 5 ? 'up' : 'neutral'}
+          />
+          <StatCard 
+            label="Return on Capital" 
+            value={extendedStock.returnOnCapital ? `${(extendedStock.returnOnCapital * 100).toFixed(2)}%` : 'N/A'}
+            trend={extendedStock.returnOnCapital && extendedStock.returnOnCapital > 0.1 ? 'up' : 'neutral'}
+          />
+          <StatCard 
+            label="Dividend Yield" 
+            value={extendedStock.dividendYield ? `${extendedStock.dividendYield.toFixed(2)}%` : 'N/A'}
+            trend={extendedStock.dividendYield && extendedStock.dividendYield > 3 ? 'up' : 'neutral'}
+          />
         </div>
       </SectionCard>
 

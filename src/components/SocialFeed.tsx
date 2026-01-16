@@ -1,14 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
-import { MessageCircle, Heart, Share2, ExternalLink, TrendingUp, Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { MessageCircle, Heart, Share2, ExternalLink, TrendingUp, Clock, RefreshCw, Loader2 } from 'lucide-react';
 
-type SocialPlatform = 'all' | 'reddit' | 'tradingview' | 'twitter';
+type SocialPlatform = 'all' | 'reddit' | 'tradingview' | 'twitter' | 'news';
 
 interface SocialPost {
   id: string;
-  platform: 'reddit' | 'tradingview' | 'twitter';
+  platform: 'reddit' | 'tradingview' | 'twitter' | 'news';
   author: string;
   authorHandle?: string;
   authorAvatar?: string;
@@ -18,9 +17,12 @@ interface SocialPost {
   comments: number;
   shares?: number;
   image?: string;
+  url?: string;
   stockMentions?: string[];
   subreddit?: string;
   verified?: boolean;
+  sentiment?: 'bullish' | 'bearish' | 'neutral' | 'mixed';
+  sentimentScore?: number;
 }
 
 const PLACEHOLDER_POSTS: SocialPost[] = [
@@ -28,20 +30,19 @@ const PLACEHOLDER_POSTS: SocialPost[] = [
     id: '1',
     platform: 'reddit',
     author: 'NigeriaInvestor',
-    authorAvatar: '',
     content: "DANGCEM just broke through resistance at ₦630. Technical analysis shows strong bullish momentum with RSI above 60. Volume picking up significantly this week. Anyone else loading up?",
     timestamp: '2 hours ago',
     likes: 47,
     comments: 23,
     subreddit: 'r/NigerianStocks',
     stockMentions: ['DANGCEM'],
+    sentiment: 'bullish',
   },
   {
     id: '2',
     platform: 'twitter',
     author: 'Lagos Stock Watch',
     authorHandle: '@LagosStockWatch',
-    authorAvatar: '',
     content: "Breaking: GTBank reports Q4 earnings beat expectations. Revenue up 18% YoY. The banking sector is showing resilience despite macro headwinds. $GTCO looking strong heading into 2026.",
     timestamp: '4 hours ago',
     likes: 128,
@@ -49,54 +50,29 @@ const PLACEHOLDER_POSTS: SocialPost[] = [
     shares: 45,
     stockMentions: ['GTCO'],
     verified: true,
+    sentiment: 'bullish',
   },
   {
     id: '3',
     platform: 'tradingview',
     author: 'ChartMaster_NG',
-    authorAvatar: '',
     content: "ZENITHBANK forming a classic cup and handle pattern on the daily chart. Breakout target around ₦42. Set your alerts! This could run 15-20% from current levels.",
     timestamp: '5 hours ago',
     likes: 89,
     comments: 41,
     stockMentions: ['ZENITHBANK'],
-    image: '/placeholder-chart.png',
+    sentiment: 'bullish',
   },
   {
     id: '4',
-    platform: 'reddit',
-    author: 'AfricanMarkets',
-    authorAvatar: '',
-    content: "Weekly watchlist thread: What are you buying this week? I'm eyeing MTNN after the pullback. Telecoms sector seems undervalued relative to subscriber growth.",
+    platform: 'news',
+    author: 'Nairametrics',
+    content: "NGX All-Share Index closes up 0.8% today. Banking stocks lead gains. Foreign investors returning to Nigerian equities as FX concerns ease. Outlook remains positive for Q1.",
     timestamp: '6 hours ago',
     likes: 62,
-    comments: 87,
-    subreddit: 'r/AfricanStocks',
-    stockMentions: ['MTNN'],
-  },
-  {
-    id: '5',
-    platform: 'twitter',
-    author: 'Nigerian Market Daily',
-    authorHandle: '@NGMarketDaily',
-    authorAvatar: '',
-    content: "NGX All-Share Index closes up 0.8% today. Banking stocks lead gains. Foreign investors returning to Nigerian equities as FX concerns ease. Outlook remains positive for Q1.",
-    timestamp: '8 hours ago',
-    likes: 215,
-    comments: 56,
-    shares: 78,
-    verified: true,
-  },
-  {
-    id: '6',
-    platform: 'tradingview',
-    author: 'NairaTrader',
-    authorAvatar: '',
-    content: "AIRTELAFRI hitting all-time highs. This stock has been a monster since listing. Still seeing strong buying pressure. Telecom play of the decade?",
-    timestamp: '10 hours ago',
-    likes: 156,
-    comments: 72,
-    stockMentions: ['AIRTELAFRI'],
+    comments: 15,
+    stockMentions: ['MTNN', 'DANGCEM'],
+    sentiment: 'bullish',
   },
 ];
 
@@ -130,6 +106,24 @@ const platformConfig = {
       </svg>
     ),
   },
+  news: {
+    name: 'News',
+    color: 'bg-green-600',
+    textColor: 'text-green-600',
+    bgColor: 'bg-green-600/10',
+    icon: (
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+      </svg>
+    ),
+  },
+};
+
+const sentimentConfig = {
+  bullish: { label: 'Bullish', color: 'text-green-500', bg: 'bg-green-500/10' },
+  bearish: { label: 'Bearish', color: 'text-red-500', bg: 'bg-red-500/10' },
+  neutral: { label: 'Neutral', color: 'text-gray-500', bg: 'bg-gray-500/10' },
+  mixed: { label: 'Mixed', color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
 };
 
 function generateAvatarColor(name: string): string {
@@ -148,6 +142,7 @@ function PostCard({ post }: { post: SocialPost }) {
   const config = platformConfig[post.platform];
   const avatarColor = generateAvatarColor(post.author);
   const initials = post.author.substring(0, 2).toUpperCase();
+  const sentiment = post.sentiment ? sentimentConfig[post.sentiment] : null;
 
   return (
     <div className="bg-white dark:bg-slate-800/50 rounded-xl border border-gray-200 dark:border-slate-700/50 p-4 hover:shadow-lg transition-all duration-300 hover:border-green-500/30">
@@ -178,11 +173,16 @@ function PostCard({ post }: { post: SocialPost }) {
             )}
           </div>
           
-          <div className="flex items-center gap-2 mt-0.5">
+          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
             <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full ${config.bgColor} ${config.textColor} text-xs font-medium`}>
               {config.icon}
               <span>{config.name}</span>
             </div>
+            {sentiment && (
+              <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full ${sentiment.bg} ${sentiment.color} text-xs font-medium`}>
+                <span>{sentiment.label}</span>
+              </div>
+            )}
             <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
               <Clock className="w-3 h-3" />
               <span>{post.timestamp}</span>
@@ -196,18 +196,20 @@ function PostCard({ post }: { post: SocialPost }) {
           {post.stockMentions && post.stockMentions.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-2">
               {post.stockMentions.map(stock => (
-                <span key={stock} className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
+                <a 
+                  key={stock} 
+                  href={`/stocks/${stock}`}
+                  className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded-full hover:bg-green-200 dark:hover:bg-green-800/40 transition-colors"
+                >
                   ${stock}
-                </span>
+                </a>
               ))}
             </div>
           )}
           
           {post.image && (
             <div className="mt-3 rounded-lg overflow-hidden bg-gray-100 dark:bg-slate-700/50 aspect-video relative">
-              <div className="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-slate-500">
-                <TrendingUp className="w-12 h-12" />
-              </div>
+              <img src={post.image} alt="" className="w-full h-full object-cover" />
             </div>
           )}
           
@@ -226,9 +228,16 @@ function PostCard({ post }: { post: SocialPost }) {
                 <span>{post.shares}</span>
               </button>
             )}
-            <button className="ml-auto text-gray-500 dark:text-slate-400 hover:text-green-500 transition-colors">
-              <ExternalLink className="w-4 h-4" />
-            </button>
+            {post.url && (
+              <a 
+                href={post.url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="ml-auto text-gray-500 dark:text-slate-400 hover:text-green-500 transition-colors"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            )}
           </div>
         </div>
       </div>
@@ -238,16 +247,67 @@ function PostCard({ post }: { post: SocialPost }) {
 
 export default function SocialFeed() {
   const [activeFilter, setActiveFilter] = useState<SocialPlatform>('all');
-  
+  const [posts, setPosts] = useState<SocialPost[]>(PLACEHOLDER_POSTS);
+  const [loading, setLoading] = useState(false);
+  const [crawling, setCrawling] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchPosts = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/social?platform=${activeFilter}&limit=20`);
+      const data = await response.json();
+      
+      if (data.success && data.posts.length > 0) {
+        setPosts(data.posts);
+        setLastUpdated(new Date());
+      } else if (data.posts?.length === 0) {
+        setPosts(PLACEHOLDER_POSTS);
+      }
+    } catch (err: any) {
+      console.error('Failed to fetch posts:', err);
+      setError('Failed to load posts');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const runCrawler = async () => {
+    setCrawling(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/social/crawl', { method: 'POST' });
+      const data = await response.json();
+      
+      if (data.success) {
+        await fetchPosts();
+      } else {
+        setError(data.error || 'Crawler failed');
+      }
+    } catch (err: any) {
+      console.error('Crawler error:', err);
+      setError('Failed to run crawler');
+    } finally {
+      setCrawling(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, [activeFilter]);
+
   const filteredPosts = activeFilter === 'all' 
-    ? PLACEHOLDER_POSTS 
-    : PLACEHOLDER_POSTS.filter(post => post.platform === activeFilter);
+    ? posts 
+    : posts.filter(post => post.platform === activeFilter);
 
   const filters: { value: SocialPlatform; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'reddit', label: 'Reddit' },
     { value: 'tradingview', label: 'TradingView' },
     { value: 'twitter', label: 'X (Twitter)' },
+    { value: 'news', label: 'News' },
   ];
 
   return (
@@ -258,38 +318,72 @@ export default function SocialFeed() {
             Market Buzz
           </h2>
           <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
-            Latest discussions about Nigerian stocks
+            AI-powered sentiment from social media & news
+            {lastUpdated && (
+              <span className="ml-2">
+                • Updated {lastUpdated.toLocaleTimeString()}
+              </span>
+            )}
           </p>
         </div>
         
-        <div className="flex items-center gap-2 bg-gray-100 dark:bg-slate-800/50 rounded-lg p-1">
-          {filters.map(filter => (
-            <button
-              key={filter.value}
-              onClick={() => setActiveFilter(filter.value)}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
-                activeFilter === filter.value
-                  ? 'bg-white dark:bg-slate-700 text-green-600 dark:text-green-400 shadow-sm'
-                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              {filter.label}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={runCrawler}
+            disabled={crawling}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+          >
+            {crawling ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <RefreshCw className="w-4 h-4" />
+            )}
+            {crawling ? 'Crawling...' : 'Refresh'}
+          </button>
         </div>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filteredPosts.map(post => (
-          <PostCard key={post.id} post={post} />
+
+      <div className="flex items-center gap-2 bg-gray-100 dark:bg-slate-800/50 rounded-lg p-1 mb-4 overflow-x-auto">
+        {filters.map(filter => (
+          <button
+            key={filter.value}
+            onClick={() => setActiveFilter(filter.value)}
+            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all whitespace-nowrap ${
+              activeFilter === filter.value
+                ? 'bg-white dark:bg-slate-700 text-green-600 dark:text-green-400 shadow-sm'
+                : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            {filter.label}
+          </button>
         ))}
       </div>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg text-sm">
+          {error}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-green-500" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filteredPosts.map(post => (
+            <PostCard key={post.id} post={post} />
+          ))}
+        </div>
+      )}
       
-      <div className="mt-4 p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl border border-green-500/20 text-center">
-        <p className="text-sm text-gray-600 dark:text-slate-400">
-          This is a preview of the social feed feature. Real-time integration coming soon!
-        </p>
-      </div>
+      {posts === PLACEHOLDER_POSTS && (
+        <div className="mt-4 p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl border border-green-500/20 text-center">
+          <p className="text-sm text-gray-600 dark:text-slate-400">
+            Click "Refresh" to crawl latest posts from Reddit, Twitter, TradingView & Nigerian news sources
+          </p>
+        </div>
+      )}
     </div>
   );
 }

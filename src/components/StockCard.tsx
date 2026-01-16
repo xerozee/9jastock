@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { TrendingUp, TrendingDown, Star } from 'lucide-react';
+import { TrendingUp, TrendingDown, Star, Activity } from 'lucide-react';
 import { Stock } from '@/types/stock';
 import { formatCurrency, formatVolume } from '@/lib/stockData';
 import { useWatchlist } from '@/lib/watchlistContext';
@@ -17,34 +17,54 @@ export default function StockCard({ stock, showDetails = false }: StockCardProps
   const inWatchlist = isInWatchlist(stock.symbol);
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-lg dark:hover:shadow-slate-900/50 transition-all duration-200 overflow-hidden card-hover">
-      <div className="p-4">
-        <div className="flex items-start justify-between mb-3">
+    <div className="scifi-card group">
+      {/* Holographic shine effect */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[rgba(0,255,200,0.05)] to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+      </div>
+
+      <div className="relative p-5">
+        {/* Header with symbol and trend indicator */}
+        <div className="flex items-start justify-between mb-4">
           <Link href={`/stocks/${stock.symbol}`} className="flex-1">
-            <div className="flex items-center space-x-2">
-              <span className="text-lg font-bold text-gray-900 dark:text-white">{stock.symbol}</span>
+            <div className="flex items-center gap-3">
+              {/* Stock Symbol with glow */}
+              <div className="relative">
+                <span className="text-xl font-bold tracking-wider text-white">
+                  {stock.symbol}
+                </span>
+                <div className={`absolute -bottom-1 left-0 right-0 h-[2px] ${
+                  isPositive ? 'bg-[var(--stock-up)]' : 'bg-[var(--stock-down)]'
+                } opacity-50`} />
+              </div>
+
+              {/* Trend Badge */}
               <span
-                className={`inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium ${
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-semibold uppercase tracking-wide ${
                   isPositive
-                    ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400'
-                    : 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400'
+                    ? 'stock-badge-up'
+                    : 'stock-badge-down'
                 }`}
               >
-                {isPositive ? <TrendingUp size={12} className="mr-1" /> : <TrendingDown size={12} className="mr-1" />}
+                {isPositive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                 {isPositive ? '+' : ''}{stock.changePercent.toFixed(2)}%
               </span>
             </div>
-            <p className="text-sm text-gray-500 dark:text-slate-400 truncate mt-1">{stock.name}</p>
+            <p className="text-sm text-[var(--muted-foreground)] truncate mt-2 font-medium">
+              {stock.name}
+            </p>
           </Link>
+
+          {/* Watchlist Button */}
           <button
             onClick={(e) => {
               e.preventDefault();
               toggleWatchlist(stock.symbol);
             }}
-            className={`p-2 rounded-xl transition-all ${
+            className={`relative p-2.5 rounded-lg transition-all duration-300 ${
               inWatchlist
-                ? 'text-yellow-500 bg-yellow-50 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/50'
-                : 'text-gray-400 dark:text-slate-500 hover:text-yellow-500 hover:bg-gray-50 dark:hover:bg-slate-700'
+                ? 'text-[var(--accent-warning)] bg-[rgba(255,170,0,0.15)] border border-[rgba(255,170,0,0.3)] shadow-[0_0_15px_rgba(255,170,0,0.3)]'
+                : 'text-[var(--muted-foreground)] hover:text-[var(--accent)] hover:bg-[rgba(0,255,200,0.1)] border border-transparent hover:border-[rgba(0,255,200,0.2)]'
             }`}
             title={inWatchlist ? 'Remove from watchlist' : 'Add to watchlist'}
           >
@@ -52,41 +72,63 @@ export default function StockCard({ stock, showDetails = false }: StockCardProps
           </button>
         </div>
 
+        {/* Price Display */}
         <Link href={`/stocks/${stock.symbol}`}>
           <div className="flex items-end justify-between">
             <div>
-              <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                {formatCurrency(stock.price)}
-              </span>
+              {/* Main Price */}
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold text-white tracking-tight">
+                  {formatCurrency(stock.price)}
+                </span>
+                <Activity size={16} className={`${isPositive ? 'text-[var(--stock-up)]' : 'text-[var(--stock-down)]'} animate-pulse`} />
+              </div>
+
+              {/* Change Amount */}
               <span
-                className={`block text-sm font-medium ${
-                  isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                className={`text-sm font-semibold ${
+                  isPositive ? 'stock-up' : 'stock-down'
                 }`}
               >
                 {isPositive ? '+' : ''}{formatCurrency(stock.change)}
               </span>
             </div>
+
             {showDetails && (
-              <div className="text-right text-sm text-gray-500 dark:text-slate-400">
-                <p>Vol: {formatVolume(stock.volume)}</p>
-                <p>MCap: {formatCurrency(stock.marketCap)}</p>
+              <div className="text-right space-y-1">
+                <div className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide">
+                  <span className="opacity-70">Vol:</span>{' '}
+                  <span className="text-white font-medium">{formatVolume(stock.volume)}</span>
+                </div>
+                <div className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide">
+                  <span className="opacity-70">MCap:</span>{' '}
+                  <span className="text-white font-medium">{formatCurrency(stock.marketCap)}</span>
+                </div>
               </div>
             )}
           </div>
         </Link>
 
+        {/* Extended Details */}
         {showDetails && (
-          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-slate-700 grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-gray-500 dark:text-slate-400">Sector</span>
-              <p className="font-medium text-gray-900 dark:text-white">{stock.sector}</p>
+          <div className="mt-4 pt-4 border-t border-[var(--border)] grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <span className="text-[10px] text-[var(--muted-foreground)] uppercase tracking-widest">Sector</span>
+              <p className="text-sm font-medium text-[var(--accent-secondary)]">{stock.sector}</p>
             </div>
-            <div>
-              <span className="text-gray-500 dark:text-slate-400">P/E Ratio</span>
-              <p className="font-medium text-gray-900 dark:text-white">{stock.pe?.toFixed(2) || 'N/A'}</p>
+            <div className="space-y-1">
+              <span className="text-[10px] text-[var(--muted-foreground)] uppercase tracking-widest">P/E Ratio</span>
+              <p className="text-sm font-medium text-white">{stock.pe?.toFixed(2) || 'N/A'}</p>
             </div>
           </div>
         )}
+
+        {/* Bottom accent line */}
+        <div className={`absolute bottom-0 left-4 right-4 h-[1px] ${
+          isPositive
+            ? 'bg-gradient-to-r from-transparent via-[var(--stock-up)] to-transparent'
+            : 'bg-gradient-to-r from-transparent via-[var(--stock-down)] to-transparent'
+        } opacity-30`} />
       </div>
     </div>
   );

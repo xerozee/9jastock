@@ -1,6 +1,6 @@
 'use client';
 
-import { TrendingUp, TrendingDown, Activity, BarChart3, ArrowUp, ArrowDown, Minus, Zap } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity, BarChart3, ArrowUp, ArrowDown, Zap, Radio } from 'lucide-react';
 import { MarketSummary } from '@/types/stock';
 import { formatCurrency, formatVolume } from '@/lib/stockData';
 
@@ -16,104 +16,135 @@ export default function MarketOverview({ summary }: MarketOverviewProps) {
 
   return (
     <div className="space-y-6">
+      {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="group bg-white dark:bg-slate-800 rounded-2xl p-5 border border-gray-100 dark:border-slate-700 card-hover">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-xl">
-              <BarChart3 size={20} className="text-blue-600 dark:text-blue-400" />
+        {/* Market Cap */}
+        <div className="scifi-card group">
+          <div className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 rounded-lg bg-[rgba(0,212,255,0.15)] border border-[rgba(0,212,255,0.2)]">
+                <BarChart3 size={20} className="text-[var(--accent-secondary)]" />
+              </div>
+              <span className="text-[10px] font-semibold text-[var(--muted-foreground)] uppercase tracking-widest">Market Cap</span>
             </div>
-            <span className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">Market Cap</span>
-          </div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
-            {formatCurrency(summary.totalMarketCap)}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Total value</p>
-        </div>
-
-        <div className="group bg-white dark:bg-slate-800 rounded-2xl p-5 border border-gray-100 dark:border-slate-700 card-hover">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/40 rounded-xl">
-              <Activity size={20} className="text-purple-600 dark:text-purple-400" />
-            </div>
-            <span className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">Volume</span>
-          </div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
-            {formatVolume(summary.totalVolume)}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Shares traded</p>
-        </div>
-
-        <div className="group bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-5 border border-green-100 dark:border-green-800/50 card-hover">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2 bg-green-100 dark:bg-green-800/50 rounded-xl">
-              <ArrowUp size={20} className="text-green-600 dark:text-green-400" />
-            </div>
-            <span className="text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wide">Gainers</span>
-          </div>
-          <p className="text-3xl font-bold text-green-600 dark:text-green-400">{summary.advancers}</p>
-          <div className="flex items-center mt-1">
-            <div className="h-1.5 bg-green-200 dark:bg-green-800 rounded-full flex-1 overflow-hidden">
-              <div className="h-full bg-green-500 dark:bg-green-400 rounded-full transition-all duration-500" style={{ width: `${advancerPercent}%` }} />
-            </div>
-            <span className="text-sm text-green-600 dark:text-green-400 ml-2 font-medium">{advancerPercent.toFixed(0)}%</span>
+            <p className="text-2xl font-bold text-white tracking-tight">
+              {formatCurrency(summary.totalMarketCap)}
+            </p>
+            <p className="text-xs text-[var(--muted-foreground)] mt-1 uppercase tracking-wide">Total value</p>
           </div>
         </div>
 
-        <div className="group bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 rounded-2xl p-5 border border-red-100 dark:border-red-800/50 card-hover">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2 bg-red-100 dark:bg-red-800/50 rounded-xl">
-              <ArrowDown size={20} className="text-red-600 dark:text-red-400" />
+        {/* Volume */}
+        <div className="scifi-card group">
+          <div className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 rounded-lg bg-[rgba(255,0,255,0.15)] border border-[rgba(255,0,255,0.2)]">
+                <Activity size={20} className="text-[var(--accent-tertiary)]" />
+              </div>
+              <span className="text-[10px] font-semibold text-[var(--muted-foreground)] uppercase tracking-widest">Volume</span>
             </div>
-            <span className="text-xs font-medium text-red-600 dark:text-red-400 uppercase tracking-wide">Losers</span>
+            <p className="text-2xl font-bold text-white tracking-tight">
+              {formatVolume(summary.totalVolume)}
+            </p>
+            <p className="text-xs text-[var(--muted-foreground)] mt-1 uppercase tracking-wide">Shares traded</p>
           </div>
-          <p className="text-3xl font-bold text-red-600 dark:text-red-400">{summary.decliners}</p>
-          <div className="flex items-center mt-1">
-            <div className="h-1.5 bg-red-200 dark:bg-red-800 rounded-full flex-1 overflow-hidden">
-              <div className="h-full bg-red-500 dark:bg-red-400 rounded-full transition-all duration-500" style={{ width: `${declinerPercent}%` }} />
+        </div>
+
+        {/* Gainers */}
+        <div className="scifi-card group relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-[rgba(0,255,200,0.05)] to-transparent" />
+          <div className="relative p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 rounded-lg bg-[rgba(0,255,200,0.15)] border border-[rgba(0,255,200,0.3)]">
+                <ArrowUp size={20} className="text-[var(--stock-up)]" />
+              </div>
+              <span className="text-[10px] font-semibold text-[var(--stock-up)] uppercase tracking-widest">Gainers</span>
             </div>
-            <span className="text-sm text-red-600 dark:text-red-400 ml-2 font-medium">{declinerPercent.toFixed(0)}%</span>
+            <p className="text-3xl font-bold text-[var(--stock-up)] neon-text-subtle">{summary.advancers}</p>
+            <div className="flex items-center mt-2 gap-2">
+              <div className="h-1.5 bg-[var(--muted)] rounded-full flex-1 overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-[var(--stock-up)] to-[var(--accent-secondary)] rounded-full transition-all duration-500 shadow-[0_0_10px_var(--glow-primary)]"
+                  style={{ width: `${advancerPercent}%` }}
+                />
+              </div>
+              <span className="text-sm text-[var(--stock-up)] font-bold">{advancerPercent.toFixed(0)}%</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Losers */}
+        <div className="scifi-card group relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-[rgba(255,51,102,0.05)] to-transparent" />
+          <div className="relative p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 rounded-lg bg-[rgba(255,51,102,0.15)] border border-[rgba(255,51,102,0.3)]">
+                <ArrowDown size={20} className="text-[var(--stock-down)]" />
+              </div>
+              <span className="text-[10px] font-semibold text-[var(--stock-down)] uppercase tracking-widest">Losers</span>
+            </div>
+            <p className="text-3xl font-bold text-[var(--stock-down)]" style={{ textShadow: '0 0 10px rgba(255,51,102,0.5)' }}>{summary.decliners}</p>
+            <div className="flex items-center mt-2 gap-2">
+              <div className="h-1.5 bg-[var(--muted)] rounded-full flex-1 overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-[var(--stock-down)] to-[#ff6b9d] rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(255,51,102,0.5)]"
+                  style={{ width: `${declinerPercent}%` }}
+                />
+              </div>
+              <span className="text-sm text-[var(--stock-down)] font-bold">{declinerPercent.toFixed(0)}%</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden">
-        <div className="p-5 border-b border-gray-100 dark:border-slate-700">
+      {/* Market Indices */}
+      <div className="scifi-card">
+        <div className="p-5 border-b border-[var(--border)]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl">
-                <Zap size={20} className="text-white" />
+              <div className="relative">
+                <div className="p-2.5 rounded-lg bg-gradient-to-br from-[var(--accent)] to-[var(--accent-secondary)]">
+                  <Zap size={20} className="text-[var(--accent-foreground)]" />
+                </div>
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-[var(--accent)] rounded-full animate-ping opacity-75" />
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-[var(--accent)] rounded-full" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Market Indices</h3>
-                <p className="text-sm text-gray-500 dark:text-slate-400">Live performance tracking</p>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  Market Indices
+                  <Radio size={14} className="text-[var(--accent)] animate-pulse" />
+                </h3>
+                <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide">Live performance tracking</p>
               </div>
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0.5 bg-gray-100 dark:bg-slate-700">
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {summary.indices.map((index, i) => {
             const isPositive = index.change >= 0;
-            const isFirst = i === 0;
             return (
               <div
                 key={index.name}
-                className={`bg-white dark:bg-slate-800 p-4 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors ${isFirst ? 'lg:col-span-1' : ''}`}
+                className="p-4 border-b border-r border-[var(--border)] last:border-r-0 md:[&:nth-child(2n)]:border-r-0 lg:[&:nth-child(2n)]:border-r lg:[&:nth-child(3n)]:border-r-0 hover:bg-[rgba(0,255,200,0.02)] transition-colors group"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-600 dark:text-slate-400 truncate">{index.name}</p>
-                    <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">
+                    <p className="text-xs font-medium text-[var(--muted-foreground)] truncate uppercase tracking-wide">{index.name}</p>
+                    <p className="text-xl font-bold text-white mt-1 tracking-tight group-hover:text-[var(--accent)] transition-colors">
                       {index.value.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                   </div>
-                  <div className={`text-right ml-3 ${isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                    <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg ${isPositive ? 'bg-green-100 dark:bg-green-900/40' : 'bg-red-100 dark:bg-red-900/40'}`}>
-                      {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                      <span className="text-sm font-bold">
+                  <div className="text-right ml-3">
+                    <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded ${
+                      isPositive ? 'stock-badge-up' : 'stock-badge-down'
+                    }`}>
+                      {isPositive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                      <span className="text-xs font-bold">
                         {isPositive ? '+' : ''}{index.changePercent.toFixed(2)}%
                       </span>
                     </div>
-                    <p className="text-xs mt-1">
+                    <p className={`text-xs mt-1 font-medium ${isPositive ? 'text-[var(--stock-up)]' : 'text-[var(--stock-down)]'}`}>
                       {isPositive ? '+' : ''}{index.change.toFixed(2)}
                     </p>
                   </div>
@@ -124,50 +155,64 @@ export default function MarketOverview({ summary }: MarketOverviewProps) {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Market Breadth</h3>
-        <div className="space-y-3">
-          <div className="flex rounded-xl overflow-hidden h-8">
-            <div
-              className="bg-gradient-to-r from-green-500 to-emerald-500 dark:from-green-400 dark:to-emerald-400 flex items-center justify-center transition-all duration-500"
-              style={{ width: `${advancerPercent}%` }}
-            >
-              {advancerPercent > 15 && (
-                <span className="text-xs font-bold text-white">{summary.advancers}</span>
-              )}
+      {/* Market Breadth */}
+      <div className="scifi-card">
+        <div className="p-5">
+          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <span className="w-2 h-2 bg-[var(--accent)] rounded-full animate-pulse" />
+            Market Breadth
+          </h3>
+
+          <div className="space-y-4">
+            {/* Progress Bar */}
+            <div className="relative">
+              <div className="flex rounded-lg overflow-hidden h-10 border border-[var(--border)]">
+                <div
+                  className="bg-gradient-to-r from-[var(--stock-up)] to-[#00e6b8] flex items-center justify-center transition-all duration-700 relative"
+                  style={{ width: `${advancerPercent}%` }}
+                >
+                  <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)] animate-[holoShine_2s_ease-in-out_infinite]" />
+                  {advancerPercent > 15 && (
+                    <span className="text-sm font-bold text-[var(--accent-foreground)] relative z-10">{summary.advancers}</span>
+                  )}
+                </div>
+                <div
+                  className="bg-[var(--muted)] flex items-center justify-center transition-all duration-700"
+                  style={{ width: `${unchangedPercent}%` }}
+                >
+                  {unchangedPercent > 10 && (
+                    <span className="text-sm font-bold text-[var(--muted-foreground)]">{summary.unchanged}</span>
+                  )}
+                </div>
+                <div
+                  className="bg-gradient-to-r from-[var(--stock-down)] to-[#ff6b9d] flex items-center justify-center transition-all duration-700 relative"
+                  style={{ width: `${declinerPercent}%` }}
+                >
+                  <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)] animate-[holoShine_2s_ease-in-out_infinite]" />
+                  {declinerPercent > 15 && (
+                    <span className="text-sm font-bold text-white relative z-10">{summary.decliners}</span>
+                  )}
+                </div>
+              </div>
             </div>
-            <div
-              className="bg-gray-300 dark:bg-slate-600 flex items-center justify-center transition-all duration-500"
-              style={{ width: `${unchangedPercent}%` }}
-            >
-              {unchangedPercent > 10 && (
-                <span className="text-xs font-bold text-gray-600 dark:text-slate-300">{summary.unchanged}</span>
-              )}
+
+            {/* Legend */}
+            <div className="flex flex-wrap justify-between gap-4 text-sm">
+              <span className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-gradient-to-r from-[var(--stock-up)] to-[#00e6b8] shadow-[0_0_10px_var(--glow-primary)]" />
+                <span className="font-medium text-[var(--stock-up)]">{summary.advancers} Gainers</span>
+                <span className="text-[var(--muted-foreground)]">({advancerPercent.toFixed(1)}%)</span>
+              </span>
+              <span className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-[var(--muted)]" />
+                <span className="font-medium text-[var(--muted-foreground)]">{summary.unchanged} Unchanged</span>
+              </span>
+              <span className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-gradient-to-r from-[var(--stock-down)] to-[#ff6b9d] shadow-[0_0_10px_rgba(255,51,102,0.5)]" />
+                <span className="font-medium text-[var(--stock-down)]">{summary.decliners} Losers</span>
+                <span className="text-[var(--muted-foreground)]">({declinerPercent.toFixed(1)}%)</span>
+              </span>
             </div>
-            <div
-              className="bg-gradient-to-r from-red-500 to-rose-500 dark:from-red-400 dark:to-rose-400 flex items-center justify-center transition-all duration-500"
-              style={{ width: `${declinerPercent}%` }}
-            >
-              {declinerPercent > 15 && (
-                <span className="text-xs font-bold text-white">{summary.decliners}</span>
-              )}
-            </div>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="flex items-center gap-2 text-green-600 dark:text-green-400">
-              <div className="w-3 h-3 rounded-full bg-gradient-to-r from-green-500 to-emerald-500" />
-              <span className="font-medium">{summary.advancers} Gainers</span>
-              <span className="text-gray-400 dark:text-slate-500">({advancerPercent.toFixed(1)}%)</span>
-            </span>
-            <span className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
-              <div className="w-3 h-3 rounded-full bg-gray-300 dark:bg-slate-600" />
-              <span className="font-medium">{summary.unchanged} Unchanged</span>
-            </span>
-            <span className="flex items-center gap-2 text-red-600 dark:text-red-400">
-              <div className="w-3 h-3 rounded-full bg-gradient-to-r from-red-500 to-rose-500" />
-              <span className="font-medium">{summary.decliners} Losers</span>
-              <span className="text-gray-400 dark:text-slate-500">({declinerPercent.toFixed(1)}%)</span>
-            </span>
           </div>
         </div>
       </div>

@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() }).lean();
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password').lean();
 
     if (!user) {
       return NextResponse.json(

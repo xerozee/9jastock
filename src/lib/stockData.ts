@@ -2687,7 +2687,10 @@ export function getMarketSummary(): MarketSummary {
   };
 }
 
-export function formatCurrency(value: number): string {
+export function formatCurrency(value: number | null | undefined): string {
+  if (value === null || value === undefined || isNaN(value)) {
+    return 'N/A';
+  }
   if (value >= 1e12) {
     return `₦${(value / 1e12).toFixed(2)}T`;
   } else if (value >= 1e9) {
@@ -2700,7 +2703,10 @@ export function formatCurrency(value: number): string {
   return `₦${value.toFixed(2)}`;
 }
 
-export function formatVolume(value: number): string {
+export function formatVolume(value: number | null | undefined): string {
+  if (value === null || value === undefined || isNaN(value)) {
+    return 'N/A';
+  }
   if (value >= 1e9) {
     return `${(value / 1e9).toFixed(2)}B`;
   } else if (value >= 1e6) {
@@ -2711,7 +2717,10 @@ export function formatVolume(value: number): string {
   return value.toString();
 }
 
-export function formatLargeNumber(value: number): string {
+export function formatLargeNumber(value: number | null | undefined): string {
+  if (value === null || value === undefined || isNaN(value)) {
+    return 'N/A';
+  }
   if (value >= 1e12) {
     return `₦${(value / 1e12).toFixed(2)}T`;
   } else if (value >= 1e9) {

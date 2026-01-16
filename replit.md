@@ -61,3 +61,11 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
   - iOS/Android "Add to Home Screen" compatible
   - Offline fallback page when no connection
   - Icon generation script at scripts/generate-icons.js
+- **Stripe Subscription System**: Premium tier monetization
+  - Free tier: 5-minute data refresh, 10 portfolio stocks
+  - Premium tier: ₦2,999/month or ₦24,999/year (17% savings)
+  - 1-minute real-time data, unlimited portfolio, AI recommendations
+  - Stripe Checkout for payments, Customer Portal for management
+  - Webhook handler with signature verification for security
+  - User model tracks: stripeCustomerId, subscriptionStatus, subscriptionId, subscriptionPriceId, subscriptionCurrentPeriodEnd
+  - Required secret: STRIPE_WEBHOOK_SECRET for webhook verification

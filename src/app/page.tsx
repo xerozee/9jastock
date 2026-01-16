@@ -2,24 +2,16 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Clock } from 'lucide-react';
+import { ArrowRight, Clock, RefreshCw, AlertCircle } from 'lucide-react';
 import SearchBar from '@/components/SearchBar';
 import MarketOverview from '@/components/MarketOverview';
 import StockCard from '@/components/StockCard';
+import StockGridSkeleton from '@/components/StockGridSkeleton';
 import LandingPage from '@/components/LandingPage';
 import { useLiveStocks, formatLastUpdate } from '@/lib/useLiveStocks';
 import { useAuth } from '@/hooks/useAuth';
 import { Stock, MarketSummary } from '@/types/stock';
-
-const REFRESH_INTERVAL_AUTHENTICATED = 5 * 60 * 1000;
-const REFRESH_INTERVAL_GUEST = 6 * 60 * 60 * 1000;
-
-function formatMarketCap(value: number): string {
-  if (value >= 1e12) return `₦${(value / 1e12).toFixed(2)}T`;
-  if (value >= 1e9) return `₦${(value / 1e9).toFixed(2)}B`;
-  if (value >= 1e6) return `₦${(value / 1e6).toFixed(2)}M`;
-  return `₦${value.toLocaleString()}`;
-}
+import { MARKET_INDEX_CONFIG, SECTOR_MAPPINGS, REFRESH_INTERVALS } from '@/lib/marketConfig';
 
 function computeMarketSummary(stocks: Stock[]): MarketSummary {
   const advancers = stocks.filter(s => s.changePercent > 0).length;
@@ -28,11 +20,11 @@ function computeMarketSummary(stocks: Stock[]): MarketSummary {
   const totalMarketCap = stocks.reduce((sum, s) => sum + s.marketCap, 0);
   const totalVolume = stocks.reduce((sum, s) => sum + s.volume, 0);
 
-  const financialStocks = stocks.filter(s => s.sector === 'Financial Services');
-  const consumerStocks = stocks.filter(s => s.sector === 'Consumer Goods');
-  const oilGasStocks = stocks.filter(s => s.sector === 'Oil & Gas');
-  const industrialStocks = stocks.filter(s => s.sector === 'Industrial Goods');
-  const insuranceStocks = stocks.filter(s => s.sector === 'Insurance');
+  const financialStocks = stocks.filter(s => s.sector === SECTOR_MAPPINGS.financial);
+  const consumerStocks = stocks.filter(s => s.sector === SECTOR_MAPPINGS.consumer);
+  const oilGasStocks = stocks.filter(s => s.sector === SECTOR_MAPPINGS.oilGas);
+  const industrialStocks = stocks.filter(s => s.sector === SECTOR_MAPPINGS.industrial);
+  const insuranceStocks = stocks.filter(s => s.sector === SECTOR_MAPPINGS.insurance);
 
   const calcIndex = (sectorStocks: Stock[], baseValue: number) => {
     if (sectorStocks.length === 0) return { value: baseValue, change: 0, changePercent: 0 };
@@ -41,11 +33,10 @@ function computeMarketSummary(stocks: Stock[]): MarketSummary {
     return { value: baseValue + change, change, changePercent: avgChange };
   };
 
-  const allShareBase = 99876.54;
-  const allShareAvgChange = stocks.length > 0 
-    ? stocks.reduce((sum, s) => sum + s.changePercent, 0) / stocks.length 
+  const allShareAvgChange = stocks.length > 0
+    ? stocks.reduce((sum, s) => sum + s.changePercent, 0) / stocks.length
     : 0;
-  const allShareChange = allShareBase * (allShareAvgChange / 100);
+  const allShareChange = MARKET_INDEX_CONFIG.allShare.baseValue * (allShareAvgChange / 100);
 
   return {
     totalMarketCap,
@@ -55,34 +46,34 @@ function computeMarketSummary(stocks: Stock[]): MarketSummary {
     unchanged,
     indices: [
       {
-        name: 'NGX All-Share Index',
-        value: allShareBase + allShareChange,
+        name: MARKET_INDEX_CONFIG.allShare.name,
+        value: MARKET_INDEX_CONFIG.allShare.baseValue + allShareChange,
         change: allShareChange,
         changePercent: allShareAvgChange,
       },
       {
-        name: 'NGX 30 Index',
-        ...calcIndex(stocks.slice(0, 30), 3456.78),
+        name: MARKET_INDEX_CONFIG.ngx30.name,
+        ...calcIndex(stocks.slice(0, 30), MARKET_INDEX_CONFIG.ngx30.baseValue),
       },
       {
-        name: 'NGX Banking Index',
-        ...calcIndex(financialStocks, 876.32),
+        name: MARKET_INDEX_CONFIG.banking.name,
+        ...calcIndex(financialStocks, MARKET_INDEX_CONFIG.banking.baseValue),
       },
       {
-        name: 'NGX Consumer Goods',
-        ...calcIndex(consumerStocks, 1234.56),
+        name: MARKET_INDEX_CONFIG.consumerGoods.name,
+        ...calcIndex(consumerStocks, MARKET_INDEX_CONFIG.consumerGoods.baseValue),
       },
       {
-        name: 'NGX Oil & Gas Index',
-        ...calcIndex(oilGasStocks, 567.89),
+        name: MARKET_INDEX_CONFIG.oilGas.name,
+        ...calcIndex(oilGasStocks, MARKET_INDEX_CONFIG.oilGas.baseValue),
       },
       {
-        name: 'NGX Industrial Index',
-        ...calcIndex(industrialStocks, 2345.67),
+        name: MARKET_INDEX_CONFIG.industrial.name,
+        ...calcIndex(industrialStocks, MARKET_INDEX_CONFIG.industrial.baseValue),
       },
       {
-        name: 'NGX Insurance Index',
-        ...calcIndex(insuranceStocks, 234.56),
+        name: MARKET_INDEX_CONFIG.insurance.name,
+        ...calcIndex(insuranceStocks, MARKET_INDEX_CONFIG.insurance.baseValue),
       },
     ],
   };
@@ -90,9 +81,11 @@ function computeMarketSummary(stocks: Stock[]): MarketSummary {
 
 export default function HomePage() {
   const { isAuthenticated, isLoading: authLoading, login } = useAuth();
-  
-  const refreshInterval = isAuthenticated ? REFRESH_INTERVAL_AUTHENTICATED : REFRESH_INTERVAL_GUEST;
-  const { stocks, isLoading, error, liveCount, refresh, lastRefresh } = useLiveStocks(refreshInterval);
+
+  const refreshInterval = isAuthenticated
+    ? REFRESH_INTERVALS.authenticated
+    : REFRESH_INTERVALS.guest;
+  const { stocks, isLoading, error, refresh, lastRefresh } = useLiveStocks(refreshInterval);
 
   const marketSummary = useMemo(() => computeMarketSummary(stocks), [stocks]);
 
@@ -137,13 +130,44 @@ export default function HomePage() {
               <span className="text-xs font-medium text-green-700 dark:text-green-400">Live</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400">
-            <Clock size={14} />
-            <span>Last update: {formatLastUpdate(lastRefresh)}</span>
+          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-slate-400">
+            <div className="flex items-center gap-2">
+              <Clock size={14} />
+              <span>Last update: {formatLastUpdate(lastRefresh)}</span>
+            </div>
+            <button
+              onClick={refresh}
+              disabled={isLoading}
+              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Refresh stock data"
+            >
+              <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+              Refresh
+            </button>
           </div>
         </div>
         <SearchBar />
       </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-red-800 dark:text-red-200">
+              Failed to load stock data
+            </p>
+            <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+              {error}. Showing cached data if available.
+            </p>
+            <button
+              onClick={refresh}
+              className="mt-2 text-sm font-medium text-red-700 dark:text-red-300 hover:underline"
+            >
+              Try again
+            </button>
+          </div>
+        </div>
+      )}
 
       <section className="mb-8">
         <MarketOverview summary={marketSummary} />
@@ -160,11 +184,7 @@ export default function HomePage() {
           </Link>
         </div>
         {isLoading && stocks.length === 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-gray-100 dark:bg-slate-800 animate-pulse h-40 rounded-2xl" />
-            ))}
-          </div>
+          <StockGridSkeleton />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {topGainers.map((stock) => (
@@ -185,11 +205,7 @@ export default function HomePage() {
           </Link>
         </div>
         {isLoading && stocks.length === 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-gray-100 dark:bg-slate-800 animate-pulse h-40 rounded-2xl" />
-            ))}
-          </div>
+          <StockGridSkeleton />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {topLosers.map((stock) => (
@@ -210,11 +226,7 @@ export default function HomePage() {
           </Link>
         </div>
         {isLoading && stocks.length === 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-gray-100 dark:bg-slate-800 animate-pulse h-40 rounded-2xl" />
-            ))}
-          </div>
+          <StockGridSkeleton />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {mostActive.map((stock) => (

@@ -12,7 +12,7 @@
     "mobile:ios": "npx cap open ios",
     "mobile:android": "npx cap open android",
     "mobile:sync": "npx cap sync",
-    "mobile:run:ios": "npx cap run ios",
+    "mobile:run:ios": "npx cap run ios --scheme App",
     "mobile:run:android": "npx cap run android"
   },
   "dependencies": {

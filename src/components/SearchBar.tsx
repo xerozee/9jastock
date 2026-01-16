@@ -69,7 +69,7 @@ export default function SearchBar() {
       <div className="relative">
         <Search
           size={20}
-          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-slate-400"
         />
         <input
           ref={inputRef}
@@ -79,7 +79,7 @@ export default function SearchBar() {
           onKeyDown={handleKeyDown}
           onFocus={() => results.length > 0 && setIsOpen(true)}
           placeholder="Search stocks by name or symbol..."
-          className="w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+          className="w-full pl-10 pr-10 py-3 bg-white dark:bg-slate-800 text-gray-900 dark:text-white border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all placeholder:text-gray-400 dark:placeholder:text-slate-500"
         />
         {query && (
           <button
@@ -87,7 +87,7 @@ export default function SearchBar() {
               setQuery('');
               inputRef.current?.focus();
             }}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
           >
             <X size={18} />
           </button>
@@ -95,31 +95,31 @@ export default function SearchBar() {
       </div>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-50">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 border border-gray-200 dark:border-slate-700 overflow-hidden z-50">
           {results.map((stock, index) => {
             const isPositive = stock.change >= 0;
             return (
               <button
                 key={stock.symbol}
                 onClick={() => navigateToStock(stock.symbol)}
-                className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors ${
-                  index === selectedIndex ? 'bg-gray-50' : ''
+                className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors ${
+                  index === selectedIndex ? 'bg-gray-100 dark:bg-slate-700' : ''
                 }`}
               >
                 <div className="text-left">
                   <div className="flex items-center space-x-2">
-                    <span className="font-semibold text-gray-900">{stock.symbol}</span>
-                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                    <span className="font-semibold text-gray-900 dark:text-white">{stock.symbol}</span>
+                    <span className="text-xs text-gray-600 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 px-2 py-0.5 rounded">
                       {stock.sector}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-500 truncate max-w-[200px]">{stock.name}</p>
+                  <p className="text-sm text-gray-600 dark:text-slate-400 truncate max-w-[200px]">{stock.name}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium text-gray-900">{formatCurrency(stock.price)}</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{formatCurrency(stock.price)}</p>
                   <p
                     className={`text-sm ${
-                      isPositive ? 'text-green-600' : 'text-red-600'
+                      isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                     }`}
                   >
                     {isPositive ? '+' : ''}{stock.changePercent.toFixed(2)}%

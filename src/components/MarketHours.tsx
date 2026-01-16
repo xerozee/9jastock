@@ -106,20 +106,20 @@ export default function MarketHours() {
   const isWeekend = !isWeekday(watTime);
 
   return (
-    <div className="bg-gradient-to-br from-slate-800/50 via-slate-800/30 to-slate-900/50 dark:from-slate-800/80 dark:via-slate-800/60 dark:to-slate-900/80 backdrop-blur-xl rounded-2xl border border-slate-700/50 p-4 md:p-6 animate-fade-in">
+    <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800/80 dark:via-slate-800/60 dark:to-slate-900/80 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-slate-700/50 shadow-sm dark:shadow-none p-4 md:p-6 animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className={`
             relative p-3 rounded-xl
             ${isOpen 
               ? 'bg-gradient-to-br from-emerald-500/20 to-green-600/20 border border-emerald-500/30' 
-              : 'bg-gradient-to-br from-slate-600/20 to-slate-700/20 border border-slate-600/30'
+              : 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-slate-600/20 dark:to-slate-700/20 border border-gray-300 dark:border-slate-600/30'
             }
           `}>
             {isOpen ? (
-              <Sun className="w-6 h-6 text-emerald-400" />
+              <Sun className="w-6 h-6 text-emerald-500 dark:text-emerald-400" />
             ) : (
-              <Moon className="w-6 h-6 text-slate-400" />
+              <Moon className="w-6 h-6 text-gray-500 dark:text-slate-400" />
             )}
             {isOpen && (
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full animate-pulse" />
@@ -130,17 +130,17 @@ export default function MarketHours() {
             <div className="flex items-center gap-2 mb-1">
               <span className={`
                 text-lg font-bold
-                ${isOpen ? 'text-emerald-400' : 'text-slate-300'}
+                ${isOpen ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-700 dark:text-slate-300'}
               `}>
                 {isOpen ? 'Market Open' : isWeekend ? 'Weekend - Market Closed' : 'Market Closed'}
               </span>
               {isOpen && (
-                <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs font-semibold rounded-full animate-pulse-glow">
+                <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold rounded-full animate-pulse-glow">
                   LIVE
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-3 text-sm text-slate-400">
+            <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-slate-400">
               <div className="flex items-center gap-1.5">
                 <Calendar size={14} />
                 <span>{currentDay}</span>
@@ -158,10 +158,10 @@ export default function MarketHours() {
 
         <div className="flex items-center gap-3">
           <div className="text-right mr-2">
-            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">
+            <p className="text-xs text-gray-500 dark:text-slate-500 uppercase tracking-wider mb-1">
               {isOpen ? 'Closes in' : 'Opens in'}
             </p>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-gray-500 dark:text-slate-400">
               {isOpen ? 'Trading session ends' : isWeekend ? 'Next trading day' : 'Next session starts'}
             </p>
           </div>
@@ -170,44 +170,44 @@ export default function MarketHours() {
             <div className={`
               flex flex-col items-center justify-center w-14 h-16 rounded-xl
               ${isOpen 
-                ? 'bg-emerald-500/10 border border-emerald-500/30' 
-                : 'bg-slate-700/30 border border-slate-600/30'
+                ? 'bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30' 
+                : 'bg-gray-100 dark:bg-slate-700/30 border border-gray-200 dark:border-slate-600/30'
               }
             `}>
-              <span className={`text-2xl font-bold tabular-nums ${isOpen ? 'text-emerald-400' : 'text-white'}`}>
+              <span className={`text-2xl font-bold tabular-nums ${isOpen ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-800 dark:text-white'}`}>
                 {countdown.hours}
               </span>
-              <span className="text-[10px] text-slate-500 uppercase">hrs</span>
+              <span className="text-[10px] text-gray-500 dark:text-slate-500 uppercase">hrs</span>
             </div>
             
-            <span className={`text-xl font-bold ${isOpen ? 'text-emerald-400' : 'text-slate-500'} animate-pulse`}>:</span>
+            <span className={`text-xl font-bold ${isOpen ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400 dark:text-slate-500'} animate-pulse`}>:</span>
             
             <div className={`
               flex flex-col items-center justify-center w-14 h-16 rounded-xl
               ${isOpen 
-                ? 'bg-emerald-500/10 border border-emerald-500/30' 
-                : 'bg-slate-700/30 border border-slate-600/30'
+                ? 'bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30' 
+                : 'bg-gray-100 dark:bg-slate-700/30 border border-gray-200 dark:border-slate-600/30'
               }
             `}>
-              <span className={`text-2xl font-bold tabular-nums ${isOpen ? 'text-emerald-400' : 'text-white'}`}>
+              <span className={`text-2xl font-bold tabular-nums ${isOpen ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-800 dark:text-white'}`}>
                 {countdown.minutes}
               </span>
-              <span className="text-[10px] text-slate-500 uppercase">min</span>
+              <span className="text-[10px] text-gray-500 dark:text-slate-500 uppercase">min</span>
             </div>
             
-            <span className={`text-xl font-bold ${isOpen ? 'text-emerald-400' : 'text-slate-500'} animate-pulse`}>:</span>
+            <span className={`text-xl font-bold ${isOpen ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400 dark:text-slate-500'} animate-pulse`}>:</span>
             
             <div className={`
               flex flex-col items-center justify-center w-14 h-16 rounded-xl
               ${isOpen 
-                ? 'bg-emerald-500/10 border border-emerald-500/30' 
-                : 'bg-slate-700/30 border border-slate-600/30'
+                ? 'bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30' 
+                : 'bg-gray-100 dark:bg-slate-700/30 border border-gray-200 dark:border-slate-600/30'
               }
             `}>
-              <span className={`text-2xl font-bold tabular-nums ${isOpen ? 'text-emerald-400' : 'text-white'}`}>
+              <span className={`text-2xl font-bold tabular-nums ${isOpen ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-800 dark:text-white'}`}>
                 {countdown.seconds}
               </span>
-              <span className="text-[10px] text-slate-500 uppercase">sec</span>
+              <span className="text-[10px] text-gray-500 dark:text-slate-500 uppercase">sec</span>
             </div>
           </div>
         </div>

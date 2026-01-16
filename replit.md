@@ -40,6 +40,23 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
 - **Nairametrics, BusinessDay, Punch**: News sources for web scraping.
 
 ## Recent Updates (January 2026)
+- **Comprehensive Stock Profile Page**: Multi-source data integration
+  - Yahoo Finance integration for company profiles, analyst ratings, earnings, and institutional holdings
+  - API endpoint at /api/stocks/[symbol]/yahoo with 10-minute caching
+  - Company Overview section with description, industry, employees, location
+  - Analyst Ratings with buy/hold/sell distribution bar and price targets
+  - Earnings History and Trend sections with quarterly data
+  - Institutional Holdings with top holder details
+  - Expanded Financial Ratios (profitability, valuation, margins)
+  - Governance Risk metrics where available
+  - Fallback to enhanced local data when Yahoo Finance unavailable
+  - External Resources section hidden for cleaner UI
+- **Live TradingView Candlestick Chart**: Interactive chart integration
+  - Replaced static chart with TradingView embedded widget
+  - Uses NSENG: symbol format for Nigerian stocks
+  - Dark mode support with theme switching
+  - RSI and MACD indicators built-in
+
 - **Stock Recommendations Engine**: AI-powered stock suggestions based on user profile
   - Recommendations API at /api/recommendations
   - Matches stocks based on user's investment goals, risk tolerance, and interested sectors

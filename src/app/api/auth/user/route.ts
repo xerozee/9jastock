@@ -32,6 +32,8 @@ export async function GET() {
       lastName: user.lastName,
       profileImageUrl: user.profileImageUrl,
       shareId: user.shareId,
+      subscriptionStatus: user.subscriptionStatus || 'free',
+      subscriptionCurrentPeriodEnd: user.subscriptionCurrentPeriodEnd,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });

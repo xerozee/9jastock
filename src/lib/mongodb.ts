@@ -65,6 +65,11 @@ const userSchema = new mongoose.Schema({
   investmentHorizon: { type: String, enum: ['less-than-1-year', '1-3-years', '3-5-years', '5-10-years', '10-plus-years'] },
   interestedSectors: [{ type: String }],
   onboardingCompleted: { type: Boolean, default: false },
+  stripeCustomerId: { type: String, sparse: true },
+  subscriptionStatus: { type: String, enum: ['free', 'active', 'canceled', 'past_due', 'trialing'], default: 'free' },
+  subscriptionId: { type: String },
+  subscriptionPriceId: { type: String },
+  subscriptionCurrentPeriodEnd: { type: Date },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
@@ -162,6 +167,11 @@ export type IUser = {
   investmentHorizon?: 'less-than-1-year' | '1-3-years' | '3-5-years' | '5-10-years' | '10-plus-years';
   interestedSectors?: string[];
   onboardingCompleted?: boolean;
+  stripeCustomerId?: string;
+  subscriptionStatus?: 'free' | 'active' | 'canceled' | 'past_due' | 'trialing';
+  subscriptionId?: string;
+  subscriptionPriceId?: string;
+  subscriptionCurrentPeriodEnd?: Date;
   createdAt: Date;
   updatedAt: Date;
 };

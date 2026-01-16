@@ -30,7 +30,7 @@ export default function StockCard({ stock, showDetails = false }: StockCardProps
             <div className="flex items-center gap-3">
               {/* Stock Symbol with glow */}
               <div className="relative">
-                <span className="text-xl font-bold tracking-wider text-white">
+                <span className="text-xl font-bold tracking-wider text-[var(--foreground)]">
                   {stock.symbol}
                 </span>
                 <div className={`absolute -bottom-1 left-0 right-0 h-[2px] ${
@@ -78,7 +78,7 @@ export default function StockCard({ stock, showDetails = false }: StockCardProps
             <div>
               {/* Main Price */}
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold text-white tracking-tight">
+                <span className="text-3xl font-bold text-[var(--foreground)] tracking-tight">
                   {formatCurrency(stock.price)}
                 </span>
                 <Activity size={16} className={`${isPositive ? 'text-[var(--stock-up)]' : 'text-[var(--stock-down)]'} animate-pulse`} />
@@ -98,11 +98,11 @@ export default function StockCard({ stock, showDetails = false }: StockCardProps
               <div className="text-right space-y-1">
                 <div className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide">
                   <span className="opacity-70">Vol:</span>{' '}
-                  <span className="text-white font-medium">{formatVolume(stock.volume)}</span>
+                  <span className="text-[var(--foreground)] font-medium">{formatVolume(stock.volume)}</span>
                 </div>
                 <div className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide">
                   <span className="opacity-70">MCap:</span>{' '}
-                  <span className="text-white font-medium">{formatCurrency(stock.marketCap)}</span>
+                  <span className="text-[var(--foreground)] font-medium">{formatCurrency(stock.marketCap)}</span>
                 </div>
               </div>
             )}
@@ -118,7 +118,7 @@ export default function StockCard({ stock, showDetails = false }: StockCardProps
             </div>
             <div className="space-y-1">
               <span className="text-[10px] text-[var(--muted-foreground)] uppercase tracking-widest">P/E Ratio</span>
-              <p className="text-sm font-medium text-white">{stock.pe?.toFixed(2) || 'N/A'}</p>
+              <p className="text-sm font-medium text-[var(--foreground)]">{stock.pe?.toFixed(2) || 'N/A'}</p>
             </div>
           </div>
         )}

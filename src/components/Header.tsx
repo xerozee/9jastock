@@ -100,7 +100,7 @@ export default function Header() {
                       <User size={14} className="text-[var(--accent-foreground)]" />
                     </div>
                   )}
-                  <span className="text-sm font-medium text-white">
+                  <span className="text-sm font-medium text-[var(--foreground)]">
                     {user.firstName || user.email?.split('@')[0] || 'User'}
                   </span>
                 </Link>
@@ -118,7 +118,7 @@ export default function Header() {
               <div className="flex items-center space-x-2">
                 <Link
                   href="/login"
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)] hover:shadow-[0_0_15px_var(--glow-primary)] text-white transition-all duration-300"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)] hover:shadow-[0_0_15px_var(--glow-primary)] text-[var(--foreground)] transition-all duration-300"
                 >
                   <LogIn size={16} />
                   <span className="text-sm font-medium">Login</span>
@@ -174,7 +174,7 @@ export default function Header() {
                     className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                       isActive
                         ? 'bg-[rgba(0,255,200,0.1)] border border-[var(--accent)] border-opacity-30 text-[var(--accent)]'
-                        : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-white'
+                        : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]'
                     }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -213,7 +213,7 @@ export default function Header() {
                       </div>
                     )}
                     <div>
-                      <span className="block text-sm font-medium text-white">
+                      <span className="block text-sm font-medium text-[var(--foreground)]">
                         {user.firstName || 'User'}
                       </span>
                       <span className="block text-xs text-[var(--muted-foreground)]">
@@ -237,7 +237,7 @@ export default function Header() {
                   <Link
                     href="/login"
                     onClick={() => setIsMenuOpen(false)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)] text-white transition-all"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)] text-[var(--foreground)] transition-all"
                   >
                     <LogIn size={18} />
                     <span className="font-medium">Login</span>

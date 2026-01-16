@@ -27,7 +27,7 @@ export default function MarketOverview({ summary }: MarketOverviewProps) {
               </div>
               <span className="text-[10px] font-semibold text-[var(--muted-foreground)] uppercase tracking-widest">Market Cap</span>
             </div>
-            <p className="text-2xl font-bold text-white tracking-tight">
+            <p className="text-2xl font-bold text-[var(--foreground)] tracking-tight">
               {formatCurrency(summary.totalMarketCap)}
             </p>
             <p className="text-xs text-[var(--muted-foreground)] mt-1 uppercase tracking-wide">Total value</p>
@@ -43,7 +43,7 @@ export default function MarketOverview({ summary }: MarketOverviewProps) {
               </div>
               <span className="text-[10px] font-semibold text-[var(--muted-foreground)] uppercase tracking-widest">Volume</span>
             </div>
-            <p className="text-2xl font-bold text-white tracking-tight">
+            <p className="text-2xl font-bold text-[var(--foreground)] tracking-tight">
               {formatVolume(summary.totalVolume)}
             </p>
             <p className="text-xs text-[var(--muted-foreground)] mt-1 uppercase tracking-wide">Shares traded</p>
@@ -110,7 +110,7 @@ export default function MarketOverview({ summary }: MarketOverviewProps) {
                 <span className="absolute -top-1 -right-1 w-3 h-3 bg-[var(--accent)] rounded-full" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <h3 className="text-lg font-bold text-[var(--foreground)] flex items-center gap-2">
                   Market Indices
                   <Radio size={14} className="text-[var(--accent)] animate-pulse" />
                 </h3>
@@ -131,7 +131,7 @@ export default function MarketOverview({ summary }: MarketOverviewProps) {
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-[var(--muted-foreground)] truncate uppercase tracking-wide">{index.name}</p>
-                    <p className="text-xl font-bold text-white mt-1 tracking-tight group-hover:text-[var(--accent)] transition-colors">
+                    <p className="text-xl font-bold text-[var(--foreground)] mt-1 tracking-tight group-hover:text-[var(--accent)] transition-colors">
                       {index.value.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                   </div>
@@ -158,7 +158,7 @@ export default function MarketOverview({ summary }: MarketOverviewProps) {
       {/* Market Breadth */}
       <div className="scifi-card">
         <div className="p-5">
-          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-bold text-[var(--foreground)] mb-4 flex items-center gap-2">
             <span className="w-2 h-2 bg-[var(--accent)] rounded-full animate-pulse" />
             Market Breadth
           </h3>
@@ -173,7 +173,7 @@ export default function MarketOverview({ summary }: MarketOverviewProps) {
                 >
                   <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)] animate-[holoShine_2s_ease-in-out_infinite]" />
                   {advancerPercent > 15 && (
-                    <span className="text-sm font-bold text-[var(--accent-foreground)] relative z-10">{summary.advancers}</span>
+                    <span className="text-sm font-bold text-[var(--foreground)] relative z-10">{summary.advancers}</span>
                   )}
                 </div>
                 <div
@@ -190,7 +190,7 @@ export default function MarketOverview({ summary }: MarketOverviewProps) {
                 >
                   <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)] animate-[holoShine_2s_ease-in-out_infinite]" />
                   {declinerPercent > 15 && (
-                    <span className="text-sm font-bold text-white relative z-10">{summary.decliners}</span>
+                    <span className="text-sm font-bold text-[var(--foreground)] relative z-10">{summary.decliners}</span>
                   )}
                 </div>
               </div>

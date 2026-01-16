@@ -146,7 +146,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                 </div>
 
                 {/* Headline */}
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-4 md:mb-6 leading-[1.1] tracking-tight">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-[var(--foreground)] mb-4 md:mb-6 leading-[1.1] tracking-tight">
                   Track NGX
                   <br />
                   <span className="relative inline-block">
@@ -244,12 +244,12 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                                   {stock.symbol.slice(0, 2)}
                                 </div>
                                 <div>
-                                  <div className="font-bold text-white text-sm md:text-base">{stock.symbol}</div>
+                                  <div className="font-bold text-[var(--foreground)] text-sm md:text-base">{stock.symbol}</div>
                                   <div className="text-xs md:text-sm text-[var(--muted-foreground)]">{stock.name}</div>
                                 </div>
                               </div>
                               <div className="text-right">
-                                <div className="font-bold text-white text-sm md:text-lg">₦{stock.price.toFixed(2)}</div>
+                                <div className="font-bold text-[var(--foreground)] text-sm md:text-lg">₦{stock.price.toFixed(2)}</div>
                                 <div className={`flex items-center gap-1 text-xs md:text-sm font-semibold ${stock.change >= 0 ? 'stock-up' : 'stock-down'}`}>
                                   {stock.change >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                                   {stock.change >= 0 ? '+' : ''}{stock.change}%
@@ -265,7 +265,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                         <div className="flex items-center justify-between relative z-10">
                           <div>
                             <div className="text-xs md:text-sm text-[var(--muted-foreground)] mb-1 uppercase tracking-wide">Portfolio Value</div>
-                            <div className="text-xl md:text-2xl font-black text-white">₦4,250,000</div>
+                            <div className="text-xl md:text-2xl font-black text-[var(--foreground)]">₦4,250,000</div>
                           </div>
                           <div className="text-right">
                             <div className="text-xs md:text-sm text-[var(--muted-foreground)] mb-1 uppercase tracking-wide">Today</div>
@@ -324,7 +324,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                 <div className={`w-5 h-5 md:w-6 md:h-6 rounded flex items-center justify-center text-[8px] md:text-[10px] font-bold ${stock.change >= 0 ? 'bg-[rgba(0,255,200,0.2)] text-[var(--stock-up)]' : 'bg-[rgba(255,51,102,0.2)] text-[var(--stock-down)]'}`}>
                   {stock.symbol.slice(0, 2)}
                 </div>
-                <span className="font-semibold text-white text-xs md:text-sm">{stock.symbol}</span>
+                <span className="font-semibold text-[var(--foreground)] text-xs md:text-sm">{stock.symbol}</span>
                 <span className="text-[var(--muted-foreground)] text-xs md:text-sm">₦{stock.price.toFixed(2)}</span>
                 <span className={`text-xs md:text-sm ${stock.change >= 0 ? 'text-[var(--stock-up)]' : 'text-[var(--stock-down)]'}`}>
                   {stock.change >= 0 ? '+' : ''}{stock.change}%
@@ -351,7 +351,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                     <div className="inline-flex p-2 rounded-lg bg-[rgba(0,255,200,0.1)] border border-[rgba(0,255,200,0.2)] mb-2 md:mb-3">
                       <Icon size={20} className="text-[var(--accent)]" />
                     </div>
-                    <div className="text-2xl md:text-4xl font-black text-white mb-0.5 md:mb-1">{stat.value}</div>
+                    <div className="text-2xl md:text-4xl font-black text-[var(--foreground)] mb-0.5 md:mb-1">{stat.value}</div>
                     <div className="text-xs md:text-sm text-[var(--muted-foreground)] uppercase tracking-wide">{stat.label}</div>
                   </div>
                 </div>
@@ -365,7 +365,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
               <Zap size={12} />
               <span className="font-medium uppercase tracking-wide">Powerful Features</span>
             </div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 md:mb-4">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--foreground)] mb-3 md:mb-4">
               Everything You <span className="gradient-text">Need</span>
             </h2>
             <p className="text-sm md:text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto px-4">
@@ -392,7 +392,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                     >
                       <Icon size={20} style={{ color: feature.color }} />
                     </div>
-                    <h3 className="text-base md:text-lg font-bold text-white mb-2">
+                    <h3 className="text-base md:text-lg font-bold text-[var(--foreground)] mb-2">
                       {feature.title}
                     </h3>
                     <p className="text-xs md:text-sm text-[var(--muted-foreground)] leading-relaxed">
@@ -415,7 +415,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                 <Smartphone size={12} />
                 <span className="font-medium uppercase tracking-wide">Mobile First</span>
               </div>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4 md:mb-6">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--foreground)] mb-4 md:mb-6">
                 Trade Anywhere,
                 <br />
                 <span className="gradient-text">Anytime</span>
@@ -460,13 +460,13 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
 
                   <div className="h-full pt-6 md:pt-8 pb-4 md:pb-6 px-3 md:px-4 overflow-hidden relative z-10">
                     <div className="flex items-center justify-between mb-3 md:mb-4">
-                      <div className="text-white font-bold text-xs md:text-sm">9jaStock</div>
+                      <div className="text-[var(--foreground)] font-bold text-xs md:text-sm">9jaStock</div>
                       <div className="w-1.5 md:w-2 h-1.5 md:h-2 bg-[var(--accent)] rounded-full animate-pulse shadow-[0_0_10px_var(--accent)]" />
                     </div>
 
                     <div className="bg-[var(--muted)] rounded-lg md:rounded-xl p-2.5 md:p-3 mb-3 md:mb-4 border border-[var(--border)]">
                       <div className="text-[8px] md:text-[10px] text-[var(--muted-foreground)] mb-1 uppercase tracking-wide">Portfolio Value</div>
-                      <div className="text-base md:text-xl font-bold text-white">₦4.25M</div>
+                      <div className="text-base md:text-xl font-bold text-[var(--foreground)]">₦4.25M</div>
                       <div className="text-[10px] md:text-xs text-[var(--stock-up)]">+3.04% today</div>
                     </div>
 
@@ -477,7 +477,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                             <div className={`w-6 h-6 md:w-8 md:h-8 rounded-lg flex items-center justify-center text-[8px] md:text-[10px] font-bold ${stock.change >= 0 ? 'bg-[rgba(0,255,200,0.2)] text-[var(--stock-up)]' : 'bg-[rgba(255,51,102,0.2)] text-[var(--stock-down)]'}`}>
                               {stock.symbol.slice(0, 2)}
                             </div>
-                            <div className="text-[10px] md:text-xs text-white font-medium">{stock.symbol}</div>
+                            <div className="text-[10px] md:text-xs text-[var(--foreground)] font-medium">{stock.symbol}</div>
                           </div>
                           <div className={`text-[10px] md:text-xs font-semibold ${stock.change >= 0 ? 'text-[var(--stock-up)]' : 'text-[var(--stock-down)]'}`}>
                             {stock.change >= 0 ? '+' : ''}{stock.change}%
@@ -491,7 +491,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                 <div className="absolute -right-4 md:-right-8 top-1/4 scifi-card p-2.5 md:p-3 animate-float">
                   <div className="flex items-center gap-2 relative z-10">
                     <TrendingUp size={14} className="text-[var(--accent)]" />
-                    <span className="text-[10px] md:text-xs text-white font-medium">+12.5%</span>
+                    <span className="text-[10px] md:text-xs text-[var(--foreground)] font-medium">+12.5%</span>
                   </div>
                 </div>
               </div>

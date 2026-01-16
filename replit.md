@@ -40,17 +40,17 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
 - **Nairametrics, BusinessDay, Punch**: News sources for web scraping.
 
 ## Recent Updates (January 2026)
-- **Comprehensive Stock Profile Page**: Multi-source data integration
-  - Yahoo Finance integration for company profiles, analyst ratings, earnings, and institutional holdings
+- **TradingView-First Stock Profile Page**: TradingView as primary data source
+  - TradingView scanner fetches 79 data fields per stock including company metadata
+  - Company Overview shows TradingView data first: sector, industry, country, exchange, currency, type
+  - Income Statement (TTM): Revenue, Gross Profit, Operating Income, Net Income, EBITDA, EPS, margins
+  - Balance Sheet: Total Assets, Total Debt, Cash, Debt/Equity, Current Ratio, Quick Ratio
+  - Valuation: Market Cap, Enterprise Value, P/E, P/B, P/S, EV/EBITDA, EV/Revenue, PEG Ratio
+  - Cash Flow section with operating, investing, financing breakdowns
+  - Profitability: ROE, ROA, Return on Capital, Gross/Operating/Net Margins
+  - Yahoo Finance serves as secondary/fallback source for analyst ratings, earnings, institutional holdings
   - API endpoint at /api/stocks/[symbol]/yahoo with 10-minute caching
-  - Company Overview section with description, industry, employees, location
-  - Analyst Ratings with buy/hold/sell distribution bar and price targets
-  - Earnings History and Trend sections with quarterly data
-  - Institutional Holdings with top holder details
-  - Expanded Financial Ratios (profitability, valuation, margins)
-  - Governance Risk metrics where available
-  - Fallback to enhanced local data when Yahoo Finance unavailable
-  - External Resources section hidden for cleaner UI
+  - All financial sections labeled "Data sourced from TradingView" where applicable
 - **Live TradingView Candlestick Chart**: Interactive chart integration
   - Replaced static chart with TradingView embedded widget
   - Uses NSENG: symbol format for Nigerian stocks

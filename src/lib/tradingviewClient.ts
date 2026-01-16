@@ -245,7 +245,10 @@ const SCANNER_COLUMNS = [
   'Volatility.D',
   'beta_1_year',
   'sector',
-  'industry'
+  'industry',
+  'country',
+  'currency',
+  'type'
 ];
 
 export async function fetchNigerianStocksFromScanner(): Promise<LiveQuote[]> {
@@ -406,10 +409,10 @@ export async function fetchNigerianStocksFromScanner(): Promise<LiveQuote[]> {
         
         sector: (d[74] as string) || '',
         industry: (d[75] as string) || '',
-        country: 'Nigeria',
+        country: (d[76] as string) || 'Nigeria',
+        currency: (d[77] as string) || 'NGN',
+        type: (d[78] as string) || 'stock',
         exchange: 'NSENG',
-        type: 'stock',
-        currency: 'NGN',
         
         timestamp: Date.now(),
         isLive: true,

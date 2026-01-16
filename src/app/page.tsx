@@ -2,14 +2,16 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Clock } from 'lucide-react';
+import { ArrowRight, Clock, RefreshCw, AlertCircle } from 'lucide-react';
 import SearchBar from '@/components/SearchBar';
 import MarketOverview from '@/components/MarketOverview';
 import StockCard from '@/components/StockCard';
+import StockGridSkeleton from '@/components/StockGridSkeleton';
 import LandingPage from '@/components/LandingPage';
 import { useLiveStocks, formatLastUpdate } from '@/lib/useLiveStocks';
 import { useAuth } from '@/hooks/useAuth';
 import { Stock, MarketSummary } from '@/types/stock';
+import { MARKET_INDEX_BASE_VALUES } from '@/lib/marketConfig';
 
 const REFRESH_INTERVAL_AUTHENTICATED = 5 * 60 * 1000;
 const REFRESH_INTERVAL_GUEST = 6 * 60 * 60 * 1000;
@@ -41,7 +43,7 @@ function computeMarketSummary(stocks: Stock[]): MarketSummary {
     return { value: baseValue + change, change, changePercent: avgChange };
   };
 
-  const allShareBase = 99876.54;
+  const allShareBase = MARKET_INDEX_BASE_VALUES['NGX All-Share Index'];
   const allShareAvgChange = stocks.length > 0 
     ? stocks.reduce((sum, s) => sum + s.changePercent, 0) / stocks.length 
     : 0;
@@ -62,27 +64,27 @@ function computeMarketSummary(stocks: Stock[]): MarketSummary {
       },
       {
         name: 'NGX 30 Index',
-        ...calcIndex(stocks.slice(0, 30), 3456.78),
+        ...calcIndex(stocks.slice(0, 30), MARKET_INDEX_BASE_VALUES['NGX 30 Index']),
       },
       {
         name: 'NGX Banking Index',
-        ...calcIndex(financialStocks, 876.32),
+        ...calcIndex(financialStocks, MARKET_INDEX_BASE_VALUES['NGX Banking Index']),
       },
       {
         name: 'NGX Consumer Goods',
-        ...calcIndex(consumerStocks, 1234.56),
+        ...calcIndex(consumerStocks, MARKET_INDEX_BASE_VALUES['NGX Consumer Goods']),
       },
       {
         name: 'NGX Oil & Gas Index',
-        ...calcIndex(oilGasStocks, 567.89),
+        ...calcIndex(oilGasStocks, MARKET_INDEX_BASE_VALUES['NGX Oil & Gas Index']),
       },
       {
         name: 'NGX Industrial Index',
-        ...calcIndex(industrialStocks, 2345.67),
+        ...calcIndex(industrialStocks, MARKET_INDEX_BASE_VALUES['NGX Industrial Index']),
       },
       {
         name: 'NGX Insurance Index',
-        ...calcIndex(insuranceStocks, 234.56),
+        ...calcIndex(insuranceStocks, MARKET_INDEX_BASE_VALUES['NGX Insurance Index']),
       },
     ],
   };
@@ -137,13 +139,39 @@ export default function HomePage() {
               <span className="text-xs font-medium text-green-700 dark:text-green-400">Live</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400">
-            <Clock size={14} />
-            <span>Last update: {formatLastUpdate(lastRefresh)}</span>
+          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-slate-400">
+            <div className="flex items-center gap-2">
+              <Clock size={14} />
+              <span>Last update: {formatLastUpdate(lastRefresh)}</span>
+            </div>
+            <button
+              onClick={() => refresh()}
+              disabled={isLoading}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors disabled:opacity-50"
+            >
+              <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+              Refresh
+            </button>
           </div>
         </div>
         <SearchBar />
       </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+          <div>
+            <p className="text-red-700 dark:text-red-400 font-medium">Failed to load stock data</p>
+            <p className="text-red-600 dark:text-red-500 text-sm">{error}</p>
+          </div>
+          <button
+            onClick={() => refresh()}
+            className="ml-auto px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+          >
+            Try again
+          </button>
+        </div>
+      )}
 
       <section className="mb-8">
         <MarketOverview summary={marketSummary} />
@@ -160,11 +188,7 @@ export default function HomePage() {
           </Link>
         </div>
         {isLoading && stocks.length === 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-gray-100 dark:bg-slate-800 animate-pulse h-40 rounded-2xl" />
-            ))}
-          </div>
+          <StockGridSkeleton count={4} />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {topGainers.map((stock) => (
@@ -185,11 +209,7 @@ export default function HomePage() {
           </Link>
         </div>
         {isLoading && stocks.length === 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-gray-100 dark:bg-slate-800 animate-pulse h-40 rounded-2xl" />
-            ))}
-          </div>
+          <StockGridSkeleton count={4} />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {topLosers.map((stock) => (
@@ -210,11 +230,7 @@ export default function HomePage() {
           </Link>
         </div>
         {isLoading && stocks.length === 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-gray-100 dark:bg-slate-800 animate-pulse h-40 rounded-2xl" />
-            ))}
-          </div>
+          <StockGridSkeleton count={4} />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {mostActive.map((stock) => (

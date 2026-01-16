@@ -48,7 +48,7 @@ export async function connectToDatabase() {
 
 const userSchema = new mongoose.Schema({
   email: { type: String, unique: true, sparse: true },
-  password: { type: String },
+  password: { type: String, select: false },
   firstName: { type: String },
   lastName: { type: String },
   profileImageUrl: { type: String },
@@ -116,6 +116,7 @@ const newsArticleSchema = new mongoose.Schema({
 newsArticleSchema.index({ source: 1 });
 newsArticleSchema.index({ publishedAt: -1 });
 newsArticleSchema.index({ symbol: 1 });
+newsArticleSchema.index({ title: 'text', summary: 'text' });
 
 const newsletterSubscriberSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },

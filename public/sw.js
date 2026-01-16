@@ -1,6 +1,9 @@
-const CACHE_NAME = '9jastock-v1';
-const STATIC_CACHE = '9jastock-static-v1';
-const DYNAMIC_CACHE = '9jastock-dynamic-v1';
+// Service Worker Version - INCREMENT THIS ON EACH DEPLOY
+const SW_VERSION = '2.0.0';
+
+const CACHE_NAME = `9jastock-v${SW_VERSION}`;
+const STATIC_CACHE = `9jastock-static-v${SW_VERSION}`;
+const DYNAMIC_CACHE = `9jastock-dynamic-v${SW_VERSION}`;
 
 // Assets to cache immediately on install
 const STATIC_ASSETS = [
@@ -18,30 +21,67 @@ const API_ROUTES = [
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
+  console.log(`[SW] Installing version ${SW_VERSION}`);
+
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => {
       console.log('[SW] Caching static assets');
       return cache.addAll(STATIC_ASSETS);
     })
   );
+
+  // Force the new service worker to activate immediately
   self.skipWaiting();
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up ALL old caches and take control
 self.addEventListener('activate', (event) => {
+  console.log(`[SW] Activating version ${SW_VERSION}`);
+
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
+    (async () => {
+      // Delete ALL caches that don't match current version
+      const cacheNames = await caches.keys();
+      await Promise.all(
         cacheNames
-          .filter((name) => name !== STATIC_CACHE && name !== DYNAMIC_CACHE)
+          .filter((name) => !name.includes(SW_VERSION))
           .map((name) => {
             console.log('[SW] Deleting old cache:', name);
             return caches.delete(name);
           })
       );
-    })
+
+      // Take control of all clients immediately
+      await self.clients.claim();
+
+      // Notify all clients that update is complete
+      const allClients = await self.clients.matchAll({ type: 'window' });
+      allClients.forEach(client => {
+        client.postMessage({
+          type: 'SW_UPDATED',
+          version: SW_VERSION,
+        });
+      });
+
+      console.log(`[SW] Version ${SW_VERSION} is now active`);
+    })()
   );
-  self.clients.claim();
+});
+
+// Listen for messages from the app
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('[SW] Skip waiting requested');
+    self.skipWaiting();
+  }
+
+  if (event.data && event.data.type === 'GET_VERSION') {
+    event.ports[0].postMessage({ version: SW_VERSION });
+  }
+
+  if (event.data && event.data.type === 'CHECK_UPDATE') {
+    self.registration.update();
+  }
 });
 
 // Fetch event - serve from cache or network

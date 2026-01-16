@@ -39,3 +39,23 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Capacitor - iOS build artifacts
+ios/App/Pods
+ios/App/App.xcworkspace/xcuserdata
+ios/App/App.xcodeproj/xcuserdata
+ios/App/DerivedData
+ios/capacitor-cordova-ios-plugins
+
+# Capacitor - Android build artifacts
+android/.gradle
+android/app/build
+android/capacitor-cordova-android-plugins
+android/local.properties
+*.apk
+*.aab
+*.keystore
+
+# IDE
+.idea/
+*.iml

@@ -4,6 +4,12 @@ export interface LiveQuote {
   description?: string;
   sector?: string;
   industry?: string;
+  country?: string;
+  employees?: number;
+  website?: string;
+  exchange?: string;
+  type?: string;
+  currency?: string;
   
   price: number;
   change: number;
@@ -107,6 +113,24 @@ export interface LiveQuote {
   postMarketChange: number;
   
   earningsDate: string | null;
+  
+  operatingMargin?: number;
+  grossMargin?: number;
+  netMargin?: number;
+  freeCashFlow?: number;
+  operatingIncome?: number;
+  enterpriseValue?: number;
+  evToEbitda?: number;
+  evToRevenue?: number;
+  pegRatio?: number;
+  bookValue?: number;
+  tangibleBookValue?: number;
+  revenuePerShare?: number;
+  cashPerShare?: number;
+  
+  basicSharesOutstanding?: number;
+  enterpriseValueToRevenue?: number;
+  returnOnCapital?: number;
   
   timestamp: number;
   isLive: boolean;
@@ -221,7 +245,26 @@ const SCANNER_COLUMNS = [
   'Volatility.D',
   'beta_1_year',
   'sector',
-  'industry'
+  'industry',
+  'country',
+  'employees',
+  'operating_margin',
+  'gross_margin',
+  'net_margin',
+  'free_cash_flow_ttm',
+  'operating_income_ttm',
+  'enterprise_value_fq',
+  'enterprise_value_to_ebitda_ttm',
+  'enterprise_value_to_revenue_ttm',
+  'price_earnings_growth_ttm',
+  'book_value_per_share_fq',
+  'tangible_book_value_per_share_fq',
+  'revenue_per_share_ttm',
+  'cash_per_share_fq',
+  'basic_shares_outstanding',
+  'return_on_invested_capital',
+  'type',
+  'currency'
 ];
 
 export async function fetchNigerianStocksFromScanner(): Promise<LiveQuote[]> {
@@ -382,6 +425,27 @@ export async function fetchNigerianStocksFromScanner(): Promise<LiveQuote[]> {
         
         sector: (d[74] as string) || '',
         industry: (d[75] as string) || '',
+        country: (d[76] as string) || 'Nigeria',
+        employees: Number(d[77]) || undefined,
+        
+        operatingMargin: Number(d[78]) || 0,
+        grossMargin: Number(d[79]) || 0,
+        netMargin: Number(d[80]) || 0,
+        freeCashFlow: Number(d[81]) || 0,
+        operatingIncome: Number(d[82]) || 0,
+        enterpriseValue: Number(d[83]) || 0,
+        evToEbitda: Number(d[84]) || 0,
+        evToRevenue: Number(d[85]) || 0,
+        pegRatio: Number(d[86]) || 0,
+        bookValue: Number(d[87]) || 0,
+        tangibleBookValue: Number(d[88]) || 0,
+        revenuePerShare: Number(d[89]) || 0,
+        cashPerShare: Number(d[90]) || 0,
+        basicSharesOutstanding: Number(d[91]) || 0,
+        returnOnCapital: Number(d[92]) || 0,
+        type: (d[93] as string) || 'stock',
+        currency: (d[94] as string) || 'NGN',
+        exchange: 'NSENG',
         
         timestamp: Date.now(),
         isLive: true,

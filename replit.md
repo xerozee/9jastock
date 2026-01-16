@@ -61,6 +61,12 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
   - iOS/Android "Add to Home Screen" compatible
   - Offline fallback page when no connection
   - Icon generation script at scripts/generate-icons.js
+- **Market Hours & Countdown**: Live trading session indicator
+  - Shows NGX trading hours (10:00 AM - 2:30 PM WAT)
+  - "Market Open" status with countdown to market close
+  - "Market Closed" status with countdown to market open
+  - Weekend detection with next trading day countdown
+  - Real-time updates every second
 - **Enhanced 3D UI/UX**: Mobile-first responsive design with animations
   - 3D animated logo with CSS transforms and hover effects
   - Mobile-first animations (slide, fade, scale, shimmer)

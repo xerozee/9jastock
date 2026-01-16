@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowRight, Clock, RefreshCw, AlertCircle } from 'lucide-react';
 import SearchBar from '@/components/SearchBar';
 import MarketOverview from '@/components/MarketOverview';
+import MarketHours from '@/components/MarketHours';
 import StockCard from '@/components/StockCard';
 import StockGridSkeleton from '@/components/StockGridSkeleton';
 import LandingPage from '@/components/LandingPage';
@@ -175,6 +176,10 @@ export default function HomePage() {
 
       <section className="mb-8">
         <MarketOverview summary={marketSummary} />
+      </section>
+
+      <section className="mb-8">
+        <MarketHours />
       </section>
 
       <section className="mb-8">

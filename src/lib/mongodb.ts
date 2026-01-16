@@ -231,3 +231,59 @@ export type ISentNewsletter = {
   sentAt: Date;
   status: string;
 };
+
+// Social Post Schema for Market Buzz feed
+const socialPostSchema = new mongoose.Schema({
+  platform: { type: String, enum: ['reddit', 'tradingview', 'twitter', 'news'], required: true },
+  externalId: { type: String, required: true },
+  author: { type: String, required: true },
+  authorHandle: { type: String },
+  authorAvatar: { type: String },
+  content: { type: String, required: true },
+  originalUrl: { type: String },
+  imageUrl: { type: String },
+  likes: { type: Number, default: 0 },
+  comments: { type: Number, default: 0 },
+  shares: { type: Number, default: 0 },
+  verified: { type: Boolean, default: false },
+  subreddit: { type: String },
+  stockMentions: [{ type: String }],
+  sentiment: { type: String, enum: ['bullish', 'bearish', 'neutral', 'mixed'] },
+  sentimentScore: { type: Number, min: -1, max: 1 },
+  sentimentReason: { type: String },
+  publishedAt: { type: Date, required: true },
+  scrapedAt: { type: Date, default: Date.now },
+  isActive: { type: Boolean, default: true },
+});
+
+socialPostSchema.index({ platform: 1 });
+socialPostSchema.index({ publishedAt: -1 });
+socialPostSchema.index({ stockMentions: 1 });
+socialPostSchema.index({ externalId: 1, platform: 1 }, { unique: true });
+socialPostSchema.index({ content: 'text' });
+
+export const SocialPost = mongoose.models.SocialPost || mongoose.model('SocialPost', socialPostSchema);
+
+export type ISocialPost = {
+  _id: mongoose.Types.ObjectId;
+  platform: 'reddit' | 'tradingview' | 'twitter' | 'news';
+  externalId: string;
+  author: string;
+  authorHandle?: string;
+  authorAvatar?: string;
+  content: string;
+  originalUrl?: string;
+  imageUrl?: string;
+  likes: number;
+  comments: number;
+  shares: number;
+  verified: boolean;
+  subreddit?: string;
+  stockMentions: string[];
+  sentiment?: 'bullish' | 'bearish' | 'neutral' | 'mixed';
+  sentimentScore?: number;
+  sentimentReason?: string;
+  publishedAt: Date;
+  scrapedAt: Date;
+  isActive: boolean;
+};

@@ -6,7 +6,7 @@ import { TrendingUp, BarChart3, Star, Menu, X, Briefcase, Newspaper, Moon, Sun, 
 import { useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/hooks/useAuth';
-import Logo from './Logo';
+import Logo3D from './Logo3D';
 
 export default function Header() {
   const pathname = usePathname();
@@ -26,8 +26,8 @@ export default function Header() {
     <header className="bg-gradient-to-r from-green-800 via-green-700 to-emerald-700 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-white shadow-lg sticky top-0 z-50 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="group hover:scale-105 transition-transform">
-            <Logo size="md" variant="full" />
+          <Link href="/" className="group transition-transform active:scale-95">
+            <Logo3D size="md" variant="full" animated={true} />
           </Link>
 
           <nav className="hidden md:flex items-center space-x-1">
@@ -126,28 +126,28 @@ export default function Header() {
         </div>
 
         {isMenuOpen && (
-          <nav className="md:hidden py-4 border-t border-white/10">
-            {navLinks.map((link) => {
+          <nav className="md:hidden py-4 border-t border-white/10 mobile-menu-enter safe-area-x">
+            {navLinks.map((link, index) => {
               const Icon = link.icon;
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center space-x-2 px-4 py-3 rounded-xl transition-all ${
+                  className={`mobile-menu-item stagger-${index + 1} flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all touch-target ${
                     isActive
-                      ? 'bg-white/20 text-white'
-                      : 'text-green-100 dark:text-slate-300 hover:bg-white/10'
+                      ? 'bg-white/20 text-white shadow-lg'
+                      : 'text-green-100 dark:text-slate-300 hover:bg-white/10 active:bg-white/15 active:scale-98'
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <Icon size={18} />
-                  <span>{link.label}</span>
+                  <Icon size={20} className={isActive ? 'animate-bounce-subtle' : ''} />
+                  <span className="font-medium">{link.label}</span>
                 </Link>
               );
             })}
 
-            <div className="mt-4 pt-4 border-t border-white/10">
+            <div className="mt-4 pt-4 border-t border-white/10 animate-fade-in" style={{ animationDelay: '0.3s' }}>
               {isLoading ? (
                 <div className="px-4 py-3">
                   <div className="w-full h-10 rounded-xl bg-white/10 animate-pulse" />

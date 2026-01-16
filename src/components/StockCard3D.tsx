@@ -53,12 +53,17 @@ export default function StockCard3D({ stock, onAddToPortfolio, onAddToWatchlist 
     return colors[index];
   };
 
+  const handleTouchStart = () => setIsHovered(true);
+  const handleTouchEnd = () => setTimeout(() => setIsHovered(false), 300);
+
   return (
     <div 
       className="perspective-1000"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onMouseMove={handleMouseMove}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       <div
         className="relative group transition-all duration-300 ease-out"
@@ -68,11 +73,12 @@ export default function StockCard3D({ stock, onAddToPortfolio, onAddToWatchlist 
         }}
       >
         <div className={`
-          relative overflow-hidden rounded-2xl p-5
+          relative overflow-hidden rounded-2xl p-4 md:p-5
           bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90
           backdrop-blur-xl border border-slate-700/50
           shadow-xl ${isHovered ? 'shadow-2xl shadow-emerald-500/10' : ''}
-          transition-all duration-300
+          transition-all duration-300 mobile-card
+          active:scale-[0.98] touch-manipulation
         `}>
           <div 
             className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"

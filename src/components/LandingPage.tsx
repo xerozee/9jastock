@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, BarChart3, Bell, Briefcase, LineChart, Shield, Zap, Globe, ArrowRight, CheckCircle, ChevronRight, Sparkles, Smartphone, Play } from 'lucide-react';
-import Logo from './Logo';
+import Logo3D from './Logo3D';
 import Link from 'next/link';
 
 interface LandingPageProps {
@@ -103,7 +103,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
         <nav className="relative z-50 w-full">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between py-4 md:py-6">
-              <Logo size="lg" variant="full" />
+              <Logo3D size="lg" variant="full" animated={true} />
               <div className="flex items-center gap-2 md:gap-4">
                 <Link
                   href="/login"
@@ -504,7 +504,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
       <footer className="bg-slate-950 border-t border-slate-800 py-8 md:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <Logo size="md" variant="full" />
+            <Logo3D size="md" variant="full" animated={false} />
             <div className="flex items-center gap-4 md:gap-6 text-xs md:text-sm text-slate-400">
               <span>© 2026 9jaStock</span>
               <span className="hidden md:inline">•</span>

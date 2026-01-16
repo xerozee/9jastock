@@ -13,7 +13,11 @@
     "cap:ios": "npx cap open ios",
     "cap:android": "npx cap open android",
     "mobile:ios": "npm run build:capacitor && npx cap sync ios && npx cap open ios",
-    "mobile:android": "npm run build:capacitor && npx cap sync android && npx cap open android"
+    "mobile:android": "npm run build:capacitor && npx cap sync android && npx cap open android",
+    "ionic:serve": "ionic serve",
+    "ionic:build": "npm run build:capacitor && ionic cap sync",
+    "ionic:run:android": "ionic cap run android --livereload --external",
+    "ionic:run:ios": "ionic cap run ios --livereload --external"
   },
   "dependencies": {
     "@capacitor/android": "^8.0.1",

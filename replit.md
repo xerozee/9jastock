@@ -55,3 +55,9 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
   - Portfolio summary reflects actual holdings from database
   - Replaced news section with personalized stock recommendations
   - Added Avatar component for auto-generated profile pictures
+- **Progressive Web App (PWA)**: Mobile-first app installation support
+  - manifest.json with app metadata and PNG icons (72-512px)
+  - Service worker for offline support and caching
+  - iOS/Android "Add to Home Screen" compatible
+  - Offline fallback page when no connection
+  - Icon generation script at scripts/generate-icons.js

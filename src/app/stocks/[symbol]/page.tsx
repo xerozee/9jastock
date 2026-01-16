@@ -7,13 +7,12 @@ import {
   Activity, BarChart3, PieChart, DollarSign, Percent, TrendingDown as TrendDown,
   ChevronRight, Building2, LineChart, Scale, Wallet, Users, BarChart2, Plus, Check
 } from 'lucide-react';
-import StockChart from '@/components/StockChart';
+import TradingViewWidget from '@/components/TradingViewWidget';
 import LiveIndicator from '@/components/LiveIndicator';
 import { useWatchlist } from '@/lib/watchlistContext';
 import { useLiveStock, formatLastUpdate } from '@/lib/useLiveStocks';
 import {
   getStockBySymbol,
-  generateHistoricalData,
   formatCurrency,
   formatVolume,
   formatLargeNumber,
@@ -159,7 +158,6 @@ export default function StockDetailPage() {
   }
 
   const extendedStock = stock as Stock;
-  const historicalData = generateHistoricalData(stock.price);
   const isPositive = stock.change >= 0;
   const inWatchlist = isInWatchlist(stock.symbol);
   const isLive = 'isLive' in stock ? Boolean(stock.isLive) : false;
@@ -254,9 +252,9 @@ export default function StockDetailPage() {
         </div>
       </div>
 
-      {/* Price Chart */}
+      {/* Live TradingView Chart */}
       <div className="mb-6">
-        <StockChart data={historicalData} symbol={stock.symbol} />
+        <TradingViewWidget symbol={stock.symbol} height={450} />
       </div>
 
       {/* Main Content Grid */}
@@ -575,21 +573,6 @@ export default function StockDetailPage() {
             value={extendedStock.relativeVolume?.toFixed(2) || 'N/A'} 
             subValue={extendedStock.relativeVolume && extendedStock.relativeVolume > 1 ? 'Above average' : 'Below average'}
             trend={extendedStock.relativeVolume && extendedStock.relativeVolume > 1 ? 'up' : 'down'}
-          />
-        </div>
-      </div>
-
-      {/* TradingView Advanced Chart */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-        <div className="flex items-center gap-2 mb-4">
-          <BarChart3 className="text-purple-600" size={24} />
-          <h2 className="text-xl font-semibold text-gray-900">TradingView Advanced Chart</h2>
-        </div>
-        <div className="rounded-lg overflow-hidden border border-gray-200">
-          <iframe
-            src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=NSENG:${stock.symbol}&interval=D&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=RSI@tv-basicstudies,MACD@tv-basicstudies&theme=light&style=1&timezone=Africa/Lagos&withdateranges=1&showpopupbutton=1&locale=en`}
-            style={{ width: '100%', height: '550px' }}
-            allowFullScreen
           />
         </div>
       </div>

@@ -1,31 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/server-auth";
 import { connectToDatabase, Holding } from "@/lib/mongodb";
 import mongoose from "mongoose";
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get("session_id")?.value;
+    const user = await getAuthenticatedUser();
 
-    if (!sessionId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const session = await getSession(sessionId);
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await connectToDatabase();
     const userHoldings = await Holding.find({
-      userId: new mongoose.Types.ObjectId(session.userId),
+      userId: new mongoose.Types.ObjectId(user.id),
     })
       .sort({ purchaseDate: -1 })
       .lean();
 
-    const holdingsWithIds = userHoldings.map(h => ({
+    const holdingsWithIds = userHoldings.map((h) => ({
       id: h._id.toString(),
       userId: h.userId.toString(),
       symbol: h.symbol,
@@ -39,21 +32,18 @@ export async function GET() {
     return NextResponse.json({ data: holdingsWithIds });
   } catch (error) {
     console.error("Failed to fetch holdings:", error);
-    return NextResponse.json({ error: "Failed to fetch holdings" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch holdings" },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get("session_id")?.value;
+    const user = await getAuthenticatedUser();
 
-    if (!sessionId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const session = await getSession(sessionId);
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -62,7 +52,10 @@ export async function POST(request: NextRequest) {
 
     if (!symbol || !shares || !purchasePrice || !purchaseDate) {
       return NextResponse.json(
-        { error: "Missing required fields: symbol, shares, purchasePrice, purchaseDate" },
+        {
+          error:
+            "Missing required fields: symbol, shares, purchasePrice, purchaseDate",
+        },
         { status: 400 }
       );
     }
@@ -76,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     await connectToDatabase();
     const newHolding = await Holding.create({
-      userId: new mongoose.Types.ObjectId(session.userId),
+      userId: new mongoose.Types.ObjectId(user.id),
       symbol: symbol.toUpperCase(),
       shares,
       purchasePrice,
@@ -98,21 +91,18 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Failed to add holding:", error);
-    return NextResponse.json({ error: "Failed to add holding" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to add holding" },
+      { status: 500 }
+    );
   }
 }
 
 export async function DELETE(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get("session_id")?.value;
+    const user = await getAuthenticatedUser();
 
-    if (!sessionId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const session = await getSession(sessionId);
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -126,7 +116,7 @@ export async function DELETE(request: NextRequest) {
     await connectToDatabase();
     const result = await Holding.deleteOne({
       _id: new mongoose.Types.ObjectId(holdingId),
-      userId: new mongoose.Types.ObjectId(session.userId),
+      userId: new mongoose.Types.ObjectId(user.id),
     });
 
     if (result.deletedCount === 0) {
@@ -136,6 +126,9 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete holding:", error);
-    return NextResponse.json({ error: "Failed to delete holding" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete holding" },
+      { status: 500 }
+    );
   }
 }

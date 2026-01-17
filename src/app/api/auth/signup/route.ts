@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase, User, Session } from "@/lib/mongodb";
+import { connectToDatabase, User } from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
 function generateReferralCode(): string {
-  return crypto.randomBytes(4).toString('hex').toUpperCase();
+  return crypto.randomBytes(4).toString("hex").toUpperCase();
 }
 
 export async function POST(request: NextRequest) {
   try {
     await connectToDatabase();
-    const { email, password, firstName, lastName, referralCode } = await request.json();
+    const { email, password, firstName, lastName, referralCode } =
+      await request.json();
 
     if (!email || !password) {
       return NextResponse.json(
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     const existingUser = await User.findOne({ email: email.toLowerCase() });
-    
+
     if (existingUser) {
       return NextResponse.json(
         { error: "An account with this email already exists" },
@@ -47,7 +48,9 @@ export async function POST(request: NextRequest) {
 
     let referredBy = null;
     if (referralCode) {
-      const referrer = await User.findOne({ referralCode: referralCode.toUpperCase() });
+      const referrer = await User.findOne({
+        referralCode: referralCode.toUpperCase(),
+      });
       if (referrer) {
         referredBy = referrer._id;
       }
@@ -59,21 +62,13 @@ export async function POST(request: NextRequest) {
       firstName: firstName || null,
       lastName: lastName || null,
       referralCode: generateReferralCode(),
-      shareId: crypto.randomBytes(8).toString('hex'),
+      shareId: crypto.randomBytes(8).toString("hex"),
       referredBy: referredBy,
       onboardingCompleted: false,
     });
 
-    const sessionId = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
-    await Session.create({
-      sid: sessionId,
-      userId: newUser._id,
-      expiresAt,
-    });
-
-    const response = NextResponse.json({
+    // Return success - NextAuth will handle session creation
+    return NextResponse.json({
       success: true,
       user: {
         id: newUser._id.toString(),
@@ -82,16 +77,6 @@ export async function POST(request: NextRequest) {
         lastName: newUser.lastName,
       },
     });
-
-    response.cookies.set("session_id", sessionId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      expires: expiresAt,
-      path: "/",
-    });
-
-    return response;
   } catch (error) {
     console.error("Signup error:", error);
     return NextResponse.json(

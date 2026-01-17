@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Mail, Lock, User, ArrowRight, AlertCircle, CheckCircle } from "lucide-react";
 import Logo from "@/components/Logo";
@@ -15,6 +16,8 @@ function SignupForm() {
   const [lastName, setLastName] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isAppleLoading, setIsAppleLoading] = useState(false);
   const [referralCode, setReferralCode] = useState("");
 
   useEffect(() => {
@@ -30,6 +33,7 @@ function SignupForm() {
     setIsLoading(true);
 
     try {
+      // First, create the account
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -42,6 +46,17 @@ function SignupForm() {
         throw new Error(data.error || "Failed to create account");
       }
 
+      // Then sign in with NextAuth
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+
       router.push("/onboarding");
       router.refresh();
     } catch (err) {
@@ -51,22 +66,70 @@ function SignupForm() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setIsGoogleLoading(true);
+    setError("");
+    try {
+      await signIn("google", { callbackUrl: "/onboarding" });
+    } catch (err) {
+      setError("Failed to sign in with Google");
+      setIsGoogleLoading(false);
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    setIsAppleLoading(true);
+    setError("");
+    try {
+      await signIn("apple", { callbackUrl: "/onboarding" });
+    } catch (err) {
+      setError("Failed to sign in with Apple");
+      setIsAppleLoading(false);
+    }
+  };
+
   return (
     <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
       <div className="bg-slate-900/50 backdrop-blur-xl py-8 px-4 shadow-2xl rounded-2xl sm:px-10 border border-slate-800">
-        <a
-          href="/api/auth/login"
-          className="w-full flex items-center justify-center gap-3 py-3.5 px-4 border border-slate-700 rounded-xl shadow-sm text-sm font-semibold text-white bg-slate-800 hover:bg-slate-700 transition-all mb-6"
+        {/* Google Sign In */}
+        <button
+          onClick={handleGoogleSignIn}
+          disabled={isGoogleLoading}
+          className="w-full flex items-center justify-center gap-3 py-3.5 px-4 border border-slate-700 rounded-xl shadow-sm text-sm font-semibold text-white bg-slate-800 hover:bg-slate-700 transition-all mb-3 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <svg className="w-5 h-5" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-          </svg>
-          Continue with Google
-        </a>
-        
+          {isGoogleLoading ? (
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              Continue with Google
+            </>
+          )}
+        </button>
+
+        {/* Apple Sign In */}
+        <button
+          onClick={handleAppleSignIn}
+          disabled={isAppleLoading}
+          className="w-full flex items-center justify-center gap-3 py-3.5 px-4 border border-slate-700 rounded-xl shadow-sm text-sm font-semibold text-white bg-slate-800 hover:bg-slate-700 transition-all mb-6 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isAppleLoading ? (
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+              </svg>
+              Continue with Apple
+            </>
+          )}
+        </button>
+
         <div className="relative mb-6">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-slate-700" />
@@ -77,7 +140,7 @@ function SignupForm() {
             </span>
           </div>
         </div>
-        
+
         <form className="space-y-5" onSubmit={handleSubmit}>
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-center gap-3">
@@ -208,12 +271,12 @@ export default function SignupPage() {
           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent" />
         </div>
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50" />
-        
+
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
           <Link href="/">
             <Logo size="lg" variant="full" />
           </Link>
-          
+
           <div className="max-w-md">
             <h1 className="text-4xl font-black text-white mb-4">
               Start tracking NGX
@@ -223,7 +286,7 @@ export default function SignupPage() {
             <p className="text-lg text-white/80 mb-8">
               Join thousands of Nigerian investors who trust 9jaStock for real-time stock tracking and analysis.
             </p>
-            
+
             <div className="space-y-3">
               {[
                 'Real-time data for 145+ stocks',
@@ -240,7 +303,7 @@ export default function SignupPage() {
               ))}
             </div>
           </div>
-          
+
           <div className="flex items-center gap-4 text-sm text-white/60">
             <span>© 2026 9jaStock</span>
             <span>•</span>
@@ -248,14 +311,14 @@ export default function SignupPage() {
           </div>
         </div>
       </div>
-      
+
       <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-950">
         <div className="lg:hidden mb-8 flex justify-center">
           <Link href="/">
             <Logo size="lg" variant="full" />
           </Link>
         </div>
-        
+
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <h2 className="text-center text-3xl font-bold text-white">
             Create your account

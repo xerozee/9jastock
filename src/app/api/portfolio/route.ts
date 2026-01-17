@@ -1,29 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/server-auth";
 import { connectToDatabase, PortfolioItem } from "@/lib/mongodb";
 import mongoose from "mongoose";
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get("session_id")?.value;
+    const user = await getAuthenticatedUser();
 
-    if (!sessionId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const session = await getSession(sessionId);
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await connectToDatabase();
-    const items = await PortfolioItem.find({ 
-      userId: new mongoose.Types.ObjectId(session.userId) 
+    const items = await PortfolioItem.find({
+      userId: new mongoose.Types.ObjectId(user.id),
     }).lean();
 
-    const formattedItems = items.map(item => ({
+    const formattedItems = items.map((item) => ({
       id: item._id.toString(),
       userId: item.userId.toString(),
       symbol: item.symbol,
@@ -33,21 +26,18 @@ export async function GET() {
     return NextResponse.json(formattedItems);
   } catch (error) {
     console.error("Error fetching portfolio:", error);
-    return NextResponse.json({ error: "Failed to fetch portfolio" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch portfolio" },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get("session_id")?.value;
+    const user = await getAuthenticatedUser();
 
-    if (!sessionId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const session = await getSession(sessionId);
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -58,7 +48,7 @@ export async function POST(request: NextRequest) {
     }
 
     await connectToDatabase();
-    const userId = new mongoose.Types.ObjectId(session.userId);
+    const userId = new mongoose.Types.ObjectId(user.id);
 
     const existing = await PortfolioItem.findOne({ userId, symbol });
 
@@ -71,29 +61,29 @@ export async function POST(request: NextRequest) {
       symbol,
     });
 
-    return NextResponse.json({
-      id: item._id.toString(),
-      userId: item.userId.toString(),
-      symbol: item.symbol,
-      addedAt: item.addedAt,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        id: item._id.toString(),
+        userId: item.userId.toString(),
+        symbol: item.symbol,
+        addedAt: item.addedAt,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error adding to portfolio:", error);
-    return NextResponse.json({ error: "Failed to add to portfolio" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to add to portfolio" },
+      { status: 500 }
+    );
   }
 }
 
 export async function DELETE(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get("session_id")?.value;
+    const user = await getAuthenticatedUser();
 
-    if (!sessionId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const session = await getSession(sessionId);
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -105,13 +95,16 @@ export async function DELETE(request: NextRequest) {
 
     await connectToDatabase();
     await PortfolioItem.deleteOne({
-      userId: new mongoose.Types.ObjectId(session.userId),
+      userId: new mongoose.Types.ObjectId(user.id),
       symbol,
     });
 
     return NextResponse.json({ message: "Removed from portfolio" });
   } catch (error) {
     console.error("Error removing from portfolio:", error);
-    return NextResponse.json({ error: "Failed to remove from portfolio" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to remove from portfolio" },
+      { status: 500 }
+    );
   }
 }

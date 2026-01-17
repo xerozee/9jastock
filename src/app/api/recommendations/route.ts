@@ -1,8 +1,7 @@
-import { NextResponse } from 'next/server';
-import { connectToDatabase, User } from '@/lib/mongodb';
-import { getSession } from '@/lib/auth';
-import { cookies } from 'next/headers';
-import { getAIStockRecommendations, StockData, UserProfile } from '@/lib/openai';
+import { NextResponse } from "next/server";
+import { connectToDatabase, User } from "@/lib/mongodb";
+import { getAuthenticatedUser } from "@/lib/server-auth";
+import { getAIStockRecommendations, StockData, UserProfile } from "@/lib/openai";
 
 interface Stock {
   symbol: string;
@@ -21,45 +20,42 @@ interface Stock {
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get('session_id')?.value;
+    const authUser = await getAuthenticatedUser();
 
-    if (!sessionId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const session = await getSession(sessionId);
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!authUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await connectToDatabase();
-    const user = await User.findById(session.userId).lean();
-    
+    const user = await User.findById(authUser.id).lean();
+
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     let stocks: Stock[] = [];
     let stocksFetchError = false;
-    
+
     try {
-      const baseUrl = process.env.REPLIT_DEV_DOMAIN 
-        ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
-        : 'http://localhost:5000';
+      const baseUrl = process.env.REPLIT_DEV_DOMAIN
+        ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+        : process.env.NEXTAUTH_URL || "http://localhost:3000";
       const stocksResponse = await fetch(`${baseUrl}/api/stocks`, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
-      
+
       if (stocksResponse.ok) {
         const stocksData = await stocksResponse.json();
         stocks = stocksData.stocks || [];
       } else {
-        console.error('Failed to fetch stocks for recommendations:', stocksResponse.status);
+        console.error(
+          "Failed to fetch stocks for recommendations:",
+          stocksResponse.status
+        );
         stocksFetchError = true;
       }
     } catch (error) {
-      console.error('Error fetching stocks for recommendations:', error);
+      console.error("Error fetching stocks for recommendations:", error);
       stocksFetchError = true;
     }
 
@@ -67,18 +63,22 @@ export async function GET() {
       return NextResponse.json({
         recommendations: [],
         hasProfile: true,
-        message: 'Unable to load stock data. Please try again later.',
+        message: "Unable to load stock data. Please try again later.",
         error: true,
       });
     }
 
-    const hasProfile = user.investmentGoal || user.riskTolerance || user.interestedSectors?.length;
-    
+    const hasProfile =
+      user.investmentGoal ||
+      user.riskTolerance ||
+      user.interestedSectors?.length;
+
     if (!hasProfile) {
       return NextResponse.json({
         recommendations: [],
         hasProfile: false,
-        message: 'Complete your investment profile to get personalized recommendations',
+        message:
+          "Complete your investment profile to get personalized recommendations",
       });
     }
 
@@ -102,8 +102,11 @@ export async function GET() {
         aiPowered: true,
       });
     } catch (aiError) {
-      console.error('AI recommendations failed, falling back to rule-based:', aiError);
-      
+      console.error(
+        "AI recommendations failed, falling back to rule-based:",
+        aiError
+      );
+
       const fallbackRecs = getFallbackRecommendations(stocks, userProfile);
       return NextResponse.json({
         recommendations: fallbackRecs,
@@ -112,36 +115,39 @@ export async function GET() {
       });
     }
   } catch (error) {
-    console.error('Recommendations fetch error:', error);
-    return NextResponse.json({ error: 'Failed to fetch recommendations' }, { status: 500 });
+    console.error("Recommendations fetch error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch recommendations" },
+      { status: 500 }
+    );
   }
 }
 
 function getFallbackRecommendations(stocks: Stock[], profile: UserProfile) {
   const { riskTolerance, investmentGoal } = profile;
-  let filtered = stocks.filter(s => s.marketCap && s.volume);
+  let filtered = stocks.filter((s) => s.marketCap && s.volume);
 
-  if (riskTolerance === 'conservative') {
-    filtered = filtered.filter(s => (s.marketCap || 0) > 100000000000);
-  } else if (riskTolerance === 'aggressive') {
-    filtered = filtered.filter(s => s.changePercent > 0);
+  if (riskTolerance === "conservative") {
+    filtered = filtered.filter((s) => (s.marketCap || 0) > 100000000000);
+  } else if (riskTolerance === "aggressive") {
+    filtered = filtered.filter((s) => s.changePercent > 0);
   }
 
-  if (investmentGoal === 'passive-income') {
-    filtered = filtered.filter(s => (s.dividendYield || 0) > 2);
+  if (investmentGoal === "passive-income") {
+    filtered = filtered.filter((s) => (s.dividendYield || 0) > 2);
   }
 
   return filtered
     .sort((a, b) => (b.volume || 0) - (a.volume || 0))
     .slice(0, 5)
-    .map(s => ({
+    .map((s) => ({
       symbol: s.symbol,
       name: s.name,
       price: s.price,
       changePercent: s.changePercent,
       sector: s.sector,
-      reason: 'Top traded stock matching your investment profile',
+      reason: "Top traded stock matching your investment profile",
       confidenceScore: 70,
-      riskLevel: 'medium' as const,
+      riskLevel: "medium" as const,
     }));
 }

@@ -54,7 +54,7 @@ export const TIER_LIMITS = {
   },
   free: {
     refreshInterval: 5 * 60 * 1000,
-    maxPortfolioItems: 10,
+    maxPortfolioItems: 2,
     maxWatchlistItems: 5,
     newsArticles: 5,
     socialPosts: 1,

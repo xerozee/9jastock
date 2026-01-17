@@ -72,6 +72,10 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
   - Nigerian finance Twitter accounts monitored: @NGXGroup, @SECNigeria, @Nairametrics, @CardinalStone, etc.
   - X Crawler service in src/lib/xTwitterCrawler.ts with official Twitter API v2
   - **NEW: 72-hour search window** - Crawler searches last 72 hours of X posts using start_time parameter
+  - **NEW: Company account filtering** - Excludes posts from official company accounts (e.g., @dangotegroup, @mtnnigeria)
+  - **NEW: Finance keyword requirement** - Only includes posts that contain stock/finance-related keywords
+  - FINANCE_KEYWORDS list: stock, share, invest, dividend, earnings, profit, market, trading, NGX, etc.
+  - COMPANY_OFFICIAL_ACCOUNTS map links stock symbols to their known X/Twitter handles
   - **NEW: All-user symbol coverage** - Crawls symbols from ALL users' portfolios and watchlists
   - getAllUserSymbols() aggregates unique symbols from PortfolioItem and Holding collections
   - **NEW: Full 129+ stock coverage** - Uses ALL stocks from stockData.ts (not hardcoded subset)

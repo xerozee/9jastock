@@ -262,6 +262,100 @@ const MARKET_ACTION_KEYWORDS = [
   'selloff', 'correction'
 ];
 
+const FINANCE_KEYWORDS = [
+  'stock', 'stocks', 'share', 'shares', 'invest', 'investor', 'investing', 'investment',
+  'dividend', 'dividends', 'earnings', 'profit', 'loss', 'revenue', 'market', 'trading',
+  'trade', 'trader', 'buy', 'sell', 'bullish', 'bearish', 'portfolio', 'equity', 'equities',
+  'ngx', 'nse', 'ipo', 'rights issue', 'bonus issue', 'agm', 'eps', 'p/e', 'pe ratio',
+  'market cap', 'valuation', 'price target', 'analyst', 'rating', 'upgrade', 'downgrade',
+  'accumulate', 'hold', 'outperform', 'underperform', 'quarter', 'quarterly', 'annual',
+  'financial', 'finance', 'fiscal', 'roi', 'yield', 'growth', 'recession', 'rally',
+  'breakout', 'selloff', 'correction', 'volatility', 'volume', 'capitalization', 'naira',
+  '₦', 'ngn', 'stock exchange', 'exchange', 'broker', 'brokerage', 'sec', 'regulator'
+];
+
+const COMPANY_OFFICIAL_ACCOUNTS: Record<string, string[]> = {
+  'DANGCEM': ['danglobal', 'dangotecement', 'dangotegroup'],
+  'MTNN': ['maborokekola', 'maboroke', 'mtloopng', 'mtlooperng', 'mtnnigeria', 'maborokeola'],
+  'AIRTELAFRI': ['airtelafrica', 'aaborokeiri', 'airtelng', 'airnelng', 'airtelin'],
+  'ZENITHBANK': ['zenithbank', 'zenith_bank', 'zenithbankng'],
+  'GTCO': ['gtaborokeban', 'gtcoplc', 'gtbank', 'guarantytrust'],
+  'ACCESSCORP': ['myaccessbank', 'accessbankplc', 'access_bankplc'],
+  'UBA': ['ubaigroup', 'ubag7i3roup', 'ubagroupplc'],
+  'FIRSTHOLDCO': ['firstbnkg7i3ia', 'firstbankng', 'firstbanknigeria'],
+  'BUACEMENT': ['buacement', 'bua_cement'],
+  'BUAFOODS': ['buafoods', 'bua_foods'],
+  'SEPLAT': ['seplatey', 'seplatgy', 'seplatm', 'seplategygy', 'seplateygy', 'seplatenergy'],
+  'NESTLE': ['nestle', 'nestleng', 'nestlenigeria'],
+  'GUINNESS': ['guinness', 'guinessng', 'guinnessnigeria'],
+  'NB': ['nigerianbreweries', 'nbplc', 'nigerianbreweria'],
+  'CADBURY': ['cadburyng', 'cadburynigeria'],
+  'UNILEVER': ['unileverng', 'unilevernigeria'],
+  'TOTAL': ['totalenergiesng', 'totalenergies', 'totalng'],
+  'OANDO': ['oandoplc', 'oando_plc'],
+  'STANBIC': ['stabicibtc', 'stanbic_ibtc', 'stanbicibtc'],
+  'FIDELITYBK': ['fidelitybankng', 'fidelity_bank'],
+  'FCMB': ['myfcmb', 'fcmbng', 'fcmbgroup'],
+  'WEMABANK': ['waborokeema', 'wemabankng'],
+  'STERLINGNG': ['sterling_bankng', 'sterlingbankng'],
+  'PRESCO': ['prescoplc', 'presco_plc'],
+  'TRANSCORP': ['transcorpore', 'transcorpore_ng'],
+  'FIDSON': ['fidsonhc', 'fidsonhealthcare'],
+  'JBERGER': ['juliusbergerng', 'julius_berger'],
+};
+
+function isCompanyOfficialAccount(symbol: string, username: string): boolean {
+  const lowerUsername = username.toLowerCase();
+  const symbolLower = symbol.toLowerCase();
+  
+  if (lowerUsername.includes(symbolLower) || symbolLower.includes(lowerUsername)) {
+    return true;
+  }
+  
+  const officialAccounts = COMPANY_OFFICIAL_ACCOUNTS[symbol];
+  if (officialAccounts) {
+    return officialAccounts.some(account => lowerUsername.includes(account) || account.includes(lowerUsername));
+  }
+  
+  const stock = NGX_STOCK_DATABASE[symbol];
+  if (stock) {
+    const companyWords = stock.name.toLowerCase().split(' ').filter(w => w.length > 3);
+    for (const word of companyWords) {
+      if (word !== 'plc' && word !== 'nigeria' && word !== 'nigerian' && word !== 'limited' && word !== 'holdings') {
+        if (lowerUsername.includes(word)) {
+          return true;
+        }
+      }
+    }
+  }
+  
+  return false;
+}
+
+function containsFinanceKeyword(text: string): boolean {
+  const lowerText = text.toLowerCase();
+  return FINANCE_KEYWORDS.some(keyword => lowerText.includes(keyword.toLowerCase()));
+}
+
+function filterTweetsForRelevance(tweets: XTweet[], symbols: string[]): XTweet[] {
+  return tweets.filter(tweet => {
+    const user = (tweet as any)._user as XUser | undefined;
+    if (!user) return true;
+    
+    for (const symbol of symbols) {
+      if (isCompanyOfficialAccount(symbol, user.username)) {
+        return false;
+      }
+    }
+    
+    if (!containsFinanceKeyword(tweet.text)) {
+      return false;
+    }
+    
+    return true;
+  });
+}
+
 interface XTweet {
   id: string;
   text: string;
@@ -354,7 +448,7 @@ export async function searchXForStocks(symbols: string[], use72Hours: boolean = 
     }
   }
 
-  return allTweets;
+  return filterTweetsForRelevance(allTweets, symbols);
 }
 
 export async function searchNigerianMarketBuzz(use72Hours: boolean = true): Promise<XTweet[]> {
@@ -420,7 +514,7 @@ export async function searchNigerianMarketBuzz(use72Hours: boolean = true): Prom
     console.error('X trusted sources search error:', error);
   }
 
-  return allTweets;
+  return filterTweetsForRelevance(allTweets, ALL_NGX_SYMBOLS);
 }
 
 export async function searchXForWatchlistStocks(watchlistSymbols: string[], use72Hours: boolean = true): Promise<XTweet[]> {
@@ -493,7 +587,7 @@ export async function searchXForWatchlistStocks(watchlistSymbols: string[], use7
     console.error('X finance accounts search error:', error);
   }
 
-  return allTweets;
+  return filterTweetsForRelevance(allTweets, watchlistSymbols);
 }
 
 const TOP_NIGERIAN_STOCKS = [
@@ -584,10 +678,10 @@ export async function crawlXPosts(): Promise<{ success: boolean; postsProcessed:
       }
     }
     
-    const tweets = allTweets;
-    console.log(`[X Crawler] Found ${tweets.length} tweets`);
+    const filteredTweets = filterTweetsForRelevance(allTweets, ALL_NGX_SYMBOLS);
+    console.log(`[X Crawler] Found ${allTweets.length} tweets, ${filteredTweets.length} after filtering`);
 
-    for (const tweet of tweets) {
+    for (const tweet of filteredTweets) {
       try {
         const user = (tweet as any)._user as XUser | undefined;
         const externalId = `x-${tweet.id}`;

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSocialPosts } from '@/lib/socialCrawler';
+import { getSocialPosts, runCrawler } from '@/lib/socialCrawler';
+import { connectToDatabase, SocialPost } from '@/lib/mongodb';
 
 export async function GET(request: NextRequest) {
   try {
@@ -64,4 +65,35 @@ function formatTimeAgo(date: Date): string {
     month: 'short',
     day: 'numeric',
   });
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const refreshKey = searchParams.get('key');
+    
+    if (refreshKey !== process.env.X_BEARER_TOKEN?.slice(0, 20)) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    
+    await connectToDatabase();
+    const deleteResult = await SocialPost.deleteMany({ platform: 'twitter' });
+    console.log(`Cleared ${deleteResult.deletedCount} old Twitter posts`);
+    
+    const reCrawl = searchParams.get('crawl') === 'true';
+    let crawlResult = null;
+    
+    if (reCrawl) {
+      crawlResult = await runCrawler();
+    }
+    
+    return NextResponse.json({
+      success: true,
+      deleted: deleteResult.deletedCount,
+      crawled: crawlResult?.postsProcessed || 0,
+    });
+  } catch (error: any) {
+    console.error('Social refresh error:', error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
 }

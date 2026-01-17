@@ -110,6 +110,8 @@ const STOCK_ALIASES: Record<string, string[]> = {
 };
 
 const STOCK_NAME_MAP: Record<string, string[]> = {};
+const STOCK_FULL_NAME_MAP: Record<string, string> = {};
+
 nigerianStocks.forEach(stock => {
   const names: string[] = [stock.name, stock.symbol];
   const words = stock.name.split(' ');
@@ -120,7 +122,21 @@ nigerianStocks.forEach(stock => {
     names.push(...STOCK_ALIASES[stock.symbol]);
   }
   STOCK_NAME_MAP[stock.symbol] = [...new Set(names)];
+  STOCK_FULL_NAME_MAP[stock.symbol] = stock.name;
 });
+
+function getSearchNameForSymbol(symbol: string): string {
+  const aliases = STOCK_ALIASES[symbol];
+  if (aliases && aliases.length > 0) {
+    return aliases[0];
+  }
+  const fullName = STOCK_FULL_NAME_MAP[symbol];
+  if (fullName) {
+    const cleanName = fullName.replace(/ Plc$/i, '').replace(/ Ltd$/i, '').replace(/ Holdings$/i, '');
+    return cleanName;
+  }
+  return symbol;
+}
 
 const NIGERIAN_STOCK_ACCOUNTS = [
   'NGXGroup', 'SECNigeria', 'Nairametrics', 'CardinalStone',
@@ -189,12 +205,12 @@ export async function searchXForStocks(symbols: string[], use72Hours: boolean = 
   const allTweets: XTweet[] = [];
   const startTime = use72Hours ? `&start_time=${get72HoursAgo()}` : '';
   
-  const cashtags = symbols.map(s => `$${s}`).join(' OR ');
-  const cashtagQuery = `(${cashtags}) lang:en -is:retweet`;
+  const companyNames = symbols.slice(0, 8).map(s => `"${getSearchNameForSymbol(s)}"`).join(' OR ');
+  const query = `(${companyNames}) (Nigeria OR NGX OR Naira) lang:en -is:retweet`;
   
-  if (cashtagQuery.length <= 500) {
+  if (query.length <= 500) {
     try {
-      const encodedQuery = encodeURIComponent(cashtagQuery);
+      const encodedQuery = encodeURIComponent(query);
       const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=20&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
       
       const response: XSearchResponse = await fetchFromXApi(endpoint);
@@ -215,7 +231,7 @@ export async function searchXForStocks(symbols: string[], use72Hours: boolean = 
       
       await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (error) {
-      console.error('X search error for cashtags:', error);
+      console.error('X search error for company names:', error);
     }
   }
 
@@ -227,19 +243,15 @@ export async function searchXForWatchlistStocks(watchlistSymbols: string[], use7
   
   const allTweets: XTweet[] = [];
   const startTime = use72Hours ? `&start_time=${get72HoursAgo()}` : '';
-  const symbolChunks: string[][] = [];
   
-  for (let i = 0; i < watchlistSymbols.length; i += 10) {
-    symbolChunks.push(watchlistSymbols.slice(i, i + 10));
-  }
-
-  for (const chunk of symbolChunks) {
-    try {
-      const cashtags = chunk.map(s => `$${s}`).join(' OR ');
-      const query = `(${cashtags}) lang:en -is:retweet`;
-      
-      if (query.length > 500) continue;
-      
+  try {
+    const companyNames = watchlistSymbols
+      .slice(0, 6)
+      .map(s => `"${getSearchNameForSymbol(s)}"`)
+      .join(' OR ');
+    const query = `(${companyNames}) (Nigeria OR NGX OR Naira OR Lagos) lang:en -is:retweet`;
+    
+    if (query.length <= 500) {
       const encodedQuery = encodeURIComponent(query);
       const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=15&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
       
@@ -258,20 +270,20 @@ export async function searchXForWatchlistStocks(watchlistSymbols: string[], use7
           allTweets.push(tweet);
         }
       }
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    } catch (error) {
-      console.error('X watchlist search error:', error);
     }
+    
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  } catch (error) {
+    console.error('X watchlist search error:', error);
   }
   
   try {
-    const symbolKeywords = watchlistSymbols
-      .slice(0, 15)
-      .map(s => `$${s}`)
+    const companyNames = watchlistSymbols
+      .slice(0, 5)
+      .map(s => getSearchNameForSymbol(s))
       .join(' OR ');
     
-    const financeQuery = `(from:NGXGroup OR from:SECNigeria OR from:Nairametrics) (${symbolKeywords}) -is:retweet`;
+    const financeQuery = `(from:NGXGroup OR from:SECNigeria OR from:Nairametrics) (${companyNames}) -is:retweet`;
     const encodedQuery = encodeURIComponent(financeQuery);
     const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=10&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
     
@@ -323,8 +335,11 @@ export async function crawlXPosts(): Promise<{ success: boolean; postsProcessed:
     console.log(`[X Crawler] Searching ${prioritySymbols.length} priority symbols (1 API call)`);
     
     try {
-      const cashtags = prioritySymbols.map(s => `$${s}`).join(' OR ');
-      const query = `(${cashtags}) lang:en -is:retweet`;
+      const companyNames = prioritySymbols
+        .slice(0, 8)
+        .map(s => `"${getSearchNameForSymbol(s)}"`)
+        .join(' OR ');
+      const query = `(${companyNames}) (Nigeria OR NGX OR Naira OR Lagos) lang:en -is:retweet`;
       const encodedQuery = encodeURIComponent(query);
       const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=50&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
       

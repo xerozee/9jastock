@@ -1,0 +1,323 @@
+# Complete NGX Twitter/X Search Query (143 Stocks with Full Company Names)
+
+# Last Updated: January 2026
+
+# Purpose: Includes both tickers AND company names to avoid conflicts with similar global tickers
+
+================================================================================
+
+## FULL COMBINED QUERY
+
+================================================================================
+
+### PART 1: General NGX Terms & News Sources
+
+(#NGX OR #NGXASI OR #NigerianStockMarket OR #NaijaStocks OR “Nigerian Exchange” OR “NGX All Share Index” OR “NGX equities” OR “NGX trading” OR “NGX investors”) OR (from:ngxgrp OR from:Nairametrics OR from:ProshareNG OR from:BusinessDayNG OR from:ngnmarket OR from:AlomolaNG OR from:CardinalStonNG OR from:vetaborker OR from:InvestorNgr OR from:TheNigerianInv)
+
+-----
+
+### PART 2: TELECOMMUNICATIONS & TECHNOLOGY (9 stocks)
+
+($AIRTELAFRI OR “Airtel Africa Plc”) OR ($MTNN OR “MTN Nigeria Communications”) OR ($ETRANZACT OR “eTranzact International Plc”) OR ($CHAMS OR “Chams Holding Company”) OR ($CWG OR “CWG Plc”) OR ($NSLTECH OR “Secure Electronic Technology Plc”) OR ($AFRIPRUD OR “Africa Prudential Plc”) OR ($LEGENDINT OR “Legend Internet Plc”) OR ($DAARCOMM OR “DAAR Communications Plc”)
+
+-----
+
+### PART 3: BANKING & FINANCIAL SERVICES (18 stocks)
+
+($ZENITHBANK OR “Zenith Bank Plc”) OR ($GTCO OR “Guaranty Trust Holding Company”) OR ($ACCESSCORP OR “Access Holdings Plc”) OR ($UBA OR “United Bank for Africa”) OR ($FIRSTHOLDCO OR “First HoldCo Plc”) OR ($ETI OR “Ecobank Transnational”) OR ($STANBIC OR “Stanbic IBTC Holdings”) OR ($FIDELITYBK OR “Fidelity Bank Plc”) OR ($FCMB OR “FCMB Group Plc”) OR ($STERLINGNG OR “Sterling Financial Holdings”) OR ($UNITYBNK OR “Unity Bank Plc”) OR ($WEMABANK OR “Wema Bank Plc”) OR ($JAIZBANK OR “Jaiz Bank Plc”) OR ($ABBEYBDS OR “Abbey Mortgage Bank”) OR ($LIVINGTRUST OR “Livingtrust Mortgage Bank”) OR ($NPFMCRFBK OR “NPF Microfinance Bank”) OR ($ASOSAVINGS OR “ASO Savings and Loans”) OR ($INFINITY OR “Infinity Trust Mortgage Bank”)
+
+-----
+
+### PART 4: CEMENT & BUILDING MATERIALS (3 stocks)
+
+($DANGCEM OR “Dangote Cement Plc”) OR ($BUACEMENT OR “BUA Cement Plc”) OR ($WAPCO OR “Lafarge Africa Plc”)
+
+-----
+
+### PART 5: CONSUMER GOODS & FOOD/BEVERAGES (19 stocks)
+
+($BUAFOODS OR “BUA Foods Plc”) OR ($NESTLE OR “Nestle Nigeria Plc”) OR ($DANGSUGAR OR “Dangote Sugar Refinery”) OR ($NASCON OR “Nascon Allied Industries”) OR ($CADBURY OR “Cadbury Nigeria Plc”) OR ($PZ OR “PZ Cussons Nigeria”) OR ($UNILEVER OR “Unilever Nigeria Plc”) OR ($HONYFLOUR OR “Honeywell Flour Mills”) OR ($CHAMPION OR “Champion Breweries Plc”) OR ($NB OR “Nigerian Breweries Plc”) OR ($INTBREW OR “International Breweries Plc”) OR ($GUINNESS OR “Guinness Nigeria Plc”) OR ($GOLDBREW OR “Golden Guinea Breweries”) OR ($NNFM OR “Northern Nigeria Flour Mills”) OR ($UNIONDICON OR “Union Dicon Salt Plc”) OR ($MCNICHOLS OR “McNichols Plc”) OR ($MULTITREX OR “Multi-Trex Integrated Foods”) OR ($TANTALIZER OR “Tantalizers Plc”)
+
+-----
+
+### PART 6: OIL & GAS (7 stocks)
+
+($SEPLAT OR “Seplat Energy Plc”) OR ($ARADEL OR “Aradel Holdings Plc”) OR ($TOTAL OR “TotalEnergies Marketing Nigeria”) OR ($OANDO OR “Oando Plc”) OR ($CONOIL OR “Conoil Plc”) OR ($ETERNA OR “Eterna Plc”)
+
+-----
+
+### PART 7: POWER & UTILITIES (2 stocks)
+
+($GEREGU OR “Geregu Power Plc”) OR ($TRANSPOWER OR “Transcorp Power Plc”)
+
+-----
+
+### PART 8: INSURANCE (23 stocks)
+
+($AIICO OR “AIICO Insurance Plc”) OR ($MANSARD OR “AXA Mansard Insurance”) OR ($NEM OR “NEM Insurance Plc”) OR ($CORNERST OR “Cornerstone Insurance”) OR ($LASACO OR “LASACO Assurance Plc”) OR ($WAPIC OR “Coronation Insurance Plc”) OR ($LINKASSURE OR “Linkage Assurance Plc”) OR ($REGALINS OR “Regency Alliance Insurance”) OR ($VERITASKAP OR “Veritas Kapital Assurance”) OR ($CAP OR “Chemical and Allied Products”) OR ($MBENEFIT OR “Mutual Benefits Assurance”) OR ($SOVRENINS OR “Sovereign Trust Insurance”) OR ($CONHALLPLC OR “Consolidated Hallmark Holdings”) OR ($SUNUASSUR OR “Sunu Assurances Nigeria”) OR ($PRESTIGE OR “Prestige Assurance Company”) OR ($UNIVINSURE OR “Universal Insurance Plc”) OR ($GUINEAINS OR “Guinea Insurance Plc”) OR ($STACO OR “STACO Insurance Plc”) OR ($AFRINSURE OR “African Alliance Insurance”) OR ($INTENEGINS OR “International Energy Insurance”) OR ($FTGINSURE OR “Fortis Global Insurance”) OR ($CUSTODIAN OR “Custodian Investment Plc”) OR ($ROYALEX OR “Royal Exchange Plc”)
+
+-----
+
+### PART 9: CONGLOMERATES, AGRICULTURE & REAL ESTATE (12 stocks)
+
+($TRANSCORP OR “Transnational Corporation of Nigeria”) OR ($TRANSCOHOT OR “Transcorp Hotels Plc”) OR ($UACN OR “UAC of Nigeria Plc”) OR ($UPDC OR “UPDC Plc”) OR ($UPDCREIT OR “UPDC Real Estate Investment Trust”) OR ($SFSREIT OR “SFS Real Estate Investment Trust”) OR ($UHOMREIT OR “UH Real Estate Investment Trust”) OR ($PRESCO OR “Presco Plc”) OR ($OKOMUOIL OR “Okomu Oil Palm Company”) OR ($ELLAHLAKES OR “Ellah Lakes Plc”) OR ($FTNCOCOA OR “FTN Cocoa Processors”) OR ($LIVESTOCK OR “Livestock Feeds Plc”)
+
+-----
+
+### PART 10: INDUSTRIAL GOODS & SERVICES (8 stocks)
+
+($JBERGER OR “Julius Berger Nigeria”) OR ($NAHCO OR “Nigerian Aviation Handling Company”) OR ($SKYAVN OR “Skyway Aviation Handling Company”) OR ($CAVERTON OR “Caverton Offshore Support Group”) OR ($ABCTRANS OR “ABC Transport Plc”) OR ($REDSTAREX OR “Red Star Express Plc”) OR ($TRANSEXPR OR “Trans-Nationwide Express”) OR ($CILEASING OR “C & I Leasing Plc”)
+
+-----
+
+### PART 11: MANUFACTURING & CONSTRUCTION (11 stocks)
+
+($VITAFOAM OR “Vitafoam Nigeria Plc”) OR ($BETAGLAS OR “Beta Glass Plc”) OR ($BERGER OR “Berger Paints Nigeria”) OR ($CUTIX OR “Cutix Plc”) OR ($IMG OR “Industrial and Medical Gases Nigeria”) OR ($ENAMELWA OR “Nigerian Enamelware Plc”) OR ($ALEX OR “Aluminium Extrusion Industries”) OR ($PREMPAINTS OR “Premier Paints Plc”) OR ($VANLEER OR “Greif Nigeria Plc”) OR ($MEYER OR “Meyer Plc”) OR ($DUNLOP OR “DN Tyre & Rubber Plc”)
+
+-----
+
+### PART 12: HEALTHCARE & PHARMACEUTICALS (6 stocks)
+
+($FIDSON OR “Fidson Healthcare Plc”) OR ($MAYBAKER OR “May & Baker Nigeria”) OR ($NEIMETH OR “Neimeth International Pharmaceuticals”) OR ($PHARMDEKO OR “Pharma Deko Plc”) OR ($MORISON OR “Morison Industries Plc”) OR ($EKOCORP OR “Ekocorp Plc”)
+
+-----
+
+### PART 13: OTHER LISTED COMPANIES (27 stocks)
+
+($NGXGROUP OR “Nigerian Exchange Group”) OR ($UCAP OR “United Capital Plc”) OR ($VFDGROUP OR “VFD Group Plc”) OR ($DEAPCAP OR “DEAP Capital Management”) OR ($MECURE OR “Mecure Industries Plc”) OR ($IKEJAHOTEL OR “Ikeja Hotel Plc”) OR ($CHELLARAM OR “Chellarams Plc”) OR ($SCOA OR “SCOA Nigeria Plc”) OR ($RTBRISCOE OR “R.T Briscoe Nigeria”) OR ($JOHNHOLT OR “John Holt Plc”) OR ($JAPAULGOLD OR “Japaul Gold & Ventures”) OR ($MULTIVERSE OR “Multiverse Mining and Exploration”) OR ($RONCHESS OR “Ronchess Global Resources”) OR ($HMCALL OR “Haldane Mccall Plc”) OR ($TIP OR “The Initiates Plc”) OR ($AUSTINLAZ OR “Austin Laz & Company”) OR ($TRIPPLEG OR “Tripple Gee & Company”) OR ($OMATEK OR “Omatek Ventures Plc”) OR ($THOMASWY OR “Thomas Wyatt Nigeria”) OR ($ACADEMY OR “Academy Press Plc”) OR ($LEARNAFRCA OR “Learn Africa Plc”) OR ($UPL OR “University Press Plc”) OR ($AFROMEDIA OR “Afromedia Plc”) OR ($EUNISELL OR “Eunisell Interlinked Plc”) OR ($NCR OR “NCR Nigeria Plc”) OR ($BAPLC OR “Briclinks Africa Plc”) OR ($JULI OR “Juli Plc”)
+
+================================================================================
+
+## TICKER CONFLICT WARNINGS ⚠️
+
+================================================================================
+
+The following NGX tickers conflict with tickers on other global exchanges.
+ALWAYS include the full company name to avoid false matches:
+
+|NGX Ticker|NGX Company               |Conflicting Exchange|Conflicting Company    |
+|----------|--------------------------|--------------------|-----------------------|
+|$NB       |Nigerian Breweries        |NYSE                |NiSource Inc           |
+|$PZ       |PZ Cussons Nigeria        |NYSE                |Petrobras              |
+|$CAP      |Chemical & Allied Products|NYSE                |Capitol Federal        |
+|$NESTLE   |Nestle Nigeria            |Swiss: NESN         |Nestlé S.A.            |
+|$UNILEVER |Unilever Nigeria          |NYSE: UL            |Unilever PLC           |
+|$TOTAL    |TotalEnergies Marketing NG|NYSE: TTE           |TotalEnergies SE       |
+|$CADBURY  |Cadbury Nigeria           |Various             |Cadbury (Mondelez)     |
+|$GUINNESS |Guinness Nigeria          |LSE                 |Diageo (Guinness owner)|
+|$NCR      |NCR Nigeria               |NYSE                |NCR Corporation        |
+|$UPL      |University Press          |NYSE                |UPL Limited (India)    |
+|$ETI      |Ecobank Transnational     |Various             |Other tickers          |
+|$IMG      |Industrial & Medical Gases|Various             |Various                |
+|$TIP      |The Initiates Plc         |Various             |Various                |
+
+================================================================================
+
+## RECOMMENDED TWITTER/X SEARCH STRATEGY
+
+================================================================================
+
+Since Twitter has a ~512 character limit, split into these saved searches:
+
+### Search 1: General + Banking
+
+(#NGX OR #NGXASI OR “Nigerian Exchange”) OR ($ZENITHBANK OR “Zenith Bank”) OR ($GTCO OR “Guaranty Trust”) OR ($ACCESSCORP OR “Access Holdings”) OR ($UBA OR “United Bank for Africa”) OR ($FIRSTHOLDCO OR “First HoldCo”) OR ($ETI OR “Ecobank Transnational”) OR ($STANBIC OR “Stanbic IBTC”) OR ($FIDELITYBK OR “Fidelity Bank”) OR ($FCMB OR “FCMB Group”) OR ($STERLINGNG OR “Sterling Financial”) OR ($WEMABANK OR “Wema Bank”) OR ($JAIZBANK OR “Jaiz Bank”)
+
+### Search 2: Telecoms + Big Caps
+
+($AIRTELAFRI OR “Airtel Africa”) OR ($MTNN OR “MTN Nigeria”) OR ($DANGCEM OR “Dangote Cement”) OR ($BUACEMENT OR “BUA Cement”) OR ($BUAFOODS OR “BUA Foods”) OR ($SEPLAT OR “Seplat Energy”) OR ($ARADEL OR “Aradel Holdings”) OR ($GEREGU OR “Geregu Power”) OR ($TRANSPOWER OR “Transcorp Power”)
+
+### Search 3: Consumer Goods
+
+(“Nigerian Breweries” OR $NB) OR ($INTBREW OR “International Breweries”) OR ($GUINNESS OR “Guinness Nigeria”) OR (“Nestle Nigeria” OR NESTLE) OR ($DANGSUGAR OR “Dangote Sugar”) OR ($NASCON OR “Nascon Allied”) OR (“Cadbury Nigeria” OR $CADBURY) OR ($HONYFLOUR OR “Honeywell Flour”) OR (“Unilever Nigeria” OR $UNILEVER) OR (“PZ Cussons Nigeria”)
+
+### Search 4: Oil & Gas + Industrials
+
+($SEPLAT OR “Seplat Energy”) OR (“TotalEnergies Marketing Nigeria”) OR ($OANDO OR “Oando Plc”) OR ($CONOIL OR “Conoil Plc”) OR ($JBERGER OR “Julius Berger”) OR ($NAHCO OR “Nigerian Aviation Handling”) OR ($VITAFOAM OR “Vitafoam Nigeria”) OR ($BETAGLAS OR “Beta Glass”)
+
+### Search 5: Insurance
+
+($AIICO OR “AIICO Insurance”) OR ($MANSARD OR “AXA Mansard”) OR ($NEM OR “NEM Insurance”) OR ($CORNERST OR “Cornerstone Insurance”) OR ($LASACO OR “LASACO Assurance”) OR ($WAPIC OR “Coronation Insurance”) OR ($CUSTODIAN OR “Custodian Investment”) OR ($LINKASSURE OR “Linkage Assurance”)
+
+### Search 6: Agriculture + Real Estate + Others
+
+($PRESCO OR “Presco Plc”) OR ($OKOMUOIL OR “Okomu Oil Palm”) OR ($TRANSCORP OR “Transnational Corporation”) OR ($TRANSCOHOT OR “Transcorp Hotels”) OR ($UACN OR “UAC of Nigeria”) OR ($NGXGROUP OR “Nigerian Exchange Group”) OR ($UCAP OR “United Capital”) OR ($FIDSON OR “Fidson Healthcare”)
+
+### Search 7: News Sources Only
+
+from:ngxgrp OR from:Nairametrics OR from:ProshareNG OR from:BusinessDayNG OR from:ngnmarket OR from:AlomolaNG OR from:CardinalStonNG OR from:vetaborker OR from:InvestorNgr OR from:TheNigerianInv OR from:SecaborNGX OR from:APaborker
+
+================================================================================
+
+## COMPLETE STOCK REFERENCE TABLE (143 Stocks)
+
+================================================================================
+
+|#  |Ticker     |Full Company Name                        |Sector            |
+|---|-----------|-----------------------------------------|------------------|
+|1  |AIRTELAFRI |Airtel Africa Plc                        |Telecom           |
+|2  |BUAFOODS   |BUA Foods PLC                            |Consumer Goods    |
+|3  |MTNN       |MTN Nigeria Communications PLC           |Telecom           |
+|4  |DANGCEM    |Dangote Cement Plc                       |Cement            |
+|5  |BUACEMENT  |BUA Cement Plc                           |Cement            |
+|6  |SEPLAT     |Seplat Energy Plc                        |Oil & Gas         |
+|7  |ARADEL     |Aradel Holdings Plc                      |Oil & Gas         |
+|8  |GTCO       |Guaranty Trust Holding Company Plc       |Banking           |
+|9  |GEREGU     |Geregu Power Plc                         |Power             |
+|10 |ZENITHBANK |Zenith Bank Plc                          |Banking           |
+|11 |INTBREW    |International Breweries Plc              |Breweries         |
+|12 |NB         |Nigerian Breweries Plc                   |Breweries         |
+|13 |TRANSPOWER |Transcorp Power Plc                      |Power             |
+|14 |WAPCO      |Lafarge Africa Plc                       |Cement            |
+|15 |FIRSTHOLDCO|First HoldCo Plc                         |Banking           |
+|16 |TRANSCOHOT |Transcorp Hotels Plc                     |Hospitality       |
+|17 |UBA        |United Bank for Africa Plc               |Banking           |
+|18 |STANBIC    |Stanbic IBTC Holdings PLC                |Banking           |
+|19 |NESTLE     |Nestlé Nigeria Plc                       |Consumer Goods    |
+|20 |PRESCO     |Presco Plc                               |Agriculture       |
+|21 |ACCESSCORP |Access Holdings Plc                      |Banking           |
+|22 |OKOMUOIL   |The Okomu Oil Palm Company Plc           |Agriculture       |
+|23 |ETI        |Ecobank Transnational Incorporated       |Banking           |
+|24 |FIDELITYBK |Fidelity Bank Plc                        |Banking           |
+|25 |WEMABANK   |Wema Bank PLC                            |Banking           |
+|26 |GUINNESS   |Guinness Nigeria Plc                     |Breweries         |
+|27 |DANGSUGAR  |Dangote Sugar Refinery Plc               |Consumer Goods    |
+|28 |OANDO      |Oando PLC                                |Oil & Gas         |
+|29 |FCMB       |FCMB Group Plc                           |Banking           |
+|30 |TRANSCORP  |Transnational Corporation of Nigeria Plc |Conglomerate      |
+|31 |UNILEVER   |Unilever Nigeria Plc                     |Consumer Goods    |
+|32 |STERLINGNG |Sterling Financial Holdings Company Plc  |Banking           |
+|33 |UCAP       |United Capital Plc                       |Financial Services|
+|34 |NASCON     |Nascon Allied Industries Plc             |Consumer Goods    |
+|35 |UACN       |UAC of Nigeria PLC                       |Conglomerate      |
+|36 |MECURE     |Mecure Industries PLC                    |Industrial        |
+|37 |CUSTODIAN  |Custodian Investment Plc                 |Insurance         |
+|38 |JBERGER    |Julius Berger Nigeria Plc                |Construction      |
+|39 |BETAGLAS   |Beta Glass Plc                           |Industrial        |
+|40 |TOTAL      |TotalEnergies Marketing Nigeria Plc      |Oil & Gas         |
+|41 |NAHCO      |Nigerian Aviation Handling Company Plc   |Aviation          |
+|42 |JAIZBANK   |Jaiz Bank Plc                            |Banking           |
+|43 |PZ         |PZ Cussons Nigeria Plc                   |Consumer Goods    |
+|44 |HONYFLOUR  |Honeywell Flour Mills Plc                |Consumer Goods    |
+|45 |NGXGROUP   |The Nigerian Exchange Group Plc          |Financial Services|
+|46 |AIICO      |AIICO Insurance Plc                      |Insurance         |
+|47 |CADBURY    |Cadbury Nigeria Plc                      |Consumer Goods    |
+|48 |NEM        |NEM Insurance Plc                        |Insurance         |
+|49 |CONOIL     |Conoil Plc                               |Oil & Gas         |
+|50 |CHAMPION   |Champion Breweries Plc                   |Breweries         |
+|51 |MANSARD    |AXA Mansard Insurance Plc                |Insurance         |
+|52 |SKYAVN     |Skyway Aviation Handling Company Plc     |Aviation          |
+|53 |VITAFOAM   |Vitafoam Nigeria Plc                     |Industrial        |
+|54 |FIDSON     |Fidson Healthcare Plc                    |Healthcare        |
+|55 |CORNERST   |Cornerstone Insurance Plc                |Insurance         |
+|56 |ETRANZACT  |eTranzact International Plc              |Technology        |
+|57 |UPDC       |UPDC Plc                                 |Real Estate       |
+|58 |IKEJAHOTEL |Ikeja Hotel Plc                          |Hospitality       |
+|59 |VFDGROUP   |VFD Group PLC                            |Financial Services|
+|60 |WAPIC      |Coronation Insurance Plc                 |Insurance         |
+|61 |ABBEYBDS   |Abbey Mortgage Bank Plc                  |Banking           |
+|62 |MBENEFIT   |Mutual Benefits Assurance Plc            |Insurance         |
+|63 |AFRIPRUD   |Africa Prudential Plc                    |Technology        |
+|64 |CAP        |Chemical and Allied Products Plc         |Industrial        |
+|65 |SOVRENINS  |Sovereign Trust Insurance Plc            |Insurance         |
+|66 |ELLAHLAKES |Ellah Lakes Plc                          |Agriculture       |
+|67 |CONHALLPLC |Consolidated Hallmark Holdings Plc       |Insurance         |
+|68 |CWG        |CWG Plc                                  |Technology        |
+|69 |ETERNA     |Eterna Plc                               |Oil & Gas         |
+|70 |CHAMS      |Chams Holding Company Plc                |Technology        |
+|71 |JAPAULGOLD |Japaul Gold & Ventures Plc               |Mining            |
+|72 |LINKASSURE |Linkage Assurance Plc                    |Insurance         |
+|73 |MAYBAKER   |May & Baker Nigeria plc                  |Healthcare        |
+|74 |SUNUASSUR  |Sunu Assurances Nigeria Plc              |Insurance         |
+|75 |INFINITY   |Infinity Trust Mortgage Bank Plc         |Banking           |
+|76 |EUNISELL   |Eunisell Interlinked Plc                 |Oil & Gas         |
+|77 |LASACO     |LASACO Assurance Plc                     |Insurance         |
+|78 |NEIMETH    |Neimeth International Pharmaceuticals Plc|Healthcare        |
+|79 |VERITASKAP |Veritas Kapital Assurance Plc            |Insurance         |
+|80 |NPFMCRFBK  |NPF Microfinance Bank Plc                |Banking           |
+|81 |CUTIX      |Cutix Plc                                |Industrial        |
+|82 |PRESTIGE   |Prestige Assurance Company Plc           |Insurance         |
+|83 |CILEASING  |C & I Leasing Plc                        |Industrial        |
+|84 |FTNCOCOA   |FTN Cocoa Processors Plc                 |Agriculture       |
+|85 |UNIVINSURE |Universal Insurance Plc                  |Insurance         |
+|86 |UPDCREIT   |UPDC Real Estate Investment Trust        |Real Estate       |
+|87 |LIVESTOCK  |Livestock Feeds Plc                      |Agriculture       |
+|88 |CAVERTON   |Caverton Offshore Support Group Plc      |Aviation          |
+|89 |UNITYBNK   |Unity Bank Plc                           |Banking           |
+|90 |IMG        |Industrial and Medical Gases Nigeria Plc |Industrial        |
+|91 |REGALINS   |Regency Alliance Insurance Plc           |Insurance         |
+|92 |LIVINGTRUST|Livingtrust Mortgage Bank PLC            |Banking           |
+|93 |ROYALEX    |Royal Exchange Plc                       |Insurance         |
+|94 |NNFM       |Northern Nigeria Flour Mills Plc         |Consumer Goods    |
+|95 |BERGER     |Berger Paints Nigeria Plc                |Industrial        |
+|96 |TANTALIZER |Tantalizers PLC                          |Consumer Goods    |
+|97 |HMCALL     |Haldane Mccall Plc                       |Other             |
+|98 |TIP        |The Initiates Plc                        |Other             |
+|99 |LEGENDINT  |Legend Internet Plc                      |Technology        |
+|100|GUINEAINS  |Guinea Insurance Plc                     |Insurance         |
+|101|ABCTRANS   |ABC Transport Plc                        |Transport         |
+|102|UHOMREIT   |UH Real Estate Investment Trust          |Real Estate       |
+|103|CHELLARAM  |Chellarams Plc                           |Conglomerate      |
+|104|SFSREIT    |SFS Real Estate Investment Trust Fund    |Real Estate       |
+|105|REDSTAREX  |Red Star Express Plc                     |Logistics         |
+|106|NCR        |NCR (Nigeria) Plc                        |Technology        |
+|107|DAARCOMM   |Daar Communications Plc                  |Media             |
+|108|RONCHESS   |Ronchess Global Resources PLC            |Other             |
+|109|GOLDBREW   |Golden Guinea Breweries Plc              |Breweries         |
+|110|ACADEMY    |Academy Press Plc                        |Publishing        |
+|111|MEYER      |Meyer Plc                                |Industrial        |
+|112|MULTIVERSE |Multiverse Mining and Exploration Plc    |Mining            |
+|113|LEARNAFRCA |Learn Africa Plc                         |Publishing        |
+|114|ASOSAVINGS |ASO Savings and Loans Plc                |Banking           |
+|115|MORISON    |Morison Industries Plc                   |Healthcare        |
+|116|ALEX       |Aluminium Extrusion Industries Plc       |Industrial        |
+|117|SCOA       |SCOA Nigeria Plc                         |Conglomerate      |
+|118|AUSTINLAZ  |Austin Laz & Company Plc                 |Industrial        |
+|119|STACO      |STACO Insurance Plc                      |Insurance         |
+|120|TRIPPLEG   |Tripple Gee & Company Plc                |Industrial        |
+|121|NSLTECH    |Secure Electronic Technology Plc         |Technology        |
+|122|RTBRISCOE  |R.T Briscoe (Nigeria) Plc                |Conglomerate      |
+|123|AFRINSURE  |African Alliance Insurance Plc           |Insurance         |
+|124|MCNICHOLS  |McNichols PLC                            |Consumer Goods    |
+|125|OMATEK     |Omatek Ventures Plc                      |Technology        |
+|126|INTENEGINS |International Energy Insurance Plc       |Insurance         |
+|127|ENAMELWA   |Nigerian Enamelware PLC                  |Industrial        |
+|128|EKOCORP    |Ekocorp Plc                              |Healthcare        |
+|129|DEAPCAP    |DEAP Capital Management & Trust Plc      |Financial Services|
+|130|UPL        |University Press Plc                     |Publishing        |
+|131|FTGINSURE  |Fortis Global Insurance Plc              |Insurance         |
+|132|MULTITREX  |Multi-Trex Integrated Foods Plc          |Consumer Goods    |
+|133|JOHNHOLT   |John Holt Plc                            |Conglomerate      |
+|134|UNIONDICON |Union Dicon Salt Plc                     |Consumer Goods    |
+|135|JULI       |Juli plc                                 |Other             |
+|136|PREMPAINTS |Premier Paints Plc                       |Industrial        |
+|137|TRANSEXPR  |Trans-Nationwide Express Plc             |Logistics         |
+|138|AFROMEDIA  |Afromedia Plc                            |Media             |
+|139|DUNLOP     |DN Tyre & Rubber Plc                     |Industrial        |
+|140|THOMASWY   |Thomas Wyatt Nigeria Plc                 |Other             |
+|141|PHARMDEKO  |Pharma Deko Plc                          |Healthcare        |
+|142|VANLEER    |Greif Nigeria Plc                        |Industrial        |
+|143|BAPLC      |Briclinks Africa Plc                     |Other             |
+
+================================================================================
+
+## NOTES
+
+================================================================================
+
+1. **Why include full company names?**
+- $NB on NYSE = NiSource (utility company), but on NGX = Nigerian Breweries
+- $NESTLE globally = Swiss Nestlé, but “Nestle Nigeria” is specific
+- $TOTAL globally = TotalEnergies SE, but “TotalEnergies Marketing Nigeria” is the NGX stock
+- Including full names ensures your search captures Nigeria-specific mentions
+1. **Twitter Search Tip**: Use quotes around multi-word company names:
+- ✅ “Dangote Cement” (exact phrase)
+- ❌ Dangote Cement (matches any tweet with both words separately)
+1. **Alternative Hashtags to Monitor**:
+   #NigeriaStocks #NaijaBourse #NGX30 #NGX50 #NGXBanking #NGXInsurance
+   #NigeriaInvesting #AfricanStocks #FrontierMarkets #LagosBourse
+1. **Useful Accounts Beyond News**:
+- @ngaborker (analyst)
+- @DLMCapital (research)
+- @ChapelHillDenha (advisory)
+- @CSaborker (market updates)

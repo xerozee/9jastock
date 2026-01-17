@@ -37,77 +37,174 @@ async function getAllUserSymbols(): Promise<string[]> {
   return Array.from(symbolsSet);
 }
 
-const STOCK_ALIASES: Record<string, string[]> = {
-  'GTCO': ['GTBank', 'GT Bank', 'Guaranty Trust', 'GTCO'],
-  'UBA': ['United Bank for Africa', 'UBA'],
-  'FBNH': ['First Bank', 'FirstBank', 'FBN Holdings'],
-  'MTNN': ['MTN Nigeria', 'MTN'],
-  'AIRTELAFRI': ['Airtel Africa', 'Airtel'],
-  'ACCESSCORP': ['Access Bank', 'Access Holdings', 'Access Corporation'],
-  'STANBIC': ['Stanbic IBTC', 'Stanbic'],
-  'BUACEMENT': ['BUA Cement', 'BUA'],
-  'DANGCEM': ['Dangote Cement'],
-  'SEPLAT': ['Seplat Energy', 'Seplat'],
-  'FLOURMILL': ['Flour Mills', 'FMN', 'Flour Mills of Nigeria'],
-  'WAPCO': ['Lafarge Africa', 'Lafarge'],
-  'FCMB': ['First City Monument Bank', 'FCMB'],
-  'STERLINGNG': ['Sterling Bank', 'Sterling'],
-  'NB': ['Nigerian Breweries'],
-  'AFRIPRUD': ['Africa Prudential', 'AfriPrud'],
-  'TRANSCORP': ['Transnational Corporation', 'Transcorp'],
-  'HONYFLOUR': ['Honeywell Flour', 'Honeywell'],
-  'MANSARD': ['AXA Mansard', 'Mansard'],
-  'CHIPLC': ['Consolidated Hallmark', 'CHI'],
-  'ZENITHBANK': ['Zenith Bank'],
-  'FIDELITYBK': ['Fidelity Bank'],
-  'WEMABANK': ['Wema Bank'],
-  'JAIZBANK': ['Jaiz Bank'],
-  'ECOBANK': ['Ecobank Nigeria', 'Ecobank'],
-  'UNITYBNK': ['Unity Bank'],
-  'DANGSUGAR': ['Dangote Sugar'],
-  'CADBURY': ['Cadbury Nigeria', 'Cadbury'],
-  'NESTLE': ['Nestle Nigeria', 'Nestle'],
-  'GUINNESS': ['Guinness Nigeria'],
-  'INTBREW': ['International Breweries'],
-  'VITAFOAM': ['Vitafoam Nigeria', 'Vitafoam'],
-  'OANDO': ['Oando'],
-  'PRESCO': ['Presco'],
-  'CONOIL': ['Conoil'],
-  'GEREGU': ['Geregu Power'],
-  'CUTIX': ['Cutix'],
-  'LIVESTOCK': ['Livestock Feeds'],
-  'VERITASKAP': ['Veritas Kapital'],
-  'NASCON': ['NASCON Allied', 'NASCON'],
-  'BERGER': ['Berger Paints'],
-  'RTBRISCOE': ['RT Briscoe'],
-  'UPDCREIT': ['UPDC REIT'],
-  'CHAMPION': ['Champion Breweries'],
-  'NPFMCRFBK': ['NPF Microfinance Bank'],
-  'CORNERST': ['Cornerstone Insurance'],
-  'AIICO': ['AIICO Insurance', 'AIICO'],
-  'LASACO': ['Lasaco Assurance'],
-  'LINKASSURE': ['Linkage Assurance'],
-  'MBENEFIT': ['Mutual Benefits Assurance'],
-  'NEM': ['NEM Insurance'],
-  'REGALINS': ['Regency Alliance Insurance'],
-  'UCAP': ['United Capital'],
-  'CAP': ['Chemical and Allied Products'],
-  'DEAPCAP': ['DEAP Capital'],
-  'TOTAL': ['TotalEnergies Marketing Nigeria'],
-  'ARDOVA': ['Ardova Plc'],
-  'MRS': ['MRS Oil'],
-  'ETERNA': ['Eterna Plc'],
-  'UNILEVER': ['Unilever Nigeria'],
-  'PZ': ['PZ Cussons'],
-  'OKOMUOIL': ['Okomu Oil'],
-  'MAYBAKER': ['May & Baker'],
-  'NEIMETH': ['Neimeth Pharmaceuticals'],
-  'FIDSON': ['Fidson Healthcare'],
-  'GLAXOSMITH': ['GlaxoSmithKline'],
-  'UACN': ['UAC of Nigeria'],
-  'NAHCO': ['Nigerian Aviation Handling Company'],
-  'NGXGROUP': ['Nigerian Exchange Group', 'NGX Group'],
+const NGX_STOCK_DATABASE: Record<string, { name: string; sector: string; conflicting?: boolean }> = {
+  'AIRTELAFRI': { name: 'Airtel Africa Plc', sector: 'Telecom' },
+  'MTNN': { name: 'MTN Nigeria Communications PLC', sector: 'Telecom' },
+  'ETRANZACT': { name: 'eTranzact International Plc', sector: 'Technology' },
+  'CHAMS': { name: 'Chams Holding Company Plc', sector: 'Technology' },
+  'CWG': { name: 'CWG Plc', sector: 'Technology' },
+  'NSLTECH': { name: 'Secure Electronic Technology Plc', sector: 'Technology' },
+  'AFRIPRUD': { name: 'Africa Prudential Plc', sector: 'Technology' },
+  'LEGENDINT': { name: 'Legend Internet Plc', sector: 'Technology' },
+  'DAARCOMM': { name: 'DAAR Communications Plc', sector: 'Media' },
+  'ZENITHBANK': { name: 'Zenith Bank Plc', sector: 'Banking' },
+  'GTCO': { name: 'Guaranty Trust Holding Company Plc', sector: 'Banking' },
+  'ACCESSCORP': { name: 'Access Holdings Plc', sector: 'Banking' },
+  'UBA': { name: 'United Bank for Africa Plc', sector: 'Banking' },
+  'FIRSTHOLDCO': { name: 'First HoldCo Plc', sector: 'Banking' },
+  'ETI': { name: 'Ecobank Transnational Incorporated', sector: 'Banking', conflicting: true },
+  'STANBIC': { name: 'Stanbic IBTC Holdings PLC', sector: 'Banking' },
+  'FIDELITYBK': { name: 'Fidelity Bank Plc', sector: 'Banking' },
+  'FCMB': { name: 'FCMB Group Plc', sector: 'Banking' },
+  'STERLINGNG': { name: 'Sterling Financial Holdings Company Plc', sector: 'Banking' },
+  'UNITYBNK': { name: 'Unity Bank Plc', sector: 'Banking' },
+  'WEMABANK': { name: 'Wema Bank PLC', sector: 'Banking' },
+  'JAIZBANK': { name: 'Jaiz Bank Plc', sector: 'Banking' },
+  'ABBEYBDS': { name: 'Abbey Mortgage Bank Plc', sector: 'Banking' },
+  'LIVINGTRUST': { name: 'Livingtrust Mortgage Bank PLC', sector: 'Banking' },
+  'NPFMCRFBK': { name: 'NPF Microfinance Bank Plc', sector: 'Banking' },
+  'ASOSAVINGS': { name: 'ASO Savings and Loans Plc', sector: 'Banking' },
+  'INFINITY': { name: 'Infinity Trust Mortgage Bank Plc', sector: 'Banking' },
+  'DANGCEM': { name: 'Dangote Cement Plc', sector: 'Cement' },
+  'BUACEMENT': { name: 'BUA Cement Plc', sector: 'Cement' },
+  'WAPCO': { name: 'Lafarge Africa Plc', sector: 'Cement' },
+  'BUAFOODS': { name: 'BUA Foods Plc', sector: 'Consumer Goods' },
+  'NESTLE': { name: 'Nestlé Nigeria Plc', sector: 'Consumer Goods', conflicting: true },
+  'DANGSUGAR': { name: 'Dangote Sugar Refinery Plc', sector: 'Consumer Goods' },
+  'NASCON': { name: 'Nascon Allied Industries Plc', sector: 'Consumer Goods' },
+  'CADBURY': { name: 'Cadbury Nigeria Plc', sector: 'Consumer Goods', conflicting: true },
+  'PZ': { name: 'PZ Cussons Nigeria Plc', sector: 'Consumer Goods', conflicting: true },
+  'UNILEVER': { name: 'Unilever Nigeria Plc', sector: 'Consumer Goods', conflicting: true },
+  'HONYFLOUR': { name: 'Honeywell Flour Mills Plc', sector: 'Consumer Goods' },
+  'CHAMPION': { name: 'Champion Breweries Plc', sector: 'Breweries' },
+  'NB': { name: 'Nigerian Breweries Plc', sector: 'Breweries', conflicting: true },
+  'INTBREW': { name: 'International Breweries Plc', sector: 'Breweries' },
+  'GUINNESS': { name: 'Guinness Nigeria Plc', sector: 'Breweries', conflicting: true },
+  'GOLDBREW': { name: 'Golden Guinea Breweries Plc', sector: 'Breweries' },
+  'NNFM': { name: 'Northern Nigeria Flour Mills Plc', sector: 'Consumer Goods' },
+  'UNIONDICON': { name: 'Union Dicon Salt Plc', sector: 'Consumer Goods' },
+  'MCNICHOLS': { name: 'McNichols PLC', sector: 'Consumer Goods' },
+  'MULTITREX': { name: 'Multi-Trex Integrated Foods Plc', sector: 'Consumer Goods' },
+  'TANTALIZER': { name: 'Tantalizers PLC', sector: 'Consumer Goods' },
+  'SEPLAT': { name: 'Seplat Energy Plc', sector: 'Oil & Gas' },
+  'ARADEL': { name: 'Aradel Holdings Plc', sector: 'Oil & Gas' },
+  'TOTAL': { name: 'TotalEnergies Marketing Nigeria Plc', sector: 'Oil & Gas', conflicting: true },
+  'OANDO': { name: 'Oando PLC', sector: 'Oil & Gas' },
+  'CONOIL': { name: 'Conoil Plc', sector: 'Oil & Gas' },
+  'ETERNA': { name: 'Eterna Plc', sector: 'Oil & Gas' },
+  'EUNISELL': { name: 'Eunisell Interlinked Plc', sector: 'Oil & Gas' },
+  'GEREGU': { name: 'Geregu Power Plc', sector: 'Power' },
+  'TRANSPOWER': { name: 'Transcorp Power Plc', sector: 'Power' },
+  'AIICO': { name: 'AIICO Insurance Plc', sector: 'Insurance' },
+  'MANSARD': { name: 'AXA Mansard Insurance Plc', sector: 'Insurance' },
+  'NEM': { name: 'NEM Insurance Plc', sector: 'Insurance' },
+  'CORNERST': { name: 'Cornerstone Insurance Plc', sector: 'Insurance' },
+  'LASACO': { name: 'LASACO Assurance Plc', sector: 'Insurance' },
+  'WAPIC': { name: 'Coronation Insurance Plc', sector: 'Insurance' },
+  'LINKASSURE': { name: 'Linkage Assurance Plc', sector: 'Insurance' },
+  'REGALINS': { name: 'Regency Alliance Insurance Plc', sector: 'Insurance' },
+  'VERITASKAP': { name: 'Veritas Kapital Assurance Plc', sector: 'Insurance' },
+  'CAP': { name: 'Chemical and Allied Products Plc', sector: 'Industrial', conflicting: true },
+  'MBENEFIT': { name: 'Mutual Benefits Assurance Plc', sector: 'Insurance' },
+  'SOVRENINS': { name: 'Sovereign Trust Insurance Plc', sector: 'Insurance' },
+  'CONHALLPLC': { name: 'Consolidated Hallmark Holdings Plc', sector: 'Insurance' },
+  'SUNUASSUR': { name: 'Sunu Assurances Nigeria Plc', sector: 'Insurance' },
+  'PRESTIGE': { name: 'Prestige Assurance Company Plc', sector: 'Insurance' },
+  'UNIVINSURE': { name: 'Universal Insurance Plc', sector: 'Insurance' },
+  'GUINEAINS': { name: 'Guinea Insurance Plc', sector: 'Insurance' },
+  'STACO': { name: 'STACO Insurance Plc', sector: 'Insurance' },
+  'AFRINSURE': { name: 'African Alliance Insurance Plc', sector: 'Insurance' },
+  'INTENEGINS': { name: 'International Energy Insurance Plc', sector: 'Insurance' },
+  'FTGINSURE': { name: 'Fortis Global Insurance Plc', sector: 'Insurance' },
+  'CUSTODIAN': { name: 'Custodian Investment Plc', sector: 'Insurance' },
+  'ROYALEX': { name: 'Royal Exchange Plc', sector: 'Insurance' },
+  'TRANSCORP': { name: 'Transnational Corporation of Nigeria Plc', sector: 'Conglomerate' },
+  'TRANSCOHOT': { name: 'Transcorp Hotels Plc', sector: 'Hospitality' },
+  'UACN': { name: 'UAC of Nigeria PLC', sector: 'Conglomerate' },
+  'UPDC': { name: 'UPDC Plc', sector: 'Real Estate' },
+  'UPDCREIT': { name: 'UPDC Real Estate Investment Trust', sector: 'Real Estate' },
+  'SFSREIT': { name: 'SFS Real Estate Investment Trust Fund', sector: 'Real Estate' },
+  'UHOMREIT': { name: 'UH Real Estate Investment Trust', sector: 'Real Estate' },
+  'PRESCO': { name: 'Presco Plc', sector: 'Agriculture' },
+  'OKOMUOIL': { name: 'The Okomu Oil Palm Company Plc', sector: 'Agriculture' },
+  'ELLAHLAKES': { name: 'Ellah Lakes Plc', sector: 'Agriculture' },
+  'FTNCOCOA': { name: 'FTN Cocoa Processors Plc', sector: 'Agriculture' },
+  'LIVESTOCK': { name: 'Livestock Feeds Plc', sector: 'Agriculture' },
+  'JBERGER': { name: 'Julius Berger Nigeria Plc', sector: 'Construction' },
+  'NAHCO': { name: 'Nigerian Aviation Handling Company Plc', sector: 'Aviation' },
+  'SKYAVN': { name: 'Skyway Aviation Handling Company Plc', sector: 'Aviation' },
+  'CAVERTON': { name: 'Caverton Offshore Support Group Plc', sector: 'Aviation' },
+  'ABCTRANS': { name: 'ABC Transport Plc', sector: 'Transport' },
+  'REDSTAREX': { name: 'Red Star Express Plc', sector: 'Logistics' },
+  'TRANSEXPR': { name: 'Trans-Nationwide Express Plc', sector: 'Logistics' },
+  'CILEASING': { name: 'C & I Leasing Plc', sector: 'Industrial' },
+  'VITAFOAM': { name: 'Vitafoam Nigeria Plc', sector: 'Industrial' },
+  'BETAGLAS': { name: 'Beta Glass Plc', sector: 'Industrial' },
+  'BERGER': { name: 'Berger Paints Nigeria Plc', sector: 'Industrial' },
+  'CUTIX': { name: 'Cutix Plc', sector: 'Industrial' },
+  'IMG': { name: 'Industrial and Medical Gases Nigeria Plc', sector: 'Industrial', conflicting: true },
+  'ENAMELWA': { name: 'Nigerian Enamelware PLC', sector: 'Industrial' },
+  'ALEX': { name: 'Aluminium Extrusion Industries Plc', sector: 'Industrial' },
+  'PREMPAINTS': { name: 'Premier Paints Plc', sector: 'Industrial' },
+  'VANLEER': { name: 'Greif Nigeria Plc', sector: 'Industrial' },
+  'MEYER': { name: 'Meyer Plc', sector: 'Industrial' },
+  'DUNLOP': { name: 'DN Tyre & Rubber Plc', sector: 'Industrial' },
+  'FIDSON': { name: 'Fidson Healthcare Plc', sector: 'Healthcare' },
+  'MAYBAKER': { name: 'May & Baker Nigeria plc', sector: 'Healthcare' },
+  'NEIMETH': { name: 'Neimeth International Pharmaceuticals Plc', sector: 'Healthcare' },
+  'PHARMDEKO': { name: 'Pharma Deko Plc', sector: 'Healthcare' },
+  'MORISON': { name: 'Morison Industries Plc', sector: 'Healthcare' },
+  'EKOCORP': { name: 'Ekocorp Plc', sector: 'Healthcare' },
+  'NGXGROUP': { name: 'The Nigerian Exchange Group Plc', sector: 'Financial Services' },
+  'UCAP': { name: 'United Capital Plc', sector: 'Financial Services' },
+  'VFDGROUP': { name: 'VFD Group PLC', sector: 'Financial Services' },
+  'DEAPCAP': { name: 'DEAP Capital Management & Trust Plc', sector: 'Financial Services' },
+  'MECURE': { name: 'Mecure Industries PLC', sector: 'Industrial' },
+  'IKEJAHOTEL': { name: 'Ikeja Hotel Plc', sector: 'Hospitality' },
+  'CHELLARAM': { name: 'Chellarams Plc', sector: 'Conglomerate' },
+  'SCOA': { name: 'SCOA Nigeria Plc', sector: 'Conglomerate' },
+  'RTBRISCOE': { name: 'R.T Briscoe (Nigeria) Plc', sector: 'Conglomerate' },
+  'JOHNHOLT': { name: 'John Holt Plc', sector: 'Conglomerate' },
+  'JAPAULGOLD': { name: 'Japaul Gold & Ventures Plc', sector: 'Mining' },
+  'MULTIVERSE': { name: 'Multiverse Mining and Exploration Plc', sector: 'Mining' },
+  'RONCHESS': { name: 'Ronchess Global Resources PLC', sector: 'Other' },
+  'HMCALL': { name: 'Haldane Mccall Plc', sector: 'Other' },
+  'TIP': { name: 'The Initiates Plc', sector: 'Other', conflicting: true },
+  'AUSTINLAZ': { name: 'Austin Laz & Company Plc', sector: 'Industrial' },
+  'TRIPPLEG': { name: 'Tripple Gee & Company Plc', sector: 'Industrial' },
+  'OMATEK': { name: 'Omatek Ventures Plc', sector: 'Technology' },
+  'THOMASWY': { name: 'Thomas Wyatt Nigeria Plc', sector: 'Other' },
+  'ACADEMY': { name: 'Academy Press Plc', sector: 'Publishing' },
+  'LEARNAFRCA': { name: 'Learn Africa Plc', sector: 'Publishing' },
+  'UPL': { name: 'University Press Plc', sector: 'Publishing', conflicting: true },
+  'AFROMEDIA': { name: 'Afromedia Plc', sector: 'Media' },
+  'NCR': { name: 'NCR (Nigeria) Plc', sector: 'Technology', conflicting: true },
+  'BAPLC': { name: 'Briclinks Africa Plc', sector: 'Other' },
+  'JULI': { name: 'Juli plc', sector: 'Other' },
 };
+
+const CONFLICTING_TICKERS = ['NB', 'PZ', 'CAP', 'NESTLE', 'UNILEVER', 'TOTAL', 'CADBURY', 'GUINNESS', 'NCR', 'UPL', 'ETI', 'IMG', 'TIP'];
+
+const NGX_SEARCH_QUERIES = {
+  general: '(#NGX OR #NGXASI OR #NigerianStockMarket OR #NaijaStocks OR "Nigerian Exchange" OR "NGX All Share Index" OR "NGX equities" OR "NGX trading" OR "NGX investors")',
+  newsSources: 'from:ngxgrp OR from:Nairametrics OR from:ProshareNG OR from:BusinessDayNG OR from:ngnmarket OR from:AlomolaNG OR from:CardinalStonNG OR from:vetaborker OR from:InvestorNgr OR from:TheNigerianInv OR from:SecaborNGX OR from:APaborker',
+  banking: '($ZENITHBANK OR "Zenith Bank") OR ($GTCO OR "Guaranty Trust") OR ($ACCESSCORP OR "Access Holdings") OR ($UBA OR "United Bank for Africa") OR ($FIRSTHOLDCO OR "First HoldCo") OR ($ETI OR "Ecobank Transnational") OR ($STANBIC OR "Stanbic IBTC") OR ($FIDELITYBK OR "Fidelity Bank") OR ($FCMB OR "FCMB Group") OR ($STERLINGNG OR "Sterling Financial") OR ($WEMABANK OR "Wema Bank") OR ($JAIZBANK OR "Jaiz Bank")',
+  telecomBigCaps: '($AIRTELAFRI OR "Airtel Africa") OR ($MTNN OR "MTN Nigeria") OR ($DANGCEM OR "Dangote Cement") OR ($BUACEMENT OR "BUA Cement") OR ($BUAFOODS OR "BUA Foods") OR ($SEPLAT OR "Seplat Energy") OR ($ARADEL OR "Aradel Holdings") OR ($GEREGU OR "Geregu Power") OR ($TRANSPOWER OR "Transcorp Power")',
+  consumerGoods: '("Nigerian Breweries" OR $NB) OR ($INTBREW OR "International Breweries") OR ($GUINNESS OR "Guinness Nigeria") OR ("Nestle Nigeria" OR NESTLE) OR ($DANGSUGAR OR "Dangote Sugar") OR ($NASCON OR "Nascon Allied") OR ("Cadbury Nigeria" OR $CADBURY) OR ($HONYFLOUR OR "Honeywell Flour") OR ("Unilever Nigeria" OR $UNILEVER) OR ("PZ Cussons Nigeria")',
+  oilGasIndustrial: '($SEPLAT OR "Seplat Energy") OR ("TotalEnergies Marketing Nigeria") OR ($OANDO OR "Oando Plc") OR ($CONOIL OR "Conoil Plc") OR ($JBERGER OR "Julius Berger") OR ($NAHCO OR "Nigerian Aviation Handling") OR ($VITAFOAM OR "Vitafoam Nigeria") OR ($BETAGLAS OR "Beta Glass")',
+  insurance: '($AIICO OR "AIICO Insurance") OR ($MANSARD OR "AXA Mansard") OR ($NEM OR "NEM Insurance") OR ($CORNERST OR "Cornerstone Insurance") OR ($LASACO OR "LASACO Assurance") OR ($WAPIC OR "Coronation Insurance") OR ($CUSTODIAN OR "Custodian Investment") OR ($LINKASSURE OR "Linkage Assurance")',
+  agriRealEstate: '($PRESCO OR "Presco Plc") OR ($OKOMUOIL OR "Okomu Oil Palm") OR ($TRANSCORP OR "Transnational Corporation") OR ($TRANSCOHOT OR "Transcorp Hotels") OR ($UACN OR "UAC of Nigeria") OR ($NGXGROUP OR "Nigerian Exchange Group") OR ($UCAP OR "United Capital") OR ($FIDSON OR "Fidson Healthcare")',
+};
+
+function getStockSearchTerm(symbol: string): string {
+  const stock = NGX_STOCK_DATABASE[symbol];
+  if (!stock) return symbol;
+  if (stock.conflicting) {
+    return `"${stock.name.replace(/ Plc$/i, '').replace(/ PLC$/i, '')}"`;
+  }
+  const shortName = stock.name.replace(/ Plc$/i, '').replace(/ PLC$/i, '');
+  return `($${symbol} OR "${shortName}")`;
+}
 
 const STOCK_NAME_MAP: Record<string, string[]> = {};
 const STOCK_FULL_NAME_MAP: Record<string, string> = {};
@@ -118,17 +215,18 @@ nigerianStocks.forEach(stock => {
   if (words.length > 1 && words[0].length > 2) {
     names.push(words[0]);
   }
-  if (STOCK_ALIASES[stock.symbol]) {
-    names.push(...STOCK_ALIASES[stock.symbol]);
+  const dbStock = NGX_STOCK_DATABASE[stock.symbol];
+  if (dbStock) {
+    names.push(dbStock.name);
   }
   STOCK_NAME_MAP[stock.symbol] = [...new Set(names)];
   STOCK_FULL_NAME_MAP[stock.symbol] = stock.name;
 });
 
 function getSearchNameForSymbol(symbol: string): string {
-  const aliases = STOCK_ALIASES[symbol];
-  if (aliases && aliases.length > 0) {
-    return aliases[0];
+  const stock = NGX_STOCK_DATABASE[symbol];
+  if (stock) {
+    return stock.name.replace(/ Plc$/i, '').replace(/ PLC$/i, '').replace(/ Ltd$/i, '').replace(/ Holdings$/i, '');
   }
   const fullName = STOCK_FULL_NAME_MAP[symbol];
   if (fullName) {
@@ -399,10 +497,39 @@ export async function searchXForWatchlistStocks(watchlistSymbols: string[], use7
 }
 
 const TOP_NIGERIAN_STOCKS = [
-  'GTCO', 'ZENITHBANK', 'ACCESSCORP', 'UBA', 'FBNH', 'MTNN', 
+  'GTCO', 'ZENITHBANK', 'ACCESSCORP', 'UBA', 'FIRSTHOLDCO', 'MTNN', 
   'DANGCEM', 'BUACEMENT', 'SEPLAT', 'AIRTELAFRI', 'STANBIC', 
-  'NB', 'NESTLE', 'TRANSCORP', 'GEREGU'
+  'NB', 'NESTLE', 'TRANSCORP', 'GEREGU', 'BUAFOODS', 'ARADEL',
+  'TRANSPOWER', 'ETI', 'FIDELITYBK', 'OANDO', 'PRESCO', 'NGXGROUP'
 ];
+
+async function searchWithQuery(query: string, startTime: string, maxResults: number = 30): Promise<XTweet[]> {
+  const tweets: XTweet[] = [];
+  const fullQuery = `${query} lang:en -is:retweet`;
+  if (fullQuery.length > 512) {
+    console.log(`[X Crawler] Query too long (${fullQuery.length} chars), skipping`);
+    return tweets;
+  }
+  
+  const encodedQuery = encodeURIComponent(fullQuery);
+  const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=${maxResults}&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
+  
+  const response: XSearchResponse = await fetchFromXApi(endpoint);
+  
+  if (response.data) {
+    const usersMap = new Map<string, XUser>();
+    if (response.includes?.users) {
+      response.includes.users.forEach(user => {
+        usersMap.set(user.id, user);
+      });
+    }
+    for (const tweet of response.data) {
+      (tweet as any)._user = usersMap.get(tweet.author_id);
+      tweets.push(tweet);
+    }
+  }
+  return tweets;
+}
 
 export async function crawlXPosts(): Promise<{ success: boolean; postsProcessed: number; errors: string[] }> {
   const errors: string[] = [];
@@ -414,42 +541,47 @@ export async function crawlXPosts(): Promise<{ success: boolean; postsProcessed:
 
   try {
     await connectToDatabase();
-    console.log('[X Crawler] Starting cost-effective X/Twitter crawl...');
+    console.log('[X Crawler] Starting sector-based X/Twitter crawl with 143 stocks...');
 
     const allTweets: XTweet[] = [];
+    const seenIds = new Set<string>();
     const startTime = `&start_time=${get72HoursAgo()}`;
     
-    const userSymbols = await getAllUserSymbols();
-    const prioritySymbols = [...new Set([...userSymbols, ...TOP_NIGERIAN_STOCKS, ...ALL_NGX_SYMBOLS.slice(0, 30)])].slice(0, 25);
-    console.log(`[X Crawler] Searching ${prioritySymbols.length} priority symbols (multiple API calls)`);
+    const sectorQueries = [
+      { name: 'General + Banking', query: `${NGX_SEARCH_QUERIES.general} OR ${NGX_SEARCH_QUERIES.banking}` },
+      { name: 'Telecoms + Big Caps', query: NGX_SEARCH_QUERIES.telecomBigCaps },
+      { name: 'Consumer Goods', query: NGX_SEARCH_QUERIES.consumerGoods },
+      { name: 'Oil & Gas + Industrial', query: NGX_SEARCH_QUERIES.oilGasIndustrial },
+      { name: 'Insurance', query: NGX_SEARCH_QUERIES.insurance },
+      { name: 'Agri + Real Estate', query: NGX_SEARCH_QUERIES.agriRealEstate },
+      { name: 'News Sources', query: NGX_SEARCH_QUERIES.newsSources },
+    ];
     
-    try {
-      const companyNames = prioritySymbols
-        .slice(0, 10)
-        .map(s => `"${getSearchNameForSymbol(s)}"`)
-        .join(' OR ');
-      const nigerianContext = '(Nigeria OR NGX OR #NGX OR #NigerianStockMarket OR #NaijaStocks)';
-      const query = `(${companyNames}) ${nigerianContext} lang:en -is:retweet`;
-      const encodedQuery = encodeURIComponent(query);
-      const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=50&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
-      
-      const response: XSearchResponse = await fetchFromXApi(endpoint);
-      
-      if (response.data) {
-        const usersMap = new Map<string, XUser>();
-        if (response.includes?.users) {
-          response.includes.users.forEach(user => {
-            usersMap.set(user.id, user);
-          });
-        }
-        for (const tweet of response.data) {
-          (tweet as any)._user = usersMap.get(tweet.author_id);
-          allTweets.push(tweet);
-        }
+    let callCount = 0;
+    for (const sector of sectorQueries) {
+      if (callCount >= 4) {
+        console.log(`[X Crawler] Reached API call limit (4 calls), stopping to minimize costs`);
+        break;
       }
-      console.log(`[X Crawler] API call 1: Found ${response.data?.length || 0} tweets`);
-    } catch (error: any) {
-      errors.push(`Stock search error: ${error.message}`);
+      
+      try {
+        console.log(`[X Crawler] Searching: ${sector.name}`);
+        const tweets = await searchWithQuery(sector.query, startTime, 25);
+        
+        for (const tweet of tweets) {
+          if (!seenIds.has(tweet.id)) {
+            seenIds.add(tweet.id);
+            allTweets.push(tweet);
+          }
+        }
+        
+        console.log(`[X Crawler] ${sector.name}: Found ${tweets.length} tweets (${allTweets.length} total unique)`);
+        callCount++;
+        
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } catch (error: any) {
+        errors.push(`${sector.name} search error: ${error.message}`);
+      }
     }
     
     const tweets = allTweets;

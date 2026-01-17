@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Target, TrendingUp, Shield, Clock, Building2, ChevronRight, ChevronLeft, Check, AlertCircle } from 'lucide-react';
 
@@ -43,6 +43,7 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [referralApplied, setReferralApplied] = useState(false);
   const [formData, setFormData] = useState({
     investmentGoal: '',
     experienceLevel: '',
@@ -53,6 +54,43 @@ export default function OnboardingPage() {
   });
 
   const totalSteps = 5;
+
+  useEffect(() => {
+    const applyPendingReferral = async (retryCount = 0) => {
+      const pendingCode = sessionStorage.getItem('pendingReferralCode');
+      if (!pendingCode) return;
+      
+      try {
+        const response = await fetch('/api/referral/apply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ referralCode: pendingCode.trim().toUpperCase() }),
+        });
+        
+        if (response.status === 401 && retryCount < 3) {
+          setTimeout(() => applyPendingReferral(retryCount + 1), 1000);
+          return;
+        }
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && !data.alreadyReferred) {
+            setReferralApplied(true);
+          }
+          sessionStorage.removeItem('pendingReferralCode');
+        } else if (response.status !== 401) {
+          sessionStorage.removeItem('pendingReferralCode');
+        }
+      } catch (err) {
+        console.error('Failed to apply referral:', err);
+        if (retryCount < 3) {
+          setTimeout(() => applyPendingReferral(retryCount + 1), 1000);
+        }
+      }
+    };
+    
+    setTimeout(() => applyPendingReferral(), 500);
+  }, []);
 
   const handleNext = () => {
     if (step < totalSteps) {

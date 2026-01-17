@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { Mail, Lock, User, ArrowRight, AlertCircle, CheckCircle } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, AlertCircle, CheckCircle, Gift } from "lucide-react";
 import Logo from "@/components/Logo";
 
 function SignupForm() {
@@ -31,6 +31,10 @@ function SignupForm() {
     setIsGoogleLoading(true);
     setError("");
     try {
+      // Store referral code in sessionStorage for OAuth callback
+      if (referralCode) {
+        sessionStorage.setItem('pendingReferralCode', referralCode.toUpperCase());
+      }
       await signIn("google", { callbackUrl: "/onboarding" });
     } catch {
       setError("Failed to sign in with Google");
@@ -42,6 +46,10 @@ function SignupForm() {
     setIsAppleLoading(true);
     setError("");
     try {
+      // Store referral code in sessionStorage for OAuth callback
+      if (referralCode) {
+        sessionStorage.setItem('pendingReferralCode', referralCode.toUpperCase());
+      }
       await signIn("apple", { callbackUrl: "/onboarding" });
     } catch {
       setError("Failed to sign in with Apple");
@@ -225,6 +233,32 @@ function SignupForm() {
           <div className="flex items-center gap-2 text-sm text-slate-400">
             <CheckCircle className={`w-4 h-4 ${password.length >= 6 ? 'text-emerald-500' : 'text-slate-600'}`} />
             <span>At least 6 characters</span>
+          </div>
+
+          <div>
+            <label htmlFor="referralCode" className="block text-sm font-medium text-slate-300 mb-1.5">
+              Referral code <span className="text-slate-500">(optional)</span>
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <Gift className="h-5 w-5 text-slate-500" />
+              </div>
+              <input
+                id="referralCode"
+                name="referralCode"
+                type="text"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                className="block w-full pl-11 pr-4 py-3 border border-slate-700 rounded-xl placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-slate-800/50 text-white transition-all uppercase"
+                placeholder="Enter code if someone referred you"
+              />
+            </div>
+            {referralCode && (
+              <p className="mt-1.5 text-xs text-emerald-400 flex items-center gap-1">
+                <CheckCircle className="w-3 h-3" />
+                Referral code will be applied on signup
+              </p>
+            )}
           </div>
 
           <button

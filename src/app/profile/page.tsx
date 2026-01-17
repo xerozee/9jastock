@@ -14,6 +14,7 @@ import Avatar from '@/components/Avatar';
 import ProfileXPosts from '@/components/ProfileXPosts';
 import NotificationSettings from '@/components/NotificationSettings';
 import PriceAlertManager from '@/components/PriceAlertManager';
+import PortfolioShareImage from '@/components/PortfolioShareImage';
 
 interface ProfileData {
   user: {
@@ -345,18 +346,21 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   <Briefcase className="w-5 h-5 text-purple-500" />
                   Portfolio Summary
                 </h2>
-                <button
-                  onClick={copyShareLink}
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
-                >
-                  {copied ? <Check className="w-4 h-4 text-green-500" /> : <Share2 className="w-4 h-4" />}
-                  {copied ? 'Copied!' : 'Share Portfolio'}
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <PortfolioShareImage />
+                  <button
+                    onClick={copyShareLink}
+                    className="flex items-center gap-2 px-3 py-2.5 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-colors"
+                  >
+                    {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                    {copied ? 'Copied!' : 'Copy Link'}
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">

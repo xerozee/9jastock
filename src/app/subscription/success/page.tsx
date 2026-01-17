@@ -11,19 +11,18 @@ function SuccessContent() {
   const sessionId = searchParams.get('session_id');
 
   useEffect(() => {
+    if (countdown <= 0) {
+      router.push('/');
+    }
+  }, [countdown, router]);
+
+  useEffect(() => {
     const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          router.push('/');
-          return 0;
-        }
-        return prev - 1;
-      });
+      setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [router]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white flex items-center justify-center px-4">

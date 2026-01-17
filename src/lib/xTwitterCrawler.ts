@@ -297,6 +297,12 @@ export async function searchXForWatchlistStocks(watchlistSymbols: string[], use7
   return allTweets;
 }
 
+const TOP_NIGERIAN_STOCKS = [
+  'GTCO', 'ZENITHBANK', 'ACCESSCORP', 'UBA', 'FBNH', 'MTNN', 
+  'DANGCEM', 'BUACEMENT', 'SEPLAT', 'AIRTELAFRI', 'STANBIC', 
+  'NB', 'NESTLE', 'TRANSCORP', 'GEREGU'
+];
+
 export async function crawlXPosts(): Promise<{ success: boolean; postsProcessed: number; errors: string[] }> {
   const errors: string[] = [];
   let postsProcessed = 0;
@@ -307,59 +313,38 @@ export async function crawlXPosts(): Promise<{ success: boolean; postsProcessed:
 
   try {
     await connectToDatabase();
-    console.log('[X Crawler] Starting X/Twitter crawl (last 72 hours)...');
+    console.log('[X Crawler] Starting cost-effective X/Twitter crawl...');
 
     const allTweets: XTweet[] = [];
     const startTime = `&start_time=${get72HoursAgo()}`;
     
     const userSymbols = await getAllUserSymbols();
-    console.log(`[X Crawler] Found ${userSymbols.length} user-tracked symbols`);
+    const prioritySymbols = [...new Set([...userSymbols, ...TOP_NIGERIAN_STOCKS])].slice(0, 15);
+    console.log(`[X Crawler] Searching ${prioritySymbols.length} priority symbols (1 API call)`);
     
-    const allSymbols = [...new Set([...userSymbols, ...ALL_NGX_SYMBOLS])];
-    console.log(`[X Crawler] Total unique symbols to search: ${allSymbols.length}`);
-    
-    const symbolBatches: string[][] = [];
-    for (let i = 0; i < allSymbols.length; i += 20) {
-      symbolBatches.push(allSymbols.slice(i, i + 20));
-    }
-    
-    for (const batch of symbolBatches) {
-      try {
-        const batchTweets = await searchXForStocks(batch, true);
-        allTweets.push(...batchTweets);
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      } catch (error: any) {
-        errors.push(`Batch crawl error: ${error.message}`);
-      }
-    }
-    
-    const globalQueries = [
-      `(from:NGXGroup OR from:SECNigeria OR from:Nairametrics OR from:CardinalStone) -is:retweet`,
-      `("Nigerian stocks" OR "NGX" OR "Nigeria Stock Exchange") lang:en -is:retweet`,
-    ];
-    
-    for (const query of globalQueries) {
-      try {
-        const encodedQuery = encodeURIComponent(query);
-        const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=20&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
-        const response: XSearchResponse = await fetchFromXApi(endpoint);
-        
-        if (response.data) {
-          const usersMap = new Map<string, XUser>();
-          if (response.includes?.users) {
-            response.includes.users.forEach(user => {
-              usersMap.set(user.id, user);
-            });
-          }
-          for (const tweet of response.data) {
-            (tweet as any)._user = usersMap.get(tweet.author_id);
-            allTweets.push(tweet);
-          }
+    try {
+      const cashtags = prioritySymbols.map(s => `$${s}`).join(' OR ');
+      const query = `(${cashtags}) lang:en -is:retweet`;
+      const encodedQuery = encodeURIComponent(query);
+      const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=50&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
+      
+      const response: XSearchResponse = await fetchFromXApi(endpoint);
+      
+      if (response.data) {
+        const usersMap = new Map<string, XUser>();
+        if (response.includes?.users) {
+          response.includes.users.forEach(user => {
+            usersMap.set(user.id, user);
+          });
         }
-        await new Promise(resolve => setTimeout(resolve, 1500));
-      } catch (error: any) {
-        errors.push(`Global query error: ${error.message}`);
+        for (const tweet of response.data) {
+          (tweet as any)._user = usersMap.get(tweet.author_id);
+          allTweets.push(tweet);
+        }
       }
+      console.log(`[X Crawler] API call 1: Found ${response.data?.length || 0} tweets`);
+    } catch (error: any) {
+      errors.push(`Stock search error: ${error.message}`);
     }
     
     const tweets = allTweets;

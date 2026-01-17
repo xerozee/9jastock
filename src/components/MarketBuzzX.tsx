@@ -95,7 +95,7 @@ export default function MarketBuzzX() {
 
     fetchPosts();
     
-    const interval = setInterval(() => fetchPosts(true), 2 * 60 * 1000);
+    const interval = setInterval(() => fetchPosts(true), 10 * 60 * 1000);
     return () => clearInterval(interval);
   }, [userSymbols]);
 

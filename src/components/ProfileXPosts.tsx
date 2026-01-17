@@ -54,7 +54,7 @@ export default function ProfileXPosts({ symbols, title = "News from X", limit = 
 
     fetchPosts();
     
-    const interval = setInterval(fetchPosts, 2 * 60 * 1000);
+    const interval = setInterval(fetchPosts, 10 * 60 * 1000);
     return () => clearInterval(interval);
   }, [symbolsKey, limit]);
 

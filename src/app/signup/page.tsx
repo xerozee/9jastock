@@ -42,7 +42,29 @@ function SignupForm() {
     setIsAppleLoading(true);
     setError("");
     try {
-      await signIn("apple", { callbackUrl: "/onboarding" });
+      const width = 600;
+      const height = 700;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+      const popup = window.open(
+        `/api/auth/signin/apple`,
+        "apple-signin",
+        `width=${width},height=${height},left=${left},top=${top},popup=1`
+      );
+      
+      if (!popup) {
+        setError("Please allow popups to sign in with Apple");
+        setIsAppleLoading(false);
+        return;
+      }
+
+      const checkPopup = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkPopup);
+          setIsAppleLoading(false);
+          window.location.reload();
+        }
+      }, 500);
     } catch {
       setError("Failed to sign in with Apple");
       setIsAppleLoading(false);

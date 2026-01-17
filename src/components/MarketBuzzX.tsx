@@ -23,7 +23,9 @@ interface XPost {
 export default function MarketBuzzX() {
   const [posts, setPosts] = useState<XPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [userSymbols, setUserSymbols] = useState<string[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   useEffect(() => {
     const fetchUserStocks = async () => {
@@ -68,7 +70,8 @@ export default function MarketBuzzX() {
   }, []);
 
   useEffect(() => {
-    const fetchPosts = async () => {
+    const fetchPosts = async (isRefresh = false) => {
+      if (isRefresh) setIsRefreshing(true);
       try {
         let response;
         if (userSymbols.length > 0) {
@@ -80,15 +83,20 @@ export default function MarketBuzzX() {
         if (response.ok) {
           const data = await response.json();
           setPosts(data.posts?.slice(0, 6) || []);
+          setLastUpdated(new Date());
         }
       } catch (error) {
         console.error('Failed to fetch market buzz:', error);
       } finally {
         setIsLoading(false);
+        setIsRefreshing(false);
       }
     };
 
     fetchPosts();
+    
+    const interval = setInterval(() => fetchPosts(true), 2 * 60 * 1000);
+    return () => clearInterval(interval);
   }, [userSymbols]);
 
   const getSentimentColor = (sentiment?: string) => {
@@ -129,9 +137,17 @@ export default function MarketBuzzX() {
             View all <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          Latest Nigerian stock market discussions from X
-        </p>
+        <div className="flex items-center justify-between mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Latest Nigerian stock market discussions from X
+          </p>
+          {lastUpdated && (
+            <span className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
+              {isRefreshing && <Loader2 className="w-3 h-3 animate-spin" />}
+              Updated {formatTime(lastUpdated.toISOString())}
+            </span>
+          )}
+        </div>
       </div>
       
       <div className="p-4">

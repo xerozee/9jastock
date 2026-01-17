@@ -71,6 +71,12 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
   - API endpoints: GET /api/social (feed), POST /api/social/crawl (trigger crawl)
   - Nigerian finance Twitter accounts monitored: @NGXGroup, @SECNigeria, @Nairametrics, @CardinalStone, etc.
   - X Crawler service in src/lib/xTwitterCrawler.ts with official Twitter API v2
+  - **NEW: 72-hour search window** - Crawler searches last 72 hours of X posts using start_time parameter
+  - **NEW: All-user symbol coverage** - Crawls symbols from ALL users' portfolios and watchlists
+  - getAllUserSymbols() aggregates unique symbols from PortfolioItem and Holding collections
+  - Combines user-tracked symbols with NGX stock symbols for comprehensive coverage
+  - **NEW: Auto-refresh** - MarketBuzzX and ProfileXPosts auto-refresh every 2 minutes
+  - "Last updated" timestamp shown in Market Buzz header
 
 - **Stock Recommendations Engine**: AI-powered stock suggestions based on user profile
   - Recommendations API at /api/recommendations

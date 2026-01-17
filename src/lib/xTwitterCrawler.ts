@@ -1,7 +1,38 @@
-import { connectToDatabase, SocialPost } from './mongodb';
+import { connectToDatabase, SocialPost, PortfolioItem, Holding } from './mongodb';
 import { analyzeSentiment } from './socialCrawler';
 
 const X_BEARER_TOKEN = process.env.X_BEARER_TOKEN;
+
+function get72HoursAgo(): string {
+  const date = new Date();
+  date.setHours(date.getHours() - 72);
+  return date.toISOString();
+}
+
+async function getAllUserSymbols(): Promise<string[]> {
+  await connectToDatabase();
+  
+  const [portfolioItems, holdings] = await Promise.all([
+    PortfolioItem.find({}).select('symbol').lean(),
+    Holding.find({}).select('symbol').lean(),
+  ]);
+  
+  const symbolsSet = new Set<string>();
+  
+  portfolioItems.forEach((item: any) => {
+    if (item.symbol) {
+      symbolsSet.add(item.symbol.replace('NGX:', '').toUpperCase());
+    }
+  });
+  
+  holdings.forEach((item: any) => {
+    if (item.symbol) {
+      symbolsSet.add(item.symbol.replace('NGX:', '').toUpperCase());
+    }
+  });
+  
+  return Array.from(symbolsSet);
+}
 
 const NGX_STOCK_SYMBOLS = [
   'DANGCEM', 'GTCO', 'ZENITHBANK', 'MTNN', 'AIRTELAFRI', 'ACCESSCORP',
@@ -132,8 +163,9 @@ async function fetchFromXApi(endpoint: string): Promise<any> {
   return response.json();
 }
 
-export async function searchXForStocks(symbols: string[]): Promise<XTweet[]> {
+export async function searchXForStocks(symbols: string[], use72Hours: boolean = true): Promise<XTweet[]> {
   const allTweets: XTweet[] = [];
+  const startTime = use72Hours ? `&start_time=${get72HoursAgo()}` : '';
   
   const cashtags = symbols.map(s => `$${s}`).join(' OR ');
   const companyNames = symbols
@@ -152,7 +184,7 @@ export async function searchXForStocks(symbols: string[]): Promise<XTweet[]> {
   for (const query of queries) {
     try {
       const encodedQuery = encodeURIComponent(query);
-      const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=20&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url`;
+      const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=20&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
       
       const response: XSearchResponse = await fetchFromXApi(endpoint);
       
@@ -179,10 +211,11 @@ export async function searchXForStocks(symbols: string[]): Promise<XTweet[]> {
   return allTweets;
 }
 
-export async function searchXForWatchlistStocks(watchlistSymbols: string[]): Promise<XTweet[]> {
+export async function searchXForWatchlistStocks(watchlistSymbols: string[], use72Hours: boolean = true): Promise<XTweet[]> {
   if (!watchlistSymbols.length) return [];
   
   const allTweets: XTweet[] = [];
+  const startTime = use72Hours ? `&start_time=${get72HoursAgo()}` : '';
   const symbolChunks: string[][] = [];
   
   for (let i = 0; i < watchlistSymbols.length; i += 5) {
@@ -205,7 +238,7 @@ export async function searchXForWatchlistStocks(watchlistSymbols: string[]): Pro
       query += ` lang:en -is:retweet`;
       
       const encodedQuery = encodeURIComponent(query);
-      const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=15&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url`;
+      const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=15&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
       
       const response: XSearchResponse = await fetchFromXApi(endpoint);
       
@@ -240,7 +273,7 @@ export async function searchXForWatchlistStocks(watchlistSymbols: string[]): Pro
     
     const financeQuery = `(from:NGXGroup OR from:SECNigeria OR from:Nairametrics) (${symbolKeywords}) -is:retweet`;
     const encodedQuery = encodeURIComponent(financeQuery);
-    const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=10&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url`;
+    const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=10&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
     
     const response: XSearchResponse = await fetchFromXApi(endpoint);
     
@@ -274,18 +307,25 @@ export async function crawlXPosts(): Promise<{ success: boolean; postsProcessed:
 
   try {
     await connectToDatabase();
-    console.log('[X Crawler] Starting X/Twitter crawl...');
+    console.log('[X Crawler] Starting X/Twitter crawl (last 72 hours)...');
 
     const allTweets: XTweet[] = [];
+    const startTime = `&start_time=${get72HoursAgo()}`;
+    
+    const userSymbols = await getAllUserSymbols();
+    console.log(`[X Crawler] Found ${userSymbols.length} user-tracked symbols`);
+    
+    const allSymbols = [...new Set([...userSymbols, ...NGX_STOCK_SYMBOLS])];
+    console.log(`[X Crawler] Total unique symbols to search: ${allSymbols.length}`);
     
     const symbolBatches: string[][] = [];
-    for (let i = 0; i < NGX_STOCK_SYMBOLS.length; i += 10) {
-      symbolBatches.push(NGX_STOCK_SYMBOLS.slice(i, i + 10));
+    for (let i = 0; i < allSymbols.length; i += 10) {
+      symbolBatches.push(allSymbols.slice(i, i + 10));
     }
     
     for (const batch of symbolBatches) {
       try {
-        const batchTweets = await searchXForStocks(batch);
+        const batchTweets = await searchXForStocks(batch, true);
         allTweets.push(...batchTweets);
         await new Promise(resolve => setTimeout(resolve, 2000));
       } catch (error: any) {
@@ -301,7 +341,7 @@ export async function crawlXPosts(): Promise<{ success: boolean; postsProcessed:
     for (const query of globalQueries) {
       try {
         const encodedQuery = encodeURIComponent(query);
-        const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=20&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url`;
+        const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=20&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
         const response: XSearchResponse = await fetchFromXApi(endpoint);
         
         if (response.data) {

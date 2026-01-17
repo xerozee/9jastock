@@ -16,61 +16,78 @@ export async function GET(
 
   const staticStock = getStockBySymbol(upperSymbol);
 
-  if (!staticStock) {
-    return NextResponse.json(
-      { success: false, error: 'Stock not found' },
-      { status: 404 }
-    );
-  }
-
-  if (!hasSession()) {
-    return NextResponse.json({
-      success: true,
-      data: {
-        ...staticStock,
-        isLive: false,
-        lastUpdated: Date.now(),
-      },
-      timestamp: Date.now(),
-      note: 'TradingView session not configured.',
-    });
-  }
-
   try {
     const now = Date.now();
     const lastScan = getLastScanTime();
     const timeSinceLastScan = now - lastScan;
     const cachedQuotes = getAllCachedQuotes();
 
-    if (cachedQuotes.size === 0 || timeSinceLastScan > CACHE_TTL) {
+    if (hasSession() && (cachedQuotes.size === 0 || timeSinceLastScan > CACHE_TTL)) {
       await fetchNigerianStocksFromScanner();
     }
 
     const cached = getCachedQuote(upperSymbol);
+    
+    if (!staticStock && !cached) {
+      return NextResponse.json(
+        { success: false, error: 'Stock not found' },
+        { status: 404 }
+      );
+    }
 
-    if (cached && cached.price > 0) {
-      const isFresh = (now - cached.timestamp) < CACHE_TTL;
+    if (!hasSession() && staticStock) {
       return NextResponse.json({
         success: true,
         data: {
           ...staticStock,
-          name: cached.name || staticStock.name,
+          isLive: false,
+          lastUpdated: Date.now(),
+        },
+        timestamp: Date.now(),
+        note: 'TradingView session not configured.',
+      });
+    }
+
+    if (cached && cached.price > 0) {
+      const isFresh = (now - cached.timestamp) < CACHE_TTL;
+      const baseStock = staticStock || {
+        symbol: upperSymbol,
+        name: cached.name || upperSymbol,
+        sector: cached.sector || 'Unknown',
+        industry: cached.industry || '',
+        price: 0,
+        change: 0,
+        changePercent: 0,
+        volume: 0,
+        marketCap: 0,
+        open: 0,
+        high: 0,
+        low: 0,
+        previousClose: 0,
+        high52Week: 0,
+        low52Week: 0,
+      };
+      return NextResponse.json({
+        success: true,
+        data: {
+          ...baseStock,
+          name: cached.name || baseStock.name,
           description: cached.description || '',
-          sector: cached.sector || staticStock.sector,
-          industry: cached.industry || staticStock.industry || '',
+          sector: cached.sector || baseStock.sector,
+          industry: cached.industry || baseStock.industry || '',
           
           price: cached.price,
           change: cached.change,
           changePercent: cached.changePercent,
-          volume: cached.volume || staticStock.volume,
-          open: cached.open || staticStock.open,
-          high: cached.high || staticStock.high,
-          low: cached.low || staticStock.low,
-          previousClose: cached.previousClose || staticStock.previousClose,
+          volume: cached.volume || baseStock.volume,
+          open: cached.open || baseStock.open,
+          high: cached.high || baseStock.high,
+          low: cached.low || baseStock.low,
+          previousClose: cached.previousClose || baseStock.previousClose,
           
-          marketCap: cached.marketCap || staticStock.marketCap,
-          high52Week: cached.high52Week || staticStock.high52Week,
-          low52Week: cached.low52Week || staticStock.low52Week,
+          marketCap: cached.marketCap || baseStock.marketCap,
+          high52Week: cached.high52Week || baseStock.high52Week,
+          low52Week: cached.low52Week || baseStock.low52Week,
           
           perfWeek: cached.perfWeek,
           perfMonth: cached.perfMonth,

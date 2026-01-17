@@ -35,28 +35,12 @@ export default function ProfileXPosts({ symbols, title = "News from X", limit = 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        let fetchedPosts: XPost[] = [];
-        
-        if (symbolsKey) {
-          const watchlistRes = await fetch(`/api/social/watchlist?symbols=${symbolsKey}`, { credentials: 'include' });
-          if (watchlistRes.ok) {
-            const data = await watchlistRes.json();
-            fetchedPosts = data.posts || [];
-          }
+        const generalRes = await fetch(`/api/social?platform=twitter&limit=${limit + 5}`, { credentials: 'include' });
+        if (generalRes.ok) {
+          const data = await generalRes.json();
+          const allPosts = data.posts || [];
+          setPosts(allPosts.slice(0, limit));
         }
-        
-        if (fetchedPosts.length < limit) {
-          const generalRes = await fetch(`/api/social?platform=twitter&limit=${limit + 5}`, { credentials: 'include' });
-          if (generalRes.ok) {
-            const data = await generalRes.json();
-            const generalPosts = data.posts || [];
-            const existingIds = new Set(fetchedPosts.map(p => p.id));
-            const newPosts = generalPosts.filter((p: XPost) => !existingIds.has(p.id));
-            fetchedPosts = [...fetchedPosts, ...newPosts].slice(0, limit);
-          }
-        }
-        
-        setPosts(fetchedPosts.slice(0, limit));
       } catch (error) {
         console.error('Failed to fetch X posts:', error);
       } finally {
@@ -68,7 +52,7 @@ export default function ProfileXPosts({ symbols, title = "News from X", limit = 
     
     const interval = setInterval(fetchPosts, 10 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [symbolsKey, limit]);
+  }, [limit]);
 
   const getSentimentColor = (sentiment?: string) => {
     switch (sentiment) {
@@ -107,21 +91,6 @@ export default function ProfileXPosts({ symbols, title = "News from X", limit = 
     );
   }
 
-  if (symbols.length === 0) {
-    return (
-      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-          </svg>
-          {title}
-        </h3>
-        <p className="text-center text-gray-500 dark:text-gray-400 py-4">
-          Add stocks to your watchlist or portfolio to see related posts from X.
-        </p>
-      </div>
-    );
-  }
 
   if (posts.length === 0) {
     return (

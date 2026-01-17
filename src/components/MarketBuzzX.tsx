@@ -73,29 +73,13 @@ export default function MarketBuzzX() {
     const fetchPosts = async (isRefresh = false) => {
       if (isRefresh) setIsRefreshing(true);
       try {
-        let fetchedPosts: XPost[] = [];
-        
-        if (userSymbols.length > 0) {
-          const watchlistRes = await fetch(`/api/social/watchlist?symbols=${userSymbols.join(',')}`, { credentials: 'include' });
-          if (watchlistRes.ok) {
-            const data = await watchlistRes.json();
-            fetchedPosts = data.posts || [];
-          }
+        const generalRes = await fetch('/api/social?platform=twitter&limit=15', { credentials: 'include' });
+        if (generalRes.ok) {
+          const data = await generalRes.json();
+          const allPosts = data.posts || [];
+          setPosts(allPosts.slice(0, 10));
+          setLastUpdated(new Date());
         }
-        
-        if (fetchedPosts.length < 10) {
-          const generalRes = await fetch('/api/social?platform=twitter&limit=15', { credentials: 'include' });
-          if (generalRes.ok) {
-            const data = await generalRes.json();
-            const generalPosts = data.posts || [];
-            const existingIds = new Set(fetchedPosts.map(p => p.id));
-            const newPosts = generalPosts.filter((p: XPost) => !existingIds.has(p.id));
-            fetchedPosts = [...fetchedPosts, ...newPosts].slice(0, 10);
-          }
-        }
-        
-        setPosts(fetchedPosts.slice(0, 10));
-        setLastUpdated(new Date());
       } catch (error) {
         console.error('Failed to fetch market buzz:', error);
       } finally {

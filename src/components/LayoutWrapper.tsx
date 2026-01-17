@@ -58,9 +58,13 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
               </div>
               <div>
                 <h4 className="font-semibold mb-4">Disclaimer</h4>
-                <p className="text-slate-400 text-sm">
+                <p className="text-slate-400 text-sm mb-4">
                   Data provided is for informational purposes only. Always do your own research before making investment decisions.
                 </p>
+                <div className="flex gap-4 text-sm">
+                  <a href="/terms" className="text-slate-400 hover:text-white transition-colors">Terms of Service</a>
+                  <a href="/privacy" className="text-slate-400 hover:text-white transition-colors">Privacy Policy</a>
+                </div>
               </div>
             </div>
             <div className="border-t border-slate-700 mt-8 pt-8 text-center text-slate-400 text-sm">

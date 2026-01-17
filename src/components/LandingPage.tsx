@@ -503,12 +503,21 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
 
       <footer className="bg-slate-950 border-t border-slate-800 py-8 md:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
             <Logo3D size="md" variant="full" animated={false} />
             <div className="flex items-center gap-4 md:gap-6 text-xs md:text-sm text-slate-400">
               <span>© 2026 9jaStock</span>
               <span className="hidden md:inline">•</span>
               <span className="hidden md:inline">NGX Stock Tracker</span>
+            </div>
+          </div>
+          <div className="border-t border-slate-800 pt-6">
+            <p className="text-xs md:text-sm text-slate-500 text-center mb-4">
+              Data provided is for informational purposes only. Always do your own research before making investment decisions.
+            </p>
+            <div className="flex justify-center gap-6 text-xs md:text-sm">
+              <Link href="/terms" className="text-slate-400 hover:text-white transition-colors">Terms of Service</Link>
+              <Link href="/privacy" className="text-slate-400 hover:text-white transition-colors">Privacy Policy</Link>
             </div>
           </div>
         </div>

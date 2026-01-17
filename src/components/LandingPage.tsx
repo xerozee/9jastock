@@ -38,7 +38,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
     {
       icon: TrendingUp,
       title: 'Real-Time Data',
-      description: 'Live prices for 145+ NGX stocks from TradingView, updated every 5 minutes.',
+      description: 'Live prices for 145+ NGX stocks, updated every 5 minutes.',
       gradient: 'from-emerald-500 to-teal-600',
     },
     {
@@ -68,7 +68,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
     {
       icon: BarChart3,
       title: 'Technical Analysis',
-      description: 'Interactive TradingView charts with RSI, MACD, Bollinger Bands & more.',
+      description: 'Interactive charts with RSI, MACD, Bollinger Bands & more.',
       gradient: 'from-rose-500 to-pink-600',
     },
     {
@@ -108,7 +108,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
     {
       name: 'Amaka N.',
       role: 'Day Trader',
-      text: 'Price alerts and real-time data from TradingView make this my go-to NGX platform.',
+      text: 'Price alerts and real-time data make this my go-to NGX platform.',
       rating: 5,
     },
     {
@@ -199,7 +199,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                 
                 <p className="text-base md:text-lg lg:text-xl text-slate-300 max-w-xl mb-6 md:mb-8 leading-relaxed mx-auto lg:mx-0">
                   Nigeria&apos;s most powerful stock tracking platform with
-                  <span className="text-emerald-400 font-medium"> TradingView charts</span>, 
+                  <span className="text-emerald-400 font-medium"> interactive charts</span>, 
                   <span className="text-purple-400 font-medium"> AI analysis</span>, 
                   <span className="text-blue-400 font-medium"> X/Twitter sentiment</span>, and
                   <span className="text-orange-400 font-medium"> price alerts</span>.
@@ -490,7 +490,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
               </p>
               <ul className="space-y-2 text-sm text-slate-400">
                 <li className="flex items-center gap-2"><CheckCircle size={14} className="text-teal-400" /> Nairametrics, BusinessDay, Punch</li>
-                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-teal-400" /> TradingView market updates</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-teal-400" /> Real-time market updates</li>
                 <li className="flex items-center gap-2"><CheckCircle size={14} className="text-teal-400" /> Delivered to your inbox</li>
               </ul>
             </div>
@@ -889,7 +889,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
             </div>
           </div>
           <div className="pt-8 border-t border-slate-800 text-center text-sm text-slate-400">
-            <p>&copy; {new Date().getFullYear()} 9jaStock. All rights reserved. Data powered by TradingView.</p>
+            <p>&copy; {new Date().getFullYear()} 9jaStock. All rights reserved.</p>
           </div>
         </div>
       </footer>

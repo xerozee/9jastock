@@ -278,7 +278,6 @@ export default function StockBlogPage() {
                     </h3>
                     <p className="text-gray-600 text-sm mb-2">{item.summary}</p>
                     <div className="flex items-center gap-4 text-xs text-gray-500">
-                      <span className="px-2 py-0.5 bg-gray-100 rounded">{item.source}</span>
                       <span className="flex items-center gap-1">
                         <Clock size={12} />
                         {item.date}

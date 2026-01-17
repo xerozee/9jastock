@@ -755,9 +755,8 @@ export default function StockDetailPage() {
         </div>
       </SectionCard>
 
-      {/* TradingView Financial Data - Primary Source */}
+      {/* Financial Data */}
       <SectionCard title="Income Statement (TTM)" icon={FileText} iconColor="text-emerald-600">
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Data sourced from TradingView</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard label="Total Revenue" value={extendedStock.revenue ? formatLargeNumber(extendedStock.revenue) : 'N/A'} icon={DollarSign} />
           <StatCard label="Gross Profit" value={extendedStock.grossProfit ? formatLargeNumber(extendedStock.grossProfit) : 'N/A'} />
@@ -794,10 +793,9 @@ export default function StockDetailPage() {
         </div>
       </SectionCard>
 
-      {/* TradingView Balance Sheet & Valuation */}
+      {/* Balance Sheet & Valuation */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <SectionCard title="Balance Sheet" icon={Building2} iconColor="text-slate-600">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Data sourced from TradingView</p>
           <div className="grid grid-cols-2 gap-4">
             <StatCard label="Total Assets" value={extendedStock.totalAssets ? formatLargeNumber(extendedStock.totalAssets) : 'N/A'} />
             <StatCard label="Total Debt" value={extendedStock.totalDebt ? formatLargeNumber(extendedStock.totalDebt) : 'N/A'} />
@@ -829,7 +827,6 @@ export default function StockDetailPage() {
         </SectionCard>
 
         <SectionCard title="Valuation" icon={Scale} iconColor="text-amber-600">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Data sourced from TradingView</p>
           <div className="grid grid-cols-2 gap-4">
             <StatCard label="Market Cap" value={extendedStock.marketCap ? formatLargeNumber(extendedStock.marketCap) : 'N/A'} icon={DollarSign} />
             <StatCard label="Enterprise Value" value={extendedStock.enterpriseValue ? formatLargeNumber(extendedStock.enterpriseValue) : 'N/A'} />
@@ -845,7 +842,6 @@ export default function StockDetailPage() {
 
       {/* Cash Flow */}
       <SectionCard title="Cash Flow" icon={Wallet} iconColor="text-cyan-600">
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Data sourced from TradingView</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard 
             label="Free Cash Flow" 
@@ -869,7 +865,6 @@ export default function StockDetailPage() {
 
       {/* Profitability & Returns */}
       <SectionCard title="Profitability & Returns" icon={TrendingUp} iconColor="text-green-600">
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Data sourced from TradingView</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard 
             label="Return on Equity" 

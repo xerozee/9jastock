@@ -39,13 +39,6 @@ interface XPost {
   url?: string;
 }
 
-const NEWS_SOURCES = [
-  { id: 'all', name: 'All Sources', color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' },
-  { id: 'TradingView', name: 'TradingView', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
-  { id: 'Nairametrics', name: 'Nairametrics', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' },
-  { id: 'BusinessDay', name: 'BusinessDay', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
-  { id: 'Punch', name: 'Punch', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
-];
 
 const NEWS_REFRESH_AUTHENTICATED = 10 * 60 * 1000;
 const NEWS_REFRESH_GUEST = 6 * 60 * 60 * 1000;
@@ -67,7 +60,6 @@ export default function BlogPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isNewsLoading, setIsNewsLoading] = useState(true);
   const [isXLoading, setIsXLoading] = useState(false);
-  const [activeSource, setActiveSource] = useState<string>('all');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [newsLastUpdated, setNewsLastUpdated] = useState<Date | null>(null);
   const [newsStats, setNewsStats] = useState<{ total: number; last24h: number; lastHour: number } | null>(null);
@@ -151,14 +143,7 @@ export default function BlogPage() {
     .sort((a, b) => b.changePercent - a.changePercent)
     .slice(0, 10);
 
-  const filteredNews = activeSource === 'all'
-    ? news
-    : news.filter(n => n.source === activeSource);
-
-  const displayedNews = isAuthenticated ? filteredNews.slice(0, 10) : filteredNews.slice(0, GUEST_ARTICLE_LIMIT);
-
-  const getSourceInfo = (sourceId: string) => 
-    NEWS_SOURCES.find(s => s.id === sourceId) || NEWS_SOURCES[0];
+  const displayedNews = isAuthenticated ? news.slice(0, 10) : news.slice(0, GUEST_ARTICLE_LIMIT);
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return 'Recently';
@@ -286,24 +271,11 @@ export default function BlogPage() {
           <div className="flex-1">
             {isAuthenticated && (
               <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-4 mb-6">
-                <div className="flex flex-wrap gap-2">
-                  {NEWS_SOURCES.map(source => (
-                    <button
-                      key={source.id}
-                      onClick={() => setActiveSource(source.id)}
-                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                        activeSource === source.id
-                          ? 'bg-green-600 text-white'
-                          : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
-                      }`}
-                    >
-                      {source.name}
-                    </button>
-                  ))}
+                <div className="flex flex-wrap gap-2 justify-end">
                   <button
                     onClick={() => fetchNews(true)}
                     disabled={isNewsLoading}
-                    className="ml-auto px-4 py-2 rounded-lg font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 flex items-center gap-2"
+                    className="px-4 py-2 rounded-lg font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 flex items-center gap-2"
                   >
                     <RefreshCw size={16} className={isNewsLoading ? 'animate-spin' : ''} />
                     Refresh
@@ -321,7 +293,7 @@ export default function BlogPage() {
                 <Newspaper className="mx-auto text-gray-400 mb-4" size={48} />
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No News Available</h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  News articles are being scraped from multiple sources. Check back soon!
+                  News articles are being updated. Check back soon!
                 </p>
                 {isAuthenticated && (
                   <button
@@ -335,16 +307,12 @@ export default function BlogPage() {
             ) : (
               <div className="grid gap-6">
                 {displayedNews.map(item => {
-                  const sourceInfo = getSourceInfo(item.source);
                   const previewText = truncateSummary(item.summary) || truncateSummary(item.title, 100);
                   return (
                     <article key={item.id} className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-6 hover:shadow-md transition-shadow group">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-3 flex-wrap">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${sourceInfo.color}`}>
-                              {item.source}
-                            </span>
                             <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
                               <Clock size={12} />
                               {formatRelativeTime(item.publishedAt || item.scrapedAt)}
@@ -390,14 +358,14 @@ export default function BlogPage() {
                   );
                 })}
                 
-                {!isAuthenticated && filteredNews.length > GUEST_ARTICLE_LIMIT && (
+                {!isAuthenticated && news.length > GUEST_ARTICLE_LIMIT && (
                   <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-xl p-6 text-center">
                     <Lock className="mx-auto text-green-600 dark:text-green-400 mb-3" size={32} />
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                      {filteredNews.length - GUEST_ARTICLE_LIMIT} More Articles Available
+                      {news.length - GUEST_ARTICLE_LIMIT} More Articles Available
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400 mb-4">
-                      Sign in to access all news articles, source filtering, and real-time updates every 10 minutes.
+                      Sign in to access all news articles and real-time updates every 10 minutes.
                     </p>
                     <button
                       onClick={login}
@@ -409,9 +377,9 @@ export default function BlogPage() {
                   </div>
                 )}
                 
-                {isAuthenticated && filteredNews.length > 10 && (
+                {isAuthenticated && news.length > 10 && (
                   <p className="text-center text-gray-500 dark:text-gray-400 text-sm">
-                    Showing 10 of {filteredNews.length} articles
+                    Showing 10 of {news.length} articles
                   </p>
                 )}
               </div>
@@ -571,89 +539,6 @@ export default function BlogPage() {
               </div>
             )}
 
-            <div className="mt-8 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">News Sources</h2>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <a 
-                  href="https://ngxgroup.com/exchange/data/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/30 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/50 transition-colors"
-                >
-                  <Building2 className="text-green-600" size={24} />
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-white">NGX Official</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Official exchange news</p>
-                  </div>
-                  <ExternalLink size={16} className="ml-auto text-gray-400" />
-                </a>
-                <a 
-                  href="https://businessday.ng/companies/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
-                >
-                  <Newspaper className="text-blue-600" size={24} />
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-white">BusinessDay</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Business & markets</p>
-                  </div>
-                  <ExternalLink size={16} className="ml-auto text-gray-400" />
-                </a>
-                <a 
-                  href="https://nairametrics.com/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-4 bg-purple-50 dark:bg-purple-900/30 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
-                >
-                  <BarChart3 className="text-purple-600" size={24} />
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-white">Nairametrics</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Financial analysis</p>
-                  </div>
-                  <ExternalLink size={16} className="ml-auto text-gray-400" />
-                </a>
-                <a 
-                  href="https://www.thisdaylive.com/business/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-4 bg-orange-50 dark:bg-orange-900/30 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors"
-                >
-                  <FileText className="text-orange-600" size={24} />
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-white">ThisDay</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Nigerian business</p>
-                  </div>
-                  <ExternalLink size={16} className="ml-auto text-gray-400" />
-                </a>
-                <a 
-                  href="https://punchng.com/topics/business/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/30 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
-                >
-                  <Newspaper className="text-red-600" size={24} />
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-white">Punch</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">National news</p>
-                  </div>
-                  <ExternalLink size={16} className="ml-auto text-gray-400" />
-                </a>
-                <a 
-                  href="https://www.sec.gov.ng/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                >
-                  <Building2 className="text-gray-600 dark:text-gray-300" size={24} />
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-white">SEC Nigeria</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Regulatory updates</p>
-                  </div>
-                  <ExternalLink size={16} className="ml-auto text-gray-400" />
-                </a>
-              </div>
-            </div>
           </div>
 
           {isAuthenticated && (

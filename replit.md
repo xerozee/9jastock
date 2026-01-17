@@ -44,7 +44,7 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
     - **Stripe Subscription System:** Integration for managing free and premium tiers, including Stripe Checkout and webhook handling.
 
 ## External Dependencies
-- **TradingView:** Primary source for live stock data via scanner API and WebSocket client (`@mathieuc/tradingview`).
+- **Stock Data API:** Live stock data via backend services (presented as 9jaStocks.app data).
 - **MongoDB Atlas:** Cloud-hosted NoSQL database.
 - **Resend:** Email API for automated newsletters.
 - **OpenAI (GPT-4o-mini):** Used for AI-powered newsletter composition, sentiment analysis, and stock recommendations.

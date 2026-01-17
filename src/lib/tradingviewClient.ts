@@ -301,7 +301,7 @@ export async function fetchNigerianStocksFromScanner(): Promise<LiveQuote[]> {
 
       const quote: LiveQuote = {
         symbol: symbol.toUpperCase(),
-        name: (d[0] as string) || symbol,
+        name: (d[1] as string) || (d[0] as string) || symbol,
         description: (d[1] as string) || '',
         
         price,

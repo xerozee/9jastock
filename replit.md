@@ -87,6 +87,13 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
   - Portfolio summary reflects actual holdings from database
   - Replaced news section with personalized stock recommendations
   - Added Avatar component for auto-generated profile pictures
+  - **NEW: "News from X" section** - Shows last 6 X posts related to user's watchlist and portfolio stocks
+  - Uses ProfileXPosts component with symbol normalization and stable fetch dependencies
+- **Market Overview Page Updates**:
+  - **NEW: "Market Buzz" section** - Shows last 6 X posts related to user's stocks
+  - Fetches user's holdings, portfolioItems, and watchlist symbols
+  - Falls back to general Nigerian stock market tweets if no user stocks
+  - MarketBuzzX component with authenticated API calls and robust symbol extraction
 - **Progressive Web App (PWA)**: Mobile-first app installation support
   - manifest.json with app metadata and PNG icons (72-512px)
   - Service worker for offline support and caching

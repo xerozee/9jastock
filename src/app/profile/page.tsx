@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import Avatar from '@/components/Avatar';
+import ProfileXPosts from '@/components/ProfileXPosts';
 
 interface ProfileData {
   user: {
@@ -503,6 +504,15 @@ export default function ProfilePage() {
                 </div>
               )}
             </div>
+
+            <ProfileXPosts 
+              symbols={[
+                ...(profile?.holdings?.map(h => h.symbol) || []),
+                ...(profile?.portfolioItems?.map(p => p.symbol) || [])
+              ].filter((v, i, a) => a.indexOf(v) === i)}
+              title="News from X"
+              limit={6}
+            />
           </div>
 
           <div className="space-y-6">

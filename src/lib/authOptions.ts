@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { connectToDatabase, User, Session } from "./mongodb";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import { generateAppleClientSecret } from "./appleClientSecret";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -14,7 +15,7 @@ export const authOptions: NextAuthOptions = {
     }),
     AppleProvider({
       clientId: process.env.APPLE_ID!,
-      clientSecret: process.env.APPLE_PRIVATE_KEY!,
+      clientSecret: generateAppleClientSecret(),
     }),
     CredentialsProvider({
       name: "credentials",

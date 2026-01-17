@@ -48,10 +48,10 @@ export async function POST(request: NextRequest) {
       await User.findByIdAndUpdate(user._id, { stripeCustomerId: customerId });
     }
     
-    const replitDomain = process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS;
-    const host = replitDomain || request.headers.get('host') || '';
-    const protocol = host.includes('localhost') ? 'http' : 'https';
-    const baseUrl = `${protocol}://${host}`;
+    const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
+    const productionUrl = 'https://9jastocks.app';
+    const devDomain = process.env.REPLIT_DEV_DOMAIN || request.headers.get('host') || '';
+    const baseUrl = isProduction ? productionUrl : `https://${devDomain}`;
     
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customerId,

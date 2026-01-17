@@ -29,9 +29,10 @@ export async function POST(request: NextRequest) {
     
     const stripe = await getStripeClient();
     
-    const host = request.headers.get('host') || '';
-    const protocol = host.includes('localhost') ? 'http' : 'https';
-    const baseUrl = `${protocol}://${host}`;
+    const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
+    const productionUrl = 'https://9jastocks.app';
+    const devDomain = request.headers.get('host') || '';
+    const baseUrl = isProduction ? productionUrl : `https://${devDomain}`;
     
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: user.stripeCustomerId,

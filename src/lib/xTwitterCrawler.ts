@@ -263,13 +263,14 @@ export async function searchNigerianMarketBuzz(use72Hours: boolean = true): Prom
   const allTweets: XTweet[] = [];
   const startTime = use72Hours ? `&start_time=${get72HoursAgo()}` : '';
   
-  const trustedSources = NIGERIAN_STOCK_ACCOUNTS.slice(0, 10).map(a => `from:${a}`).join(' OR ');
-  const marketHashtags = '#NGX OR #NigerianStockMarket OR #NaijaStocks OR #NGXDaily OR #NGXASI';
+  const allCompanyNames = ALL_NGX_SYMBOLS.map(s => getSearchNameForSymbol(s));
+  const topCompanyNames = allCompanyNames.slice(0, 10).map(n => `"${n}"`).join(' OR ');
   
-  const query = `(${trustedSources}) OR (${marketHashtags}) lang:en -is:retweet`;
+  const nigerianContext = '(Nigeria OR NGX OR #NGX OR #NigerianStockMarket OR #NaijaStocks)';
+  const companyQuery = `(${topCompanyNames}) ${nigerianContext} lang:en -is:retweet`;
   
   try {
-    const encodedQuery = encodeURIComponent(query);
+    const encodedQuery = encodeURIComponent(companyQuery);
     const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=30&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
     
     const response: XSearchResponse = await fetchFromXApi(endpoint);
@@ -289,6 +290,36 @@ export async function searchNigerianMarketBuzz(use72Hours: boolean = true): Prom
     }
   } catch (error) {
     console.error('X Nigerian market buzz search error:', error);
+  }
+  
+  const trustedSources = NIGERIAN_STOCK_ACCOUNTS.slice(0, 8).map(a => `from:${a}`).join(' OR ');
+  const marketHashtags = '#NGX OR #NigerianStockMarket OR #NaijaStocks OR #NGXASI';
+  const sourceQuery = `(${trustedSources}) OR (${marketHashtags}) lang:en -is:retweet`;
+  
+  try {
+    const encodedQuery = encodeURIComponent(sourceQuery);
+    const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=20&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
+    
+    const response: XSearchResponse = await fetchFromXApi(endpoint);
+    
+    if (response.data) {
+      const usersMap = new Map<string, XUser>();
+      if (response.includes?.users) {
+        response.includes.users.forEach(user => {
+          usersMap.set(user.id, user);
+        });
+      }
+      
+      const existingIds = new Set(allTweets.map(t => t.id));
+      for (const tweet of response.data) {
+        if (!existingIds.has(tweet.id)) {
+          (tweet as any)._user = usersMap.get(tweet.author_id);
+          allTweets.push(tweet);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('X trusted sources search error:', error);
   }
 
   return allTweets;
@@ -389,15 +420,16 @@ export async function crawlXPosts(): Promise<{ success: boolean; postsProcessed:
     const startTime = `&start_time=${get72HoursAgo()}`;
     
     const userSymbols = await getAllUserSymbols();
-    const prioritySymbols = [...new Set([...userSymbols, ...TOP_NIGERIAN_STOCKS])].slice(0, 15);
-    console.log(`[X Crawler] Searching ${prioritySymbols.length} priority symbols (1 API call)`);
+    const prioritySymbols = [...new Set([...userSymbols, ...TOP_NIGERIAN_STOCKS, ...ALL_NGX_SYMBOLS.slice(0, 30)])].slice(0, 25);
+    console.log(`[X Crawler] Searching ${prioritySymbols.length} priority symbols (multiple API calls)`);
     
     try {
       const companyNames = prioritySymbols
-        .slice(0, 8)
+        .slice(0, 10)
         .map(s => `"${getSearchNameForSymbol(s)}"`)
         .join(' OR ');
-      const query = `(${companyNames}) (Nigeria OR NGX OR Naira OR Lagos) lang:en -is:retweet`;
+      const nigerianContext = '(Nigeria OR NGX OR #NGX OR #NigerianStockMarket OR #NaijaStocks)';
+      const query = `(${companyNames}) ${nigerianContext} lang:en -is:retweet`;
       const encodedQuery = encodeURIComponent(query);
       const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=50&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
       

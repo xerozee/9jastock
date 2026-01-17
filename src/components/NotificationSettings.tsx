@@ -1,13 +1,29 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Bell, BellOff, Loader2, AlertTriangle, Check, TrendingUp, Newspaper, BarChart3, Eye } from 'lucide-react';
+import { Bell, BellOff, Loader2, AlertTriangle, Check, TrendingUp, TrendingDown, Newspaper, BarChart3, Eye, ChevronDown, ChevronUp, Plus, Trash2, X } from 'lucide-react';
 
 interface NotificationPreferences {
   priceAlerts: boolean;
   dailySummary: boolean;
   breakingNews: boolean;
   watchlistUpdates: boolean;
+}
+
+interface PriceAlert {
+  id: string;
+  symbol: string;
+  targetPrice: number;
+  condition: 'above' | 'below';
+  isActive: boolean;
+  triggered: boolean;
+  currentPrice?: number;
+}
+
+interface StockData {
+  symbol: string;
+  name: string;
+  price: number;
 }
 
 export default function NotificationSettings() {
@@ -24,6 +40,15 @@ export default function NotificationSettings() {
     breakingNews: true,
     watchlistUpdates: true,
   });
+  
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const [userStocks, setUserStocks] = useState<StockData[]>([]);
+  const [priceAlerts, setPriceAlerts] = useState<PriceAlert[]>([]);
+  const [isLoadingStocks, setIsLoadingStocks] = useState(false);
+  const [isLoadingAlerts, setIsLoadingAlerts] = useState(false);
+  const [showAlertForm, setShowAlertForm] = useState<string | null>(null);
+  const [alertForm, setAlertForm] = useState({ targetPrice: '', condition: 'above' as 'above' | 'below' });
+  const [isCreatingAlert, setIsCreatingAlert] = useState(false);
 
   useEffect(() => {
     checkNotificationSupport();
@@ -52,6 +77,48 @@ export default function NotificationSettings() {
       }
     } catch (error) {
       console.error('Failed to check subscription status:', error);
+    }
+  }
+
+  async function fetchUserStocksAndAlerts() {
+    setIsLoadingStocks(true);
+    setIsLoadingAlerts(true);
+    
+    try {
+      const [holdingsRes, stocksRes, alertsRes] = await Promise.all([
+        fetch('/api/holdings', { credentials: 'include' }),
+        fetch('/api/stocks'),
+        fetch('/api/price-alerts', { credentials: 'include' })
+      ]);
+
+      const holdingsData = holdingsRes.ok ? await holdingsRes.json() : { data: [] };
+      const stocksData = stocksRes.ok ? await stocksRes.json() : [];
+      const alertsData = alertsRes.ok ? await alertsRes.json() : { alerts: [] };
+
+      const userSymbols = new Set<string>();
+      (holdingsData.data || []).forEach((h: any) => userSymbols.add(h.symbol));
+
+      const watchlist = localStorage.getItem('watchlist');
+      if (watchlist) {
+        try {
+          JSON.parse(watchlist).forEach((s: string) => userSymbols.add(s));
+        } catch {}
+      }
+
+      const stocksMap = new Map<string, StockData>();
+      stocksData.forEach((s: any) => stocksMap.set(s.symbol, { symbol: s.symbol, name: s.name, price: s.price }));
+
+      const userStocksList = Array.from(userSymbols)
+        .map(symbol => stocksMap.get(symbol))
+        .filter((s): s is StockData => !!s);
+
+      setUserStocks(userStocksList);
+      setPriceAlerts(alertsData.alerts || []);
+    } catch (error) {
+      console.error('Failed to fetch user stocks:', error);
+    } finally {
+      setIsLoadingStocks(false);
+      setIsLoadingAlerts(false);
     }
   }
 
@@ -165,6 +232,72 @@ export default function NotificationSettings() {
     }
   }
 
+  async function toggleSection(section: string) {
+    if (expandedSection === section) {
+      setExpandedSection(null);
+    } else {
+      setExpandedSection(section);
+      if (section === 'priceAlerts' && userStocks.length === 0) {
+        await fetchUserStocksAndAlerts();
+      }
+    }
+  }
+
+  async function createAlert(symbol: string, currentPrice: number) {
+    if (!alertForm.targetPrice) return;
+
+    setIsCreatingAlert(true);
+    try {
+      const res = await fetch('/api/price-alerts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          symbol,
+          targetPrice: parseFloat(alertForm.targetPrice),
+          condition: alertForm.condition,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setPriceAlerts([data.alert, ...priceAlerts]);
+        setShowAlertForm(null);
+        setAlertForm({ targetPrice: '', condition: 'above' });
+        setSuccess('Price alert created!');
+        setTimeout(() => setSuccess(null), 3000);
+      } else {
+        const data = await res.json();
+        setError(data.error || 'Failed to create alert');
+        setTimeout(() => setError(null), 3000);
+      }
+    } catch (error) {
+      setError('Failed to create alert');
+      setTimeout(() => setError(null), 3000);
+    } finally {
+      setIsCreatingAlert(false);
+    }
+  }
+
+  async function deleteAlert(alertId: string) {
+    try {
+      const res = await fetch(`/api/price-alerts?id=${alertId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (res.ok) {
+        setPriceAlerts(priceAlerts.filter(a => a.id !== alertId));
+      }
+    } catch (error) {
+      console.error('Failed to delete alert:', error);
+    }
+  }
+
+  function getAlertsForStock(symbol: string) {
+    return priceAlerts.filter(a => a.symbol === symbol && !a.triggered);
+  }
+
   function urlBase64ToUint8Array(base64String: string): Uint8Array {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -257,22 +390,162 @@ export default function NotificationSettings() {
         <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Notification Types</h4>
         
         <div className="space-y-3">
-          <label className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-            <div className="flex items-center gap-3">
-              <TrendingUp className="w-5 h-5 text-emerald-500" />
-              <div>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">Price Alerts</span>
-                <p className="text-xs text-gray-500">Get notified when stocks hit your target prices</p>
+          {/* Price Alerts - Expandable */}
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg overflow-hidden">
+            <div 
+              className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              onClick={() => isSubscribed && preferences.priceAlerts && toggleSection('priceAlerts')}
+            >
+              <div className="flex items-center gap-3">
+                <TrendingUp className="w-5 h-5 text-emerald-500" />
+                <div>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">Price Alerts</span>
+                  <p className="text-xs text-gray-500">Get notified when stocks hit your target prices</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {isSubscribed && preferences.priceAlerts && (
+                  <button className="p-1 text-gray-400 hover:text-gray-600">
+                    {expandedSection === 'priceAlerts' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </button>
+                )}
+                <input
+                  type="checkbox"
+                  checked={preferences.priceAlerts}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    updatePreferences('priceAlerts', e.target.checked);
+                    if (e.target.checked && isSubscribed) {
+                      toggleSection('priceAlerts');
+                    }
+                  }}
+                  disabled={!isSubscribed}
+                  className="w-5 h-5 text-emerald-500 rounded focus:ring-emerald-500 disabled:opacity-50"
+                />
               </div>
             </div>
-            <input
-              type="checkbox"
-              checked={preferences.priceAlerts}
-              onChange={(e) => updatePreferences('priceAlerts', e.target.checked)}
-              disabled={!isSubscribed}
-              className="w-5 h-5 text-emerald-500 rounded focus:ring-emerald-500 disabled:opacity-50"
-            />
-          </label>
+
+            {/* Expanded Stock List for Price Alerts */}
+            {expandedSection === 'priceAlerts' && isSubscribed && preferences.priceAlerts && (
+              <div className="border-t border-gray-200 dark:border-gray-600 p-4 space-y-4">
+                {isLoadingStocks ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="w-6 h-6 animate-spin text-emerald-500" />
+                  </div>
+                ) : userStocks.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    Add stocks to your portfolio or watchlist to set price alerts
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-xs text-gray-500">Select a stock to set price alerts:</p>
+                    {userStocks.map((stock) => {
+                      const stockAlerts = getAlertsForStock(stock.symbol);
+                      const isExpanded = showAlertForm === stock.symbol;
+
+                      return (
+                        <div key={stock.symbol} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
+                          <div 
+                            className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                            onClick={() => setShowAlertForm(isExpanded ? null : stock.symbol)}
+                          >
+                            <div>
+                              <span className="font-medium text-gray-900 dark:text-white">{stock.symbol}</span>
+                              <span className="text-xs text-gray-500 ml-2">₦{stock.price.toFixed(2)}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {stockAlerts.length > 0 && (
+                                <span className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full">
+                                  {stockAlerts.length} alert{stockAlerts.length > 1 ? 's' : ''}
+                                </span>
+                              )}
+                              <Plus className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-45' : ''}`} />
+                            </div>
+                          </div>
+
+                          {/* Stock Alert Form */}
+                          {isExpanded && (
+                            <div className="border-t border-gray-200 dark:border-gray-600 p-3 space-y-3">
+                              {/* Existing alerts for this stock */}
+                              {stockAlerts.length > 0 && (
+                                <div className="space-y-2">
+                                  <p className="text-xs text-gray-500 font-medium">Active Alerts:</p>
+                                  {stockAlerts.map(alert => (
+                                    <div key={alert.id} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
+                                      <div className="flex items-center gap-2">
+                                        {alert.condition === 'above' ? (
+                                          <TrendingUp className="w-4 h-4 text-green-500" />
+                                        ) : (
+                                          <TrendingDown className="w-4 h-4 text-red-500" />
+                                        )}
+                                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                                          {alert.condition === 'above' ? 'Above' : 'Below'} ₦{alert.targetPrice.toFixed(2)}
+                                        </span>
+                                      </div>
+                                      <button
+                                        onClick={() => deleteAlert(alert.id)}
+                                        className="p-1 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/20 rounded"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* New alert form */}
+                              <div className="space-y-2">
+                                <p className="text-xs text-gray-500 font-medium">Create New Alert:</p>
+                                <div className="flex gap-2">
+                                  <div className="flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+                                    <button
+                                      onClick={() => setAlertForm({ ...alertForm, condition: 'above' })}
+                                      className={`px-3 py-2 text-xs font-medium flex items-center gap-1 ${
+                                        alertForm.condition === 'above'
+                                          ? 'bg-green-500 text-white'
+                                          : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                                      }`}
+                                    >
+                                      <TrendingUp className="w-3 h-3" /> Above
+                                    </button>
+                                    <button
+                                      onClick={() => setAlertForm({ ...alertForm, condition: 'below' })}
+                                      className={`px-3 py-2 text-xs font-medium flex items-center gap-1 ${
+                                        alertForm.condition === 'below'
+                                          ? 'bg-red-500 text-white'
+                                          : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                                      }`}
+                                    >
+                                      <TrendingDown className="w-3 h-3" /> Below
+                                    </button>
+                                  </div>
+                                  <input
+                                    type="number"
+                                    placeholder={`₦${stock.price.toFixed(2)}`}
+                                    value={alertForm.targetPrice}
+                                    onChange={(e) => setAlertForm({ ...alertForm, targetPrice: e.target.value })}
+                                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg text-sm"
+                                  />
+                                  <button
+                                    onClick={() => createAlert(stock.symbol, stock.price)}
+                                    disabled={!alertForm.targetPrice || isCreatingAlert}
+                                    className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-medium hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                                  >
+                                    {isCreatingAlert ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                                    Add
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           <label className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             <div className="flex items-center gap-3">

@@ -58,14 +58,19 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
   - RSI and MACD indicators built-in
 - **Market Buzz Social Feed with AI Crawler**: Real-time social media aggregation
   - Custom crawler scrapes TradingView community, Twitter/X (via Nitter), Reddit, and Nigerian news
+  - **NEW: Official X/Twitter API integration** - Uses Bearer Token for authenticated API access
+  - Searches X for Nigerian stock symbols, company names, and stock-related accounts
+  - Fetches real-time tweets with metrics (likes, replies, retweets, quotes)
   - OpenAI GPT-4o-mini sentiment analysis for each post (bullish/bearish/neutral/mixed)
   - MongoDB storage with SocialPost schema for persistence
   - Filter by platform (All, Reddit, TradingView, X, News)
   - Stock mention detection with automatic symbol extraction
   - Sentiment badges on each post showing AI analysis
   - Rate-limited crawler endpoint with authentication required
+  - **NEW: Watchlist-specific X posts** - GET /api/social/watchlist?symbols=GTCO,DANGCEM
   - API endpoints: GET /api/social (feed), POST /api/social/crawl (trigger crawl)
-  - Nigerian finance Twitter accounts monitored: @Naborhood, @Afrinvestor, @NGXGroup, etc.
+  - Nigerian finance Twitter accounts monitored: @NGXGroup, @SECNigeria, @Nairametrics, @CardinalStone, etc.
+  - X Crawler service in src/lib/xTwitterCrawler.ts with official Twitter API v2
 
 - **Stock Recommendations Engine**: AI-powered stock suggestions based on user profile
   - Recommendations API at /api/recommendations

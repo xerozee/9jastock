@@ -5,6 +5,7 @@ import { Star, TrendingUp, TrendingDown, ArrowRight, Clock, RefreshCw } from 'lu
 import StockTable from '@/components/StockTable';
 import StockCard from '@/components/StockCard';
 import AuthGuard from '@/components/AuthGuard';
+import WatchlistXPosts from '@/components/WatchlistXPosts';
 import { useWatchlist } from '@/lib/watchlistContext';
 import { getStocksBySymbols } from '@/lib/stockData';
 
@@ -102,6 +103,10 @@ export default function WatchlistPage() {
                   <p className="text-sm text-gray-500 dark:text-slate-500 mt-1">stocks flat today</p>
                 </div>
               </div>
+            </div>
+
+            <div className="mt-8">
+              <WatchlistXPosts watchlistSymbols={watchlist} />
             </div>
           </>
         ) : (

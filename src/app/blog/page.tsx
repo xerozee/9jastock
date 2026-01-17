@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { 
   TrendingUp, TrendingDown, Newspaper, ExternalLink, Clock, 
-  Building2, BarChart3, FileText, RefreshCw, ChevronRight, Wifi, WifiOff, Lock, LogIn
+  Building2, BarChart3, FileText, RefreshCw, ChevronRight, Wifi, WifiOff, Lock, LogIn,
+  MessageCircle, Heart, Share2, Loader2
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Stock } from '@/types/stock';
@@ -21,6 +22,22 @@ interface NewsItem {
   scrapedAt: string;
 }
 
+interface XPost {
+  id: string;
+  platform: string;
+  author: string;
+  authorHandle?: string;
+  content: string;
+  timestamp: string;
+  likes: number;
+  comments: number;
+  shares: number;
+  verified: boolean;
+  stockMentions: string[];
+  sentiment?: 'bullish' | 'bearish' | 'neutral' | 'mixed';
+  url?: string;
+}
+
 const NEWS_SOURCES = [
   { id: 'all', name: 'All Sources', color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' },
   { id: 'TradingView', name: 'TradingView', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
@@ -33,12 +50,21 @@ const NEWS_REFRESH_AUTHENTICATED = 10 * 60 * 1000;
 const NEWS_REFRESH_GUEST = 6 * 60 * 60 * 1000;
 const GUEST_ARTICLE_LIMIT = 5;
 
+const sentimentConfig = {
+  bullish: { label: 'Bullish', color: 'text-green-500', bg: 'bg-green-500/10' },
+  bearish: { label: 'Bearish', color: 'text-red-500', bg: 'bg-red-500/10' },
+  neutral: { label: 'Neutral', color: 'text-gray-500', bg: 'bg-gray-500/10' },
+  mixed: { label: 'Mixed', color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
+};
+
 export default function BlogPage() {
   const { isAuthenticated, isLoading: authLoading, login } = useAuth();
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [news, setNews] = useState<NewsItem[]>([]);
+  const [xPosts, setXPosts] = useState<XPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isNewsLoading, setIsNewsLoading] = useState(true);
+  const [isXLoading, setIsXLoading] = useState(false);
   const [activeSource, setActiveSource] = useState<string>('all');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [newsLastUpdated, setNewsLastUpdated] = useState<Date | null>(null);
@@ -85,16 +111,38 @@ export default function BlogPage() {
     }
   }, []);
 
+  const fetchXPosts = useCallback(async () => {
+    try {
+      setIsXLoading(true);
+      const response = await fetch('/api/social?platform=twitter&limit=8');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.posts?.length > 0) {
+          setXPosts(data.posts);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch X posts:', error);
+    } finally {
+      setIsXLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchStocks();
     fetchNews();
+    if (isAuthenticated) {
+      fetchXPosts();
+    }
     const stockInterval = setInterval(fetchStocks, isAuthenticated ? 5 * 60 * 1000 : 6 * 60 * 60 * 1000);
     const newsInterval = setInterval(() => fetchNews(), refreshInterval);
+    const xInterval = isAuthenticated ? setInterval(fetchXPosts, 10 * 60 * 1000) : null;
     return () => {
       clearInterval(stockInterval);
       clearInterval(newsInterval);
+      if (xInterval) clearInterval(xInterval);
     };
-  }, [fetchStocks, fetchNews, isAuthenticated, refreshInterval]);
+  }, [fetchStocks, fetchNews, fetchXPosts, isAuthenticated, refreshInterval]);
 
   const topPerformers = [...stocks]
     .filter(s => s.changePercent !== undefined)
@@ -364,6 +412,138 @@ export default function BlogPage() {
                     Showing 10 of {filteredNews.length} articles
                   </p>
                 )}
+              </div>
+            )}
+
+            {isAuthenticated && (
+              <div className="mt-8 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+                <div className="p-6 border-b border-gray-100 dark:border-slate-700">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-slate-800 dark:bg-white rounded-full flex items-center justify-center">
+                        <svg className="w-5 h-5 text-white dark:text-slate-800" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                          Market Buzz from X
+                        </h2>
+                        <p className="text-sm text-gray-500 dark:text-slate-400">
+                          Latest posts about Nigerian stocks
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={fetchXPosts}
+                      disabled={isXLoading}
+                      className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors disabled:opacity-50"
+                    >
+                      {isXLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="w-4 h-4" />
+                      )}
+                      Refresh
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  {isXLoading && xPosts.length === 0 ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                    </div>
+                  ) : xPosts.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {xPosts.slice(0, 6).map(post => {
+                        const sentiment = post.sentiment ? sentimentConfig[post.sentiment] : null;
+                        return (
+                          <div key={post.id} className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 hover:shadow-md transition-all">
+                            <div className="flex items-start gap-3">
+                              <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center text-slate-700 dark:text-slate-200 font-bold text-sm flex-shrink-0">
+                                {post.author.substring(0, 2).toUpperCase()}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-semibold text-gray-900 dark:text-white text-sm truncate">
+                                    {post.author}
+                                  </span>
+                                  {post.verified && (
+                                    <svg className="w-4 h-4 text-blue-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                    </svg>
+                                  )}
+                                  {post.authorHandle && (
+                                    <span className="text-xs text-gray-500 dark:text-slate-400 truncate">
+                                      {post.authorHandle}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                                  {sentiment && (
+                                    <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full ${sentiment.bg} ${sentiment.color} text-xs font-medium`}>
+                                      <span>{sentiment.label}</span>
+                                    </div>
+                                  )}
+                                  <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
+                                    <Clock className="w-3 h-3" />
+                                    <span>{post.timestamp}</span>
+                                  </div>
+                                </div>
+                                <p className="mt-2 text-gray-700 dark:text-slate-300 text-sm leading-relaxed line-clamp-3">
+                                  {post.content}
+                                </p>
+                                {post.stockMentions && post.stockMentions.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mt-2">
+                                    {post.stockMentions.slice(0, 3).map(stock => (
+                                      <Link 
+                                        key={stock} 
+                                        href={`/stocks/${stock}`}
+                                        className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-medium rounded-full hover:bg-blue-200 dark:hover:bg-blue-800/40 transition-colors"
+                                      >
+                                        ${stock}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                )}
+                                <div className="flex items-center gap-4 mt-2 text-xs text-gray-500 dark:text-slate-400">
+                                  <span className="flex items-center gap-1">
+                                    <Heart className="w-3 h-3" /> {post.likes}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <MessageCircle className="w-3 h-3" /> {post.comments}
+                                  </span>
+                                  {post.url && (
+                                    <a 
+                                      href={post.url} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="ml-auto text-blue-500 hover:text-blue-600 flex items-center gap-1"
+                                    >
+                                      View <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                      </div>
+                      <p className="text-gray-600 dark:text-slate-400">
+                        No posts from X yet. Click Refresh to load latest market buzz.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

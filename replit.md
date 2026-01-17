@@ -74,7 +74,9 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
   - **NEW: 72-hour search window** - Crawler searches last 72 hours of X posts using start_time parameter
   - **NEW: All-user symbol coverage** - Crawls symbols from ALL users' portfolios and watchlists
   - getAllUserSymbols() aggregates unique symbols from PortfolioItem and Holding collections
-  - Combines user-tracked symbols with NGX stock symbols for comprehensive coverage
+  - **NEW: Full 129+ stock coverage** - Uses ALL stocks from stockData.ts (not hardcoded subset)
+  - STOCK_NAME_MAP dynamically generated from nigerianStocks for company name matching
+  - Combines user-tracked symbols with ALL NGX stock symbols for comprehensive coverage
   - **NEW: Auto-refresh** - MarketBuzzX and ProfileXPosts auto-refresh every 2 minutes
   - "Last updated" timestamp shown in Market Buzz header
 

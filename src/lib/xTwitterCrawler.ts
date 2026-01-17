@@ -1,7 +1,10 @@
 import { connectToDatabase, SocialPost, PortfolioItem, Holding } from './mongodb';
 import { analyzeSentiment } from './socialCrawler';
+import { nigerianStocks } from './stockData';
 
 const X_BEARER_TOKEN = process.env.X_BEARER_TOKEN;
+
+const ALL_NGX_SYMBOLS = nigerianStocks.map(stock => stock.symbol);
 
 function get72HoursAgo(): string {
   const date = new Date();
@@ -34,16 +37,90 @@ async function getAllUserSymbols(): Promise<string[]> {
   return Array.from(symbolsSet);
 }
 
-const NGX_STOCK_SYMBOLS = [
-  'DANGCEM', 'GTCO', 'ZENITHBANK', 'MTNN', 'AIRTELAFRI', 'ACCESSCORP',
-  'BUACEMENT', 'SEPLAT', 'NESTLE', 'STANBIC', 'FBNH', 'UBA', 'TRANSCORP',
-  'OANDO', 'PRESCO', 'WAPCO', 'FLOURMILL', 'GUINNESS', 'INTBREW', 'NASCON',
-  'GEREGU', 'CONOIL', 'FIDELITYBK', 'STERLINGNG', 'FCMB', 'WEMABANK',
-  'UNITYBNK', 'JAIZBANK', 'ECOBANK', 'CADBURY', 'DANGSUGAR', 'VITAFOAM',
-  'NB', 'CHIPLC', 'CUTIX', 'BERGER', 'RTBRISCOE', 'UPDCREIT', 'LIVESTOCK',
-  'HONYFLOUR', 'CHAMPION', 'NPFMCRFBK', 'AFRIPRUD', 'CORNERST', 'MANSARD',
-  'AIICO', 'LASACO', 'LINKASSURE', 'MBENEFIT', 'NEM', 'REGALINS', 'VERITASKAP'
-];
+const STOCK_ALIASES: Record<string, string[]> = {
+  'GTCO': ['GTBank', 'GT Bank', 'Guaranty Trust', 'GTCO'],
+  'UBA': ['United Bank for Africa', 'UBA'],
+  'FBNH': ['First Bank', 'FirstBank', 'FBN Holdings'],
+  'MTNN': ['MTN Nigeria', 'MTN'],
+  'AIRTELAFRI': ['Airtel Africa', 'Airtel'],
+  'ACCESSCORP': ['Access Bank', 'Access Holdings', 'Access Corporation'],
+  'STANBIC': ['Stanbic IBTC', 'Stanbic'],
+  'BUACEMENT': ['BUA Cement', 'BUA'],
+  'DANGCEM': ['Dangote Cement'],
+  'SEPLAT': ['Seplat Energy', 'Seplat'],
+  'FLOURMILL': ['Flour Mills', 'FMN', 'Flour Mills of Nigeria'],
+  'WAPCO': ['Lafarge Africa', 'Lafarge'],
+  'FCMB': ['First City Monument Bank', 'FCMB'],
+  'STERLINGNG': ['Sterling Bank', 'Sterling'],
+  'NB': ['Nigerian Breweries'],
+  'AFRIPRUD': ['Africa Prudential', 'AfriPrud'],
+  'TRANSCORP': ['Transnational Corporation', 'Transcorp'],
+  'HONYFLOUR': ['Honeywell Flour', 'Honeywell'],
+  'MANSARD': ['AXA Mansard', 'Mansard'],
+  'CHIPLC': ['Consolidated Hallmark', 'CHI'],
+  'ZENITHBANK': ['Zenith Bank'],
+  'FIDELITYBK': ['Fidelity Bank'],
+  'WEMABANK': ['Wema Bank'],
+  'JAIZBANK': ['Jaiz Bank'],
+  'ECOBANK': ['Ecobank Nigeria', 'Ecobank'],
+  'UNITYBNK': ['Unity Bank'],
+  'DANGSUGAR': ['Dangote Sugar'],
+  'CADBURY': ['Cadbury Nigeria', 'Cadbury'],
+  'NESTLE': ['Nestle Nigeria', 'Nestle'],
+  'GUINNESS': ['Guinness Nigeria'],
+  'INTBREW': ['International Breweries'],
+  'VITAFOAM': ['Vitafoam Nigeria', 'Vitafoam'],
+  'OANDO': ['Oando'],
+  'PRESCO': ['Presco'],
+  'CONOIL': ['Conoil'],
+  'GEREGU': ['Geregu Power'],
+  'CUTIX': ['Cutix'],
+  'LIVESTOCK': ['Livestock Feeds'],
+  'VERITASKAP': ['Veritas Kapital'],
+  'NASCON': ['NASCON Allied', 'NASCON'],
+  'BERGER': ['Berger Paints'],
+  'RTBRISCOE': ['RT Briscoe'],
+  'UPDCREIT': ['UPDC REIT'],
+  'CHAMPION': ['Champion Breweries'],
+  'NPFMCRFBK': ['NPF Microfinance Bank'],
+  'CORNERST': ['Cornerstone Insurance'],
+  'AIICO': ['AIICO Insurance', 'AIICO'],
+  'LASACO': ['Lasaco Assurance'],
+  'LINKASSURE': ['Linkage Assurance'],
+  'MBENEFIT': ['Mutual Benefits Assurance'],
+  'NEM': ['NEM Insurance'],
+  'REGALINS': ['Regency Alliance Insurance'],
+  'UCAP': ['United Capital'],
+  'CAP': ['Chemical and Allied Products'],
+  'DEAPCAP': ['DEAP Capital'],
+  'TOTAL': ['TotalEnergies Marketing Nigeria'],
+  'ARDOVA': ['Ardova Plc'],
+  'MRS': ['MRS Oil'],
+  'ETERNA': ['Eterna Plc'],
+  'UNILEVER': ['Unilever Nigeria'],
+  'PZ': ['PZ Cussons'],
+  'OKOMUOIL': ['Okomu Oil'],
+  'MAYBAKER': ['May & Baker'],
+  'NEIMETH': ['Neimeth Pharmaceuticals'],
+  'FIDSON': ['Fidson Healthcare'],
+  'GLAXOSMITH': ['GlaxoSmithKline'],
+  'UACN': ['UAC of Nigeria'],
+  'NAHCO': ['Nigerian Aviation Handling Company'],
+  'NGXGROUP': ['Nigerian Exchange Group', 'NGX Group'],
+};
+
+const STOCK_NAME_MAP: Record<string, string[]> = {};
+nigerianStocks.forEach(stock => {
+  const names: string[] = [stock.name, stock.symbol];
+  const words = stock.name.split(' ');
+  if (words.length > 1 && words[0].length > 2) {
+    names.push(words[0]);
+  }
+  if (STOCK_ALIASES[stock.symbol]) {
+    names.push(...STOCK_ALIASES[stock.symbol]);
+  }
+  STOCK_NAME_MAP[stock.symbol] = [...new Set(names)];
+});
 
 const NIGERIAN_STOCK_ACCOUNTS = [
   'NGXGroup', 'SECNigeria', 'Nairametrics', 'CardinalStone',
@@ -87,61 +164,6 @@ interface XSearchResponse {
   };
 }
 
-const STOCK_COMPANY_NAMES: Record<string, string[]> = {
-  'DANGCEM': ['Dangote Cement'],
-  'GTCO': ['Guaranty Trust', 'GTCO', 'GTBank', 'GT Bank'],
-  'ZENITHBANK': ['Zenith Bank'],
-  'MTNN': ['MTN Nigeria', 'MTN'],
-  'AIRTELAFRI': ['Airtel Africa', 'Airtel'],
-  'ACCESSCORP': ['Access Holdings', 'Access Bank', 'Access Corporation'],
-  'UBA': ['United Bank for Africa', 'UBA'],
-  'FBNH': ['FBN Holdings', 'First Bank', 'FirstBank'],
-  'NESTLE': ['Nestle Nigeria', 'Nestle'],
-  'SEPLAT': ['Seplat Energy', 'Seplat'],
-  'BUACEMENT': ['BUA Cement', 'BUA'],
-  'STANBIC': ['Stanbic IBTC', 'Stanbic'],
-  'TRANSCORP': ['Transcorp', 'Transnational Corporation'],
-  'OANDO': ['Oando'],
-  'PRESCO': ['Presco'],
-  'FLOURMILL': ['Flour Mills of Nigeria', 'FMN'],
-  'GUINNESS': ['Guinness Nigeria'],
-  'NB': ['Nigerian Breweries'],
-  'WAPCO': ['Lafarge Africa', 'Lafarge'],
-  'FCMB': ['FCMB', 'First City Monument Bank'],
-  'FIDELITYBK': ['Fidelity Bank'],
-  'GEREGU': ['Geregu Power'],
-  'DANGSUGAR': ['Dangote Sugar'],
-  'CADBURY': ['Cadbury Nigeria', 'Cadbury'],
-  'INTBREW': ['International Breweries'],
-  'CONOIL': ['Conoil'],
-  'CUTIX': ['Cutix'],
-  'JAIZBANK': ['Jaiz Bank'],
-  'LIVESTOCK': ['Livestock Feeds'],
-  'UNITYBNK': ['Unity Bank'],
-  'VERITASKAP': ['Veritas Kapital'],
-  'WEMABANK': ['Wema Bank'],
-  'NASCON': ['NASCON Allied', 'NASCON'],
-  'STERLINGNG': ['Sterling Bank', 'Sterling'],
-  'ECOBANK': ['Ecobank Nigeria', 'Ecobank'],
-  'VITAFOAM': ['Vitafoam Nigeria', 'Vitafoam'],
-  'CHIPLC': ['Consolidated Hallmark', 'CHI'],
-  'BERGER': ['Berger Paints'],
-  'RTBRISCOE': ['RT Briscoe'],
-  'UPDCREIT': ['UPDC REIT'],
-  'HONYFLOUR': ['Honeywell Flour', 'Honeywell'],
-  'CHAMPION': ['Champion Breweries'],
-  'NPFMCRFBK': ['NPF Microfinance Bank'],
-  'AFRIPRUD': ['Africa Prudential', 'AfriPrud'],
-  'CORNERST': ['Cornerstone Insurance'],
-  'MANSARD': ['AXA Mansard', 'Mansard'],
-  'AIICO': ['AIICO Insurance', 'AIICO'],
-  'LASACO': ['Lasaco Assurance'],
-  'LINKASSURE': ['Linkage Assurance'],
-  'MBENEFIT': ['Mutual Benefits Assurance'],
-  'NEM': ['NEM Insurance'],
-  'REGALINS': ['Regency Alliance Insurance'],
-};
-
 async function fetchFromXApi(endpoint: string): Promise<any> {
   if (!X_BEARER_TOKEN) {
     throw new Error('X_BEARER_TOKEN is not configured');
@@ -169,7 +191,7 @@ export async function searchXForStocks(symbols: string[], use72Hours: boolean = 
   
   const cashtags = symbols.map(s => `$${s}`).join(' OR ');
   const companyNames = symbols
-    .flatMap(s => STOCK_COMPANY_NAMES[s] || [])
+    .flatMap(s => STOCK_NAME_MAP[s] || [])
     .filter(Boolean);
   
   const queries = [
@@ -226,7 +248,7 @@ export async function searchXForWatchlistStocks(watchlistSymbols: string[], use7
     try {
       const cashtags = chunk.map(s => `$${s}`).join(' OR ');
       const companyNames = chunk
-        .flatMap(s => STOCK_COMPANY_NAMES[s] || [])
+        .flatMap(s => STOCK_NAME_MAP[s] || [])
         .filter(Boolean)
         .map(n => `"${n}"`)
         .join(' OR ');
@@ -265,7 +287,7 @@ export async function searchXForWatchlistStocks(watchlistSymbols: string[], use7
   try {
     const symbolKeywords = watchlistSymbols
       .flatMap(s => {
-        const names = STOCK_COMPANY_NAMES[s] || [];
+        const names = STOCK_NAME_MAP[s] || [];
         const quoted = names.map(n => `"${n}"`);
         return [`$${s}`, ...quoted];
       })
@@ -315,7 +337,7 @@ export async function crawlXPosts(): Promise<{ success: boolean; postsProcessed:
     const userSymbols = await getAllUserSymbols();
     console.log(`[X Crawler] Found ${userSymbols.length} user-tracked symbols`);
     
-    const allSymbols = [...new Set([...userSymbols, ...NGX_STOCK_SYMBOLS])];
+    const allSymbols = [...new Set([...userSymbols, ...ALL_NGX_SYMBOLS])];
     console.log(`[X Crawler] Total unique symbols to search: ${allSymbols.length}`);
     
     const symbolBatches: string[][] = [];
@@ -476,7 +498,7 @@ function extractStockMentions(content: string): string[] {
   const mentions: string[] = [];
   const upperContent = content.toUpperCase();
   
-  for (const symbol of NGX_STOCK_SYMBOLS) {
+  for (const symbol of ALL_NGX_SYMBOLS) {
     if (upperContent.includes(symbol) || upperContent.includes(`$${symbol}`)) {
       mentions.push(symbol);
     }

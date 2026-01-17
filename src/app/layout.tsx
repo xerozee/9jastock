@@ -3,6 +3,7 @@ import "./globals.css";
 import { Providers } from "@/components/Providers";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import PWARegister from "@/components/PWARegister";
+import InstallPrompt from "@/components/InstallPrompt";
 
 export const metadata: Metadata = {
   title: "9jaStock - Nigerian Stock Exchange Tracker",
@@ -45,6 +46,7 @@ export default function RootLayout({
           <LayoutWrapper>
             {children}
           </LayoutWrapper>
+          <InstallPrompt />
         </Providers>
       </body>
     </html>

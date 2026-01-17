@@ -112,6 +112,13 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
   - iOS/Android "Add to Home Screen" compatible
   - Offline fallback page when no connection
   - Icon generation script at scripts/generate-icons.js
+  - **NEW: InstallPrompt component** - Device-specific installation instructions
+    - Detects iOS, Android, or Desktop automatically
+    - iOS: Shows Safari share button + Add to Home Screen steps
+    - Android: Shows Install App button or Chrome menu instructions
+    - Desktop: Shows browser install icon instructions
+    - Dismissible with 7-day reminder delay
+    - Auto-hides if app is already installed (standalone mode)
 - **Market Hours & Countdown**: Live trading session indicator
   - Shows NGX trading hours (10:00 AM - 2:30 PM WAT)
   - "Market Open" status with countdown to market close

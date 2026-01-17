@@ -9,6 +9,7 @@ import {
   ChevronRight, Users, Gift, Sparkles, Crown
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
 import Avatar from '@/components/Avatar';
 import ProfileXPosts from '@/components/ProfileXPosts';
 import NotificationSettings from '@/components/NotificationSettings';
@@ -92,6 +93,7 @@ const horizonLabels: Record<string, string> = {
 export default function ProfilePage() {
   const router = useRouter();
   const { user: authUser, isLoading: authLoading } = useAuth();
+  const { isPremium } = useSubscription();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [stocks, setStocks] = useState<StockData[]>([]);
   const [stocksError, setStocksError] = useState(false);
@@ -270,21 +272,40 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 text-white">
+      <div className={`text-white ${
+        isPremium 
+          ? 'bg-gradient-to-br from-amber-500 via-yellow-500 to-orange-500' 
+          : 'bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 py-12">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            <Avatar 
-              firstName={profile.user.firstName}
-              lastName={profile.user.lastName}
-              email={profile.user.email}
-              profileImageUrl={profile.user.profileImageUrl}
-              size="xl"
-              className="ring-4 ring-white/20"
-            />
+            <div className="relative">
+              <Avatar 
+                firstName={profile.user.firstName}
+                lastName={profile.user.lastName}
+                email={profile.user.email}
+                profileImageUrl={profile.user.profileImageUrl}
+                size="xl"
+                className={`ring-4 ${isPremium ? 'ring-yellow-300/50' : 'ring-white/20'}`}
+              />
+              {isPremium && (
+                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full p-1.5 shadow-lg">
+                  <Crown className="w-5 h-5 text-white" />
+                </div>
+              )}
+            </div>
             <div className="flex-1">
-              <h1 className="text-3xl font-bold">
-                {profile.user.firstName} {profile.user.lastName}
-              </h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-bold">
+                  {profile.user.firstName} {profile.user.lastName}
+                </h1>
+                {isPremium && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-white text-sm font-semibold rounded-full shadow-lg animate-pulse">
+                    <Crown className="w-4 h-4" />
+                    Premium
+                  </span>
+                )}
+              </div>
               <p className="text-white/70 mt-1">{profile.user.email}</p>
               {profile.user.bio && (
                 <p className="text-white/80 mt-2 max-w-2xl">{profile.user.bio}</p>

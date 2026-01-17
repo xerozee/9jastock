@@ -21,7 +21,9 @@ import {
   ChevronUp,
   Share2,
   Copy,
-  Check
+  Check,
+  Crown,
+  Sparkles
 } from "lucide-react";
 import AuthGuard from "@/components/AuthGuard";
 
@@ -83,6 +85,8 @@ export default function PortfolioPage() {
   const [shareId, setShareId] = useState<string | null>(null);
   const [isLoadingShare, setIsLoadingShare] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeInfo, setUpgradeInfo] = useState<{ currentCount: number; maxItems: number } | null>(null);
 
   useEffect(() => {
     if (!hasFetched) {
@@ -177,6 +181,15 @@ export default function PortfolioPage() {
           notes: newHolding.notes || null,
         }),
       });
+
+      const data = await response.json();
+
+      if (response.status === 403 && data.limitReached) {
+        setShowAddModal(false);
+        setUpgradeInfo({ currentCount: data.currentCount, maxItems: data.maxItems });
+        setShowUpgradeModal(true);
+        return;
+      }
 
       if (response.ok) {
         await fetchHoldings();
@@ -727,6 +740,56 @@ export default function PortfolioPage() {
                   <p className="text-gray-600 dark:text-gray-400">Failed to generate share link. Please try again.</p>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showUpgradeModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-md w-full border border-gray-100 dark:border-slate-700 overflow-hidden">
+            <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white text-center">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Crown className="w-8 h-8" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Portfolio Limit Reached</h2>
+              <p className="text-white/90">
+                You're tracking {upgradeInfo?.currentCount || 0} of {upgradeInfo?.maxItems || 10} stocks
+              </p>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-gray-600 dark:text-gray-300 text-center">
+                Upgrade to Premium for unlimited portfolio tracking and more:
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                  <Sparkles className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                  <span>Unlimited stock tracking</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                  <Clock className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                  <span>1-minute real-time data refresh</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                  <TrendingUp className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                  <span>AI-powered stock recommendations</span>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowUpgradeModal(false)}
+                  className="flex-1 py-3 px-4 rounded-xl font-medium border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Maybe Later
+                </button>
+                <Link
+                  href="/pricing"
+                  className="flex-1 py-3 px-4 rounded-xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white text-center hover:from-amber-600 hover:to-orange-600 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Crown className="w-4 h-4" />
+                  Upgrade Now
+                </Link>
+              </div>
             </div>
           </div>
         </div>

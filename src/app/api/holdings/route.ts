@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
-import { connectToDatabase, Holding } from "@/lib/mongodb";
+import { connectToDatabase, Holding, User } from "@/lib/mongodb";
 import mongoose from "mongoose";
+import { getUserTier, TIER_LIMITS } from "@/lib/subscription";
 
 export async function GET() {
   try {
@@ -73,6 +74,30 @@ export async function POST(request: NextRequest) {
     }
 
     await connectToDatabase();
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    // Check portfolio limits based on subscription tier
+    const user = await User.findById(userId).lean();
+    const tier = getUserTier(user);
+    const maxItems = TIER_LIMITS[tier].maxPortfolioItems;
+
+    // Count unique symbols in holdings
+    const uniqueSymbols = await Holding.distinct('symbol', { userId: userObjectId });
+    const currentSymbolCount = uniqueSymbols.length;
+    
+    // Check if adding a new symbol (not already tracked)
+    const isNewSymbol = !uniqueSymbols.includes(symbol.toUpperCase());
+    
+    if (isNewSymbol && currentSymbolCount >= maxItems) {
+      return NextResponse.json({ 
+        error: `Portfolio limit reached. Free accounts can track up to ${maxItems} stocks.`,
+        limitReached: true,
+        currentCount: currentSymbolCount,
+        maxItems,
+        upgradeUrl: '/pricing',
+      }, { status: 403 });
+    }
+
     const newHolding = await Holding.create({
       userId: new mongoose.Types.ObjectId(userId),
       symbol: symbol.toUpperCase(),

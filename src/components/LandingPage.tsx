@@ -1,7 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { TrendingUp, TrendingDown, BarChart3, Bell, Briefcase, LineChart, Shield, Zap, Globe, ArrowRight, CheckCircle, ChevronRight, Sparkles, Smartphone, Play } from 'lucide-react';
+import { 
+  TrendingUp, TrendingDown, BarChart3, Bell, Briefcase, LineChart, 
+  Shield, Zap, Globe, ArrowRight, CheckCircle, ChevronRight, Sparkles, 
+  Smartphone, Play, Twitter, Brain, Crown, Download, PieChart, 
+  Newspaper, Target, Clock, MessageSquare, Star, CreditCard
+} from 'lucide-react';
 import Logo3D from './Logo3D';
 import Link from 'next/link';
 
@@ -12,6 +17,7 @@ interface LandingPageProps {
 export default function LandingPage({ onLogin }: LandingPageProps) {
   const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 });
   const [activeCard, setActiveCard] = useState(0);
+  const [activePlan, setActivePlan] = useState<'monthly' | 'yearly'>('monthly');
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -32,26 +38,50 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
     {
       icon: TrendingUp,
       title: 'Real-Time Data',
-      description: 'Live prices for 145+ NGX stocks updated every 5 minutes.',
+      description: 'Live prices for 145+ NGX stocks from TradingView, updated every 5 minutes.',
       gradient: 'from-emerald-500 to-teal-600',
     },
     {
-      icon: BarChart3,
-      title: 'Technical Analysis',
-      description: 'RSI, MACD, Bollinger Bands and 10+ indicators.',
+      icon: Brain,
+      title: 'AI Analysis',
+      description: 'GPT-4 powered stock recommendations based on your investment profile.',
+      gradient: 'from-purple-500 to-pink-600',
+    },
+    {
+      icon: Twitter,
+      title: 'Market Buzz',
+      description: 'Real-time X/Twitter feed with AI sentiment analysis for each stock.',
       gradient: 'from-blue-500 to-indigo-600',
+    },
+    {
+      icon: Bell,
+      title: 'Price Alerts',
+      description: 'Push notifications when stocks hit your target prices.',
+      gradient: 'from-orange-500 to-red-600',
     },
     {
       icon: Briefcase,
       title: 'Portfolio Tracking',
-      description: 'Track investments with real-time P&L analytics.',
-      gradient: 'from-purple-500 to-pink-600',
+      description: 'Track investments with real-time P&L and shareable portfolio links.',
+      gradient: 'from-cyan-500 to-blue-600',
     },
     {
-      icon: Bell,
-      title: 'Market Alerts',
-      description: 'Daily newsletters with AI-curated insights.',
-      gradient: 'from-orange-500 to-red-600',
+      icon: BarChart3,
+      title: 'Technical Analysis',
+      description: 'Interactive TradingView charts with RSI, MACD, Bollinger Bands & more.',
+      gradient: 'from-rose-500 to-pink-600',
+    },
+    {
+      icon: PieChart,
+      title: 'Fundamental Data',
+      description: 'P/E ratio, EPS, dividends, balance sheet, cash flow & profitability metrics.',
+      gradient: 'from-amber-500 to-orange-600',
+    },
+    {
+      icon: Newspaper,
+      title: 'AI Newsletter',
+      description: 'Daily AI-curated market insights from Nigerian financial news sources.',
+      gradient: 'from-teal-500 to-emerald-600',
     },
   ];
 
@@ -62,10 +92,31 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
   ];
 
   const stats = [
-    { value: '145+', label: 'Stocks', icon: '📈' },
-    { value: '5min', label: 'Refresh', icon: '⚡' },
-    { value: '10+', label: 'Indicators', icon: '📊' },
+    { value: '145+', label: 'NGX Stocks', icon: '📈' },
+    { value: '79', label: 'Data Fields', icon: '📊' },
+    { value: 'AI', label: 'Powered', icon: '🤖' },
     { value: '24/7', label: 'Access', icon: '🌍' },
+  ];
+
+  const testimonials = [
+    {
+      name: 'Chidi O.',
+      role: 'Retail Investor',
+      text: 'The AI recommendations have helped me discover stocks I never would have found on my own.',
+      rating: 5,
+    },
+    {
+      name: 'Amaka N.',
+      role: 'Day Trader',
+      text: 'Price alerts and real-time data from TradingView make this my go-to NGX platform.',
+      rating: 5,
+    },
+    {
+      name: 'Emeka K.',
+      role: 'Portfolio Manager',
+      text: 'The social sentiment analysis from X gives me an edge in understanding market mood.',
+      rating: 5,
+    },
   ];
 
   return (
@@ -128,7 +179,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
               <div className="text-center lg:text-left order-2 lg:order-1">
                 <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-emerald-500/10 backdrop-blur-sm rounded-full text-emerald-400 text-xs md:text-sm mb-6 md:mb-8 border border-emerald-500/20">
                   <Sparkles size={14} className="animate-pulse" />
-                  <span className="font-medium">Live NGX Data</span>
+                  <span className="font-medium">AI-Powered • Real-Time Data • 145+ Stocks</span>
                   <div className="relative">
                     <div className="w-2 h-2 bg-emerald-400 rounded-full" />
                     <div className="absolute inset-0 w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
@@ -147,10 +198,11 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                 </h1>
                 
                 <p className="text-base md:text-lg lg:text-xl text-slate-300 max-w-xl mb-6 md:mb-8 leading-relaxed mx-auto lg:mx-0">
-                  The most powerful platform for Nigerian investors. 
-                  <span className="text-emerald-400 font-medium"> Real-time data</span>, 
-                  <span className="text-emerald-400 font-medium"> technical analysis</span>, and 
-                  <span className="text-emerald-400 font-medium"> smart portfolio tracking</span>.
+                  Nigeria&apos;s most powerful stock tracking platform with
+                  <span className="text-emerald-400 font-medium"> TradingView charts</span>, 
+                  <span className="text-purple-400 font-medium"> AI analysis</span>, 
+                  <span className="text-blue-400 font-medium"> X/Twitter sentiment</span>, and
+                  <span className="text-orange-400 font-medium"> price alerts</span>.
                 </p>
                 
                 <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4 lg:justify-start justify-center mb-8 md:mb-10">
@@ -166,16 +218,16 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                   </Link>
                   
                   <Link
-                    href="/login"
+                    href="/stocks"
                     className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 md:px-6 py-3 md:py-4 text-slate-300 hover:text-white font-medium rounded-2xl border border-slate-700/50 hover:border-slate-600 hover:bg-slate-800/50 backdrop-blur-sm transition-all text-sm md:text-base"
                   >
                     <Play size={16} className="text-emerald-400" />
-                    Watch Demo
+                    Explore Stocks
                   </Link>
                 </div>
                 
                 <div className="flex flex-wrap items-center gap-4 md:gap-6 text-xs md:text-sm text-slate-400 lg:justify-start justify-center">
-                  {['No credit card', 'Free forever', 'Mobile ready'].map((text, i) => (
+                  {['No credit card', 'Free tier available', 'Install as app'].map((text, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <CheckCircle size={14} className="text-emerald-500" />
                       <span>{text}</span>
@@ -269,12 +321,12 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                       style={{ animationDelay: '0s' }}
                     >
                       <div className="flex items-center gap-2 md:gap-3">
-                        <div className="w-8 h-8 md:w-10 md:h-10 bg-emerald-500/20 rounded-lg md:rounded-xl flex items-center justify-center">
-                          <TrendingUp size={14} className="text-emerald-400" />
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-500/20 rounded-lg md:rounded-xl flex items-center justify-center">
+                          <Twitter size={14} className="text-blue-400" />
                         </div>
                         <div>
-                          <div className="text-[10px] md:text-xs text-slate-400">Top Gainer</div>
-                          <div className="text-xs md:text-sm font-bold text-emerald-400">DANGCEM +2.45%</div>
+                          <div className="text-[10px] md:text-xs text-slate-400">Market Sentiment</div>
+                          <div className="text-xs md:text-sm font-bold text-emerald-400">Bullish 📈</div>
                         </div>
                       </div>
                     </div>
@@ -286,12 +338,12 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                       style={{ animationDelay: '1.5s' }}
                     >
                       <div className="flex items-center gap-2 md:gap-3">
-                        <div className="w-8 h-8 md:w-10 md:h-10 bg-purple-500/20 rounded-lg md:rounded-xl flex items-center justify-center">
-                          <Bell size={14} className="text-purple-400" />
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-orange-500/20 rounded-lg md:rounded-xl flex items-center justify-center">
+                          <Bell size={14} className="text-orange-400" />
                         </div>
                         <div>
-                          <div className="text-[10px] md:text-xs text-slate-400">Alert</div>
-                          <div className="text-xs md:text-sm font-bold text-purple-400">MTNN hit ₦200</div>
+                          <div className="text-[10px] md:text-xs text-slate-400">Price Alert</div>
+                          <div className="text-xs md:text-sm font-bold text-orange-400">MTNN ₦200 🎯</div>
                         </div>
                       </div>
                     </div>
@@ -352,7 +404,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
               Everything You Need
             </h2>
             <p className="text-sm md:text-lg text-slate-400 max-w-2xl mx-auto px-4">
-              Professional tools designed for Nigerian investors
+              Professional-grade tools built for Nigerian investors
             </p>
           </div>
           
@@ -382,30 +434,288 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
         </div>
       </section>
 
+      <section className="relative py-16 md:py-24 bg-gradient-to-b from-slate-950 to-slate-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10 md:mb-16">
+            <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-purple-500/10 rounded-full text-purple-400 text-xs md:text-sm mb-3 md:mb-4">
+              <Brain size={12} />
+              <span className="font-medium">AI-Powered Intelligence</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 md:mb-4">
+              Smart Stock Analysis
+            </h2>
+            <p className="text-sm md:text-lg text-slate-400 max-w-2xl mx-auto px-4">
+              Leverage artificial intelligence for personalized investment insights
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+            <div className="relative p-6 md:p-8 rounded-2xl md:rounded-3xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-4 md:mb-6">
+                <Target size={24} className="text-white" />
+              </div>
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-3">Personalized Recommendations</h3>
+              <p className="text-sm md:text-base text-slate-300 mb-4">
+                Based on your investment goals, risk tolerance, and interested sectors, our AI suggests stocks tailored to you.
+              </p>
+              <ul className="space-y-2 text-sm text-slate-400">
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-purple-400" /> Dividend stocks for passive income</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-purple-400" /> Blue-chip for beginners</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-purple-400" /> Growth stocks for aggressive investors</li>
+              </ul>
+            </div>
+
+            <div className="relative p-6 md:p-8 rounded-2xl md:rounded-3xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/20">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mb-4 md:mb-6">
+                <MessageSquare size={24} className="text-white" />
+              </div>
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-3">Sentiment Analysis</h3>
+              <p className="text-sm md:text-base text-slate-300 mb-4">
+                Every X/Twitter post is analyzed by GPT-4 for bullish, bearish, or neutral sentiment signals.
+              </p>
+              <ul className="space-y-2 text-sm text-slate-400">
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-blue-400" /> Real-time social sentiment</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-blue-400" /> Nigerian finance accounts monitored</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-blue-400" /> Stock mention detection</li>
+              </ul>
+            </div>
+
+            <div className="relative p-6 md:p-8 rounded-2xl md:rounded-3xl bg-gradient-to-br from-teal-500/10 to-emerald-500/10 border border-teal-500/20">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center mb-4 md:mb-6">
+                <Newspaper size={24} className="text-white" />
+              </div>
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-3">AI Newsletter</h3>
+              <p className="text-sm md:text-base text-slate-300 mb-4">
+                Daily AI-curated newsletters summarizing Nigerian financial news from top sources.
+              </p>
+              <ul className="space-y-2 text-sm text-slate-400">
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-teal-400" /> Nairametrics, BusinessDay, Punch</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-teal-400" /> TradingView market updates</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-teal-400" /> Delivered to your inbox</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative py-16 md:py-24 bg-slate-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10 md:mb-16">
+            <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-orange-500/10 rounded-full text-orange-400 text-xs md:text-sm mb-3 md:mb-4">
+              <Bell size={12} />
+              <span className="font-medium">Stay Informed</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 md:mb-4">
+              Never Miss a Move
+            </h2>
+            <p className="text-sm md:text-lg text-slate-400 max-w-2xl mx-auto px-4">
+              Push notifications and price alerts keep you ahead of the market
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+            <div className="space-y-6">
+              <div className="flex gap-4 p-4 md:p-5 rounded-2xl bg-slate-800/50 border border-slate-700/50 hover:border-orange-500/30 transition-colors">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                  <Target size={20} className="text-orange-400" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white mb-1">Price Alerts</h4>
+                  <p className="text-sm text-slate-400">Set target prices and get notified when stocks hit your levels.</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4 p-4 md:p-5 rounded-2xl bg-slate-800/50 border border-slate-700/50 hover:border-emerald-500/30 transition-colors">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                  <Clock size={20} className="text-emerald-400" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white mb-1">Daily Summary</h4>
+                  <p className="text-sm text-slate-400">Market recap and portfolio performance delivered daily.</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4 p-4 md:p-5 rounded-2xl bg-slate-800/50 border border-slate-700/50 hover:border-red-500/30 transition-colors">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                  <Zap size={20} className="text-red-400" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white mb-1">Breaking News</h4>
+                  <p className="text-sm text-slate-400">Instant alerts for major market events and announcements.</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4 p-4 md:p-5 rounded-2xl bg-slate-800/50 border border-slate-700/50 hover:border-blue-500/30 transition-colors">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                  <Star size={20} className="text-blue-400" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white mb-1">Watchlist Updates</h4>
+                  <p className="text-sm text-slate-400">Get notified about significant moves in your watchlist stocks.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative flex justify-center">
+              <div className="relative w-64 md:w-80">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-3xl blur-3xl" />
+                <div className="relative bg-slate-800 rounded-3xl border border-slate-700 p-6 md:p-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+                      <Bell size={18} className="text-white" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-white">Price Alert</div>
+                      <div className="text-xs text-slate-400">Just now</div>
+                    </div>
+                  </div>
+                  <div className="bg-slate-900/50 rounded-xl p-4 mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-bold text-white">DANGCEM</span>
+                      <span className="text-emerald-400 font-bold">₦295.00</span>
+                    </div>
+                    <p className="text-sm text-slate-300">Hit your target of ₦295.00 ✅</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button className="flex-1 py-2 px-4 bg-emerald-500 text-white text-sm font-bold rounded-xl">View</button>
+                    <button className="flex-1 py-2 px-4 bg-slate-700 text-white text-sm font-bold rounded-xl">Dismiss</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative py-16 md:py-24 bg-slate-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10 md:mb-16">
+            <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-amber-500/10 rounded-full text-amber-400 text-xs md:text-sm mb-3 md:mb-4">
+              <Crown size={12} />
+              <span className="font-medium">Premium Plans</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 md:mb-4">
+              Choose Your Plan
+            </h2>
+            <p className="text-sm md:text-lg text-slate-400 max-w-2xl mx-auto px-4 mb-6">
+              Start free, upgrade when you&apos;re ready
+            </p>
+            
+            <div className="inline-flex items-center p-1 bg-slate-800 rounded-xl">
+              <button
+                onClick={() => setActivePlan('monthly')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  activePlan === 'monthly' 
+                    ? 'bg-emerald-500 text-white' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setActivePlan('yearly')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  activePlan === 'yearly' 
+                    ? 'bg-emerald-500 text-white' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Yearly <span className="text-xs text-emerald-400 ml-1">Save 17%</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
+            <div className="relative p-6 md:p-8 rounded-2xl md:rounded-3xl bg-slate-900/50 border border-slate-700">
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-2">Free</h3>
+              <div className="flex items-baseline gap-1 mb-6">
+                <span className="text-3xl md:text-4xl font-black text-white">₦0</span>
+                <span className="text-slate-400">/forever</span>
+              </div>
+              <ul className="space-y-3 mb-8">
+                {[
+                  '5-minute data refresh',
+                  'Up to 10 portfolio stocks',
+                  'Basic watchlist',
+                  'Market overview',
+                  'Technical indicators',
+                ].map((feature, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm text-slate-300">
+                    <CheckCircle size={16} className="text-emerald-400" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/signup"
+                className="block w-full py-3 text-center bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-colors"
+              >
+                Get Started
+              </Link>
+            </div>
+
+            <div className="relative p-6 md:p-8 rounded-2xl md:rounded-3xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/30">
+              <div className="absolute -top-3 right-6 px-3 py-1 bg-emerald-500 text-white text-xs font-bold rounded-full">
+                POPULAR
+              </div>
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-2">Premium</h3>
+              <div className="flex items-baseline gap-1 mb-6">
+                <span className="text-3xl md:text-4xl font-black text-white">
+                  ₦{activePlan === 'monthly' ? '2,999' : '24,999'}
+                </span>
+                <span className="text-slate-400">/{activePlan === 'monthly' ? 'month' : 'year'}</span>
+              </div>
+              <ul className="space-y-3 mb-8">
+                {[
+                  '1-minute real-time data',
+                  'Unlimited portfolio stocks',
+                  'AI stock recommendations',
+                  'Push notifications & price alerts',
+                  'Priority support',
+                  'Full market sentiment analysis',
+                  'Advanced technical analysis',
+                ].map((feature, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm text-slate-300">
+                    <CheckCircle size={16} className="text-emerald-400" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/signup"
+                className="block w-full py-3 text-center bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white font-bold rounded-xl transition-all"
+              >
+                Start Premium
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="relative py-16 md:py-24 bg-slate-900/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
             <div className="order-2 lg:order-1">
               <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-emerald-500/10 rounded-full text-emerald-400 text-xs md:text-sm mb-4 md:mb-6">
-                <Smartphone size={12} />
-                <span className="font-medium">Mobile First</span>
+                <Download size={12} />
+                <span className="font-medium">Install as App</span>
               </div>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4 md:mb-6">
-                Trade Anywhere,
+                Add to Your
                 <br />
-                <span className="text-emerald-400">Anytime</span>
+                <span className="text-emerald-400">Home Screen</span>
               </h2>
               <p className="text-sm md:text-lg text-slate-300 mb-6 md:mb-8 leading-relaxed">
-                9jaStock is designed mobile-first for Nigerian investors on the go. 
-                Track your portfolio, analyze stocks, and stay updated with market news — all from your phone or tablet.
+                9jaStock works as a Progressive Web App. Install it on your phone for a native app experience — no app store needed.
               </p>
               
               <div className="space-y-3 md:space-y-4 mb-6 md:mb-8">
                 {[
-                  'Optimized for all screen sizes',
-                  'Fast, responsive interface',
-                  'Works on slow connections',
-                  'No app download required',
+                  'Works offline for portfolio viewing',
+                  'Push notifications for price alerts',
+                  'Fast, app-like experience',
+                  'No storage space needed',
+                  'Always up-to-date',
                 ].map((benefit, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
@@ -438,34 +748,32 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                       <div className="w-1.5 md:w-2 h-1.5 md:h-2 bg-emerald-400 rounded-full animate-pulse" />
                     </div>
                     
-                    <div className="bg-slate-800/50 rounded-lg md:rounded-xl p-2.5 md:p-3 mb-3 md:mb-4">
-                      <div className="text-[8px] md:text-[10px] text-slate-400 mb-1">Portfolio Value</div>
-                      <div className="text-base md:text-xl font-bold text-white">₦4.25M</div>
-                      <div className="text-[10px] md:text-xs text-emerald-400">+3.04% today</div>
+                    <div className="bg-slate-800/50 rounded-lg md:rounded-xl p-2.5 md:p-3 mb-3">
+                      <div className="text-[10px] md:text-xs text-slate-400 mb-1">Portfolio Value</div>
+                      <div className="text-lg md:text-xl font-bold text-white">₦4.25M</div>
+                      <div className="text-xs text-emerald-400">+3.04% today</div>
                     </div>
                     
-                    <div className="space-y-2">
-                      {stockCards.slice(0, 3).map((stock, i) => (
-                        <div key={i} className="flex items-center justify-between p-2 md:p-2.5 bg-slate-800/30 rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-6 h-6 md:w-8 md:h-8 rounded-lg flex items-center justify-center text-[8px] md:text-[10px] font-bold text-white ${stock.change >= 0 ? 'bg-emerald-500/30' : 'bg-red-500/30'}`}>
-                              {stock.symbol.slice(0, 2)}
-                            </div>
-                            <div className="text-[10px] md:text-xs text-white font-medium">{stock.symbol}</div>
-                          </div>
-                          <div className={`text-[10px] md:text-xs font-semibold ${stock.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                            {stock.change >= 0 ? '+' : ''}{stock.change}%
+                    <div className="space-y-2 mb-3">
+                      {stockCards.slice(0, 2).map((stock) => (
+                        <div key={stock.symbol} className="bg-slate-800/30 rounded-lg p-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-white">{stock.symbol}</span>
+                            <span className={`text-xs ${stock.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {stock.change >= 0 ? '+' : ''}{stock.change}%
+                            </span>
                           </div>
                         </div>
                       ))}
                     </div>
-                  </div>
-                </div>
-                
-                <div className="absolute -right-4 md:-right-8 top-1/4 bg-slate-800/90 backdrop-blur-xl rounded-xl p-2.5 md:p-3 border border-slate-700/50 shadow-xl animate-float">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp size={14} className="text-emerald-400" />
-                    <span className="text-[10px] md:text-xs text-white font-medium">+12.5%</span>
+                    
+                    <div className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-lg p-2.5 border border-emerald-500/20">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Bell size={10} className="text-orange-400" />
+                        <span className="text-[10px] text-slate-400">Alert</span>
+                      </div>
+                      <div className="text-xs text-white font-medium">MTNN hit ₦200 🎯</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -474,51 +782,114 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
         </div>
       </section>
 
-      <section className="relative py-16 md:py-24 bg-gradient-to-br from-emerald-600 via-green-600 to-teal-600">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
-        
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4 md:mb-6">
-            Ready to Start Trading?
+      <section className="relative py-16 md:py-24 bg-slate-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10 md:mb-16">
+            <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-blue-500/10 rounded-full text-blue-400 text-xs md:text-sm mb-3 md:mb-4">
+              <Star size={12} />
+              <span className="font-medium">Loved by Investors</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 md:mb-4">
+              What Users Say
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+            {testimonials.map((testimonial, i) => (
+              <div key={i} className="p-6 md:p-8 rounded-2xl bg-slate-900/50 border border-slate-800">
+                <div className="flex gap-1 mb-4">
+                  {Array.from({ length: testimonial.rating }).map((_, j) => (
+                    <Star key={j} size={16} className="text-amber-400 fill-amber-400" />
+                  ))}
+                </div>
+                <p className="text-sm md:text-base text-slate-300 mb-6 leading-relaxed">
+                  &ldquo;{testimonial.text}&rdquo;
+                </p>
+                <div>
+                  <div className="font-bold text-white">{testimonial.name}</div>
+                  <div className="text-sm text-slate-400">{testimonial.role}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative py-16 md:py-24 bg-gradient-to-b from-slate-950 to-slate-900">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 rounded-full text-emerald-400 text-sm mb-6">
+            <Sparkles size={14} className="animate-pulse" />
+            <span className="font-medium">Join 1,000+ Nigerian Investors</span>
+          </div>
+          
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-6">
+            Start Trading
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">
+              Smarter Today
+            </span>
           </h2>
-          <p className="text-base md:text-lg lg:text-xl text-white/80 mb-6 md:mb-8 max-w-2xl mx-auto">
-            Join thousands of Nigerian investors who track their portfolios with 9jaStock.
+          
+          <p className="text-lg md:text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
+            Free forever. Premium features when you need them. No credit card required to get started.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4">
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/signup"
-              className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 bg-white text-emerald-600 font-bold rounded-xl hover:bg-slate-100 transition-all hover:scale-105 shadow-xl text-sm md:text-base"
+              className="group relative flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold rounded-2xl shadow-2xl shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105 transition-all duration-300"
             >
               Create Free Account
+              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </Link>
+            
             <Link
-              href="/login"
-              className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 bg-transparent border-2 border-white/50 text-white font-semibold rounded-xl hover:bg-white/10 transition-all text-sm md:text-base"
+              href="/stocks"
+              className="flex items-center justify-center gap-2 px-6 py-4 text-slate-300 hover:text-white font-medium rounded-2xl border border-slate-700/50 hover:border-slate-600 hover:bg-slate-800/50 transition-all"
             >
-              Sign In
+              Explore Stocks
+              <ChevronRight size={18} />
             </Link>
           </div>
         </div>
       </section>
 
-      <footer className="bg-slate-950 border-t border-slate-800 py-8 md:py-12">
+      <footer className="relative py-12 bg-slate-900 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
-            <Logo3D size="md" variant="full" animated={false} />
-            <div className="flex items-center gap-4 md:gap-6 text-xs md:text-sm text-slate-400">
-              <span>© 2026 9jaStock</span>
-              <span className="hidden md:inline">•</span>
-              <span className="hidden md:inline">NGX Stock Tracker</span>
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <Logo3D size="md" variant="full" animated={false} />
+              <p className="text-sm text-slate-400 mt-4">
+                Nigeria&apos;s most powerful stock tracking platform for retail and professional investors.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-bold text-white mb-4">Product</h4>
+              <ul className="space-y-2 text-sm text-slate-400">
+                <li><Link href="/stocks" className="hover:text-white transition-colors">All Stocks</Link></li>
+                <li><Link href="/news" className="hover:text-white transition-colors">Market News</Link></li>
+                <li><Link href="/signup" className="hover:text-white transition-colors">Sign Up</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-white mb-4">Features</h4>
+              <ul className="space-y-2 text-sm text-slate-400">
+                <li>Real-time Data</li>
+                <li>AI Analysis</li>
+                <li>Price Alerts</li>
+                <li>Portfolio Tracking</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-white mb-4">Legal</h4>
+              <ul className="space-y-2 text-sm text-slate-400">
+                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+              </ul>
             </div>
           </div>
-          <div className="border-t border-slate-800 pt-6">
-            <p className="text-xs md:text-sm text-slate-500 text-center mb-4">
-              Data provided is for informational purposes only. Always do your own research before making investment decisions.
-            </p>
-            <div className="flex justify-center gap-6 text-xs md:text-sm">
-              <Link href="/terms" className="text-slate-400 hover:text-white transition-colors">Terms of Service</Link>
-              <Link href="/privacy" className="text-slate-400 hover:text-white transition-colors">Privacy Policy</Link>
-            </div>
+          <div className="pt-8 border-t border-slate-800 text-center text-sm text-slate-400">
+            <p>&copy; {new Date().getFullYear()} 9jaStock. All rights reserved. Data powered by TradingView.</p>
           </div>
         </div>
       </footer>
@@ -529,14 +900,14 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
           50% { transform: translateY(-10px); }
         }
         .animate-float {
-          animation: float 4s ease-in-out infinite;
+          animation: float 3s ease-in-out infinite;
         }
         @keyframes scroll {
           0% { transform: translateX(0); }
-          100% { transform: translateX(-25%); }
+          100% { transform: translateX(-50%); }
         }
         .animate-scroll {
-          animation: scroll 20s linear infinite;
+          animation: scroll 30s linear infinite;
         }
         .perspective-1000 {
           perspective: 1000px;

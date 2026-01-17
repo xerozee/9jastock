@@ -159,10 +159,16 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
   - Required secret: STRIPE_WEBHOOK_SECRET for webhook verification
   - **Tiered Access Control**: Comprehensive feature limiting system
     - useSubscription hook (src/hooks/useSubscription.ts) provides tier checking
-    - TIER_LIMITS object defines limits: guest (15min refresh, 3 portfolio), free (5min, 10 portfolio), premium (1min, unlimited)
-    - Portfolio API enforces 10-item limit for free users with 403 + limitReached response
-    - Recommendations API gates AI features behind premium with 403 + premiumRequired response
-    - Profile page shows "Unlock AI Recommendations" upgrade prompt for non-premium users
+    - TIER_LIMITS object defines all limits per tier:
+      - Guest: 15min refresh, 0 portfolio, 3 watchlist, 5 news, 1 social post
+      - Free: 5min refresh, 10 portfolio, 5 watchlist, 5 news, 1 social post
+      - Premium: 1min refresh, unlimited portfolio/watchlist/news/social
+    - Portfolio API enforces 10-item limit for free users with upgrade modal
+    - Watchlist context enforces limits with toast notification and upgrade link
+    - News API limits articles based on subscription tier
+    - Social/X API limits posts based on subscription tier
+    - Recommendations API gates AI features behind premium
+    - Profile page shows "Unlock AI Recommendations" upgrade prompt
     - Premium badge in header links to /pricing page
 - **Push Notification System**: Web Push API with VAPID authentication
   - NotificationSettings component on profile page with Enable/Disable toggle

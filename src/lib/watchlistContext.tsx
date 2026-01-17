@@ -1,13 +1,16 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { useSubscription } from '@/hooks/useSubscription';
 
 interface WatchlistContextType {
   watchlist: string[];
-  addToWatchlist: (symbol: string) => void;
+  addToWatchlist: (symbol: string) => { success: boolean; limitReached?: boolean; max?: number };
   removeFromWatchlist: (symbol: string) => void;
   isInWatchlist: (symbol: string) => boolean;
-  toggleWatchlist: (symbol: string) => void;
+  toggleWatchlist: (symbol: string) => { success: boolean; limitReached?: boolean; max?: number };
+  maxItems: number;
+  isAtLimit: boolean;
 }
 
 const WatchlistContext = createContext<WatchlistContextType | undefined>(undefined);
@@ -17,8 +20,10 @@ const WATCHLIST_STORAGE_KEY = '9jastock_watchlist';
 export function WatchlistProvider({ children }: { children: ReactNode }) {
   const [watchlist, setWatchlist] = useState<string[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const { limits, isPremium } = useSubscription();
+  
+  const maxItems = limits.maxWatchlistItems === Infinity ? 999 : limits.maxWatchlistItems;
 
-  // Load watchlist from localStorage on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem(WATCHLIST_STORAGE_KEY);
@@ -33,33 +38,44 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Save watchlist to localStorage whenever it changes
   useEffect(() => {
     if (isLoaded && typeof window !== 'undefined') {
       localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(watchlist));
     }
   }, [watchlist, isLoaded]);
 
-  const addToWatchlist = (symbol: string) => {
+  const addToWatchlist = useCallback((symbol: string): { success: boolean; limitReached?: boolean; max?: number } => {
+    if (watchlist.includes(symbol)) {
+      return { success: true };
+    }
+    
+    if (!isPremium && watchlist.length >= maxItems) {
+      return { success: false, limitReached: true, max: maxItems };
+    }
+    
     setWatchlist((prev) => {
       if (prev.includes(symbol)) return prev;
       return [...prev, symbol];
     });
-  };
+    return { success: true };
+  }, [watchlist, isPremium, maxItems]);
 
-  const removeFromWatchlist = (symbol: string) => {
+  const removeFromWatchlist = useCallback((symbol: string) => {
     setWatchlist((prev) => prev.filter((s) => s !== symbol));
-  };
+  }, []);
 
-  const isInWatchlist = (symbol: string) => watchlist.includes(symbol);
+  const isInWatchlist = useCallback((symbol: string) => watchlist.includes(symbol), [watchlist]);
 
-  const toggleWatchlist = (symbol: string) => {
+  const toggleWatchlist = useCallback((symbol: string): { success: boolean; limitReached?: boolean; max?: number } => {
     if (isInWatchlist(symbol)) {
       removeFromWatchlist(symbol);
+      return { success: true };
     } else {
-      addToWatchlist(symbol);
+      return addToWatchlist(symbol);
     }
-  };
+  }, [isInWatchlist, removeFromWatchlist, addToWatchlist]);
+
+  const isAtLimit = !isPremium && watchlist.length >= maxItems;
 
   return (
     <WatchlistContext.Provider
@@ -69,6 +85,8 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
         removeFromWatchlist,
         isInWatchlist,
         toggleWatchlist,
+        maxItems,
+        isAtLimit,
       }}
     >
       {children}

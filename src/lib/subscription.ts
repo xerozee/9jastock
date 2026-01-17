@@ -47,19 +47,25 @@ export const TIER_LIMITS = {
   guest: {
     refreshInterval: 15 * 60 * 1000,
     maxPortfolioItems: 0,
-    newsArticles: 20,
+    maxWatchlistItems: 3,
+    newsArticles: 5,
+    socialPosts: 1,
     newsDays: 7,
   },
   free: {
     refreshInterval: 5 * 60 * 1000,
     maxPortfolioItems: 10,
-    newsArticles: 50,
+    maxWatchlistItems: 5,
+    newsArticles: 5,
+    socialPosts: 1,
     newsDays: 14,
   },
   premium: {
     refreshInterval: 1 * 60 * 1000,
     maxPortfolioItems: Infinity,
+    maxWatchlistItems: Infinity,
     newsArticles: 100,
+    socialPosts: Infinity,
     newsDays: 30,
   },
 };

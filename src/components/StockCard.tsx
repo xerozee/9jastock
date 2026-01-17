@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { TrendingUp, TrendingDown, Star } from 'lucide-react';
+import { TrendingUp, TrendingDown, Star, Crown, X } from 'lucide-react';
 import { Stock } from '@/types/stock';
 import { formatCurrency, formatVolume } from '@/lib/stockData';
 import { useWatchlist } from '@/lib/watchlistContext';
@@ -12,9 +13,18 @@ interface StockCardProps {
 }
 
 export default function StockCard({ stock, showDetails = false }: StockCardProps) {
-  const { isInWatchlist, toggleWatchlist } = useWatchlist();
+  const { isInWatchlist, toggleWatchlist, maxItems } = useWatchlist();
+  const [showLimitToast, setShowLimitToast] = useState(false);
   const isPositive = stock.change >= 0;
   const inWatchlist = isInWatchlist(stock.symbol);
+
+  const handleToggleWatchlist = () => {
+    const result = toggleWatchlist(stock.symbol);
+    if (result.limitReached) {
+      setShowLimitToast(true);
+      setTimeout(() => setShowLimitToast(false), 4000);
+    }
+  };
 
   return (
     <div 
@@ -42,7 +52,7 @@ export default function StockCard({ stock, showDetails = false }: StockCardProps
           <button
             onClick={(e) => {
               e.preventDefault();
-              toggleWatchlist(stock.symbol);
+              handleToggleWatchlist();
             }}
             className={`p-2 rounded-xl transition-all shadow-sm ${
               inWatchlist
@@ -91,6 +101,23 @@ export default function StockCard({ stock, showDetails = false }: StockCardProps
           </div>
         )}
       </div>
+
+      {showLimitToast && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-4">
+          <div className="bg-amber-500 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3">
+            <Crown className="w-5 h-5 flex-shrink-0" />
+            <div>
+              <p className="font-medium text-sm">Watchlist limit reached ({maxItems} stocks)</p>
+              <Link href="/pricing" className="text-xs underline hover:no-underline">
+                Upgrade to Premium for unlimited
+              </Link>
+            </div>
+            <button onClick={() => setShowLimitToast(false)} className="p-1 hover:bg-amber-600 rounded">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,13 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/authOptions';
 import { getSocialPosts, runCrawler } from '@/lib/socialCrawler';
-import { connectToDatabase, SocialPost } from '@/lib/mongodb';
+import { connectToDatabase, SocialPost, User } from '@/lib/mongodb';
+import { getUserTier, TIER_LIMITS } from '@/lib/subscription';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const platform = searchParams.get('platform') || 'all';
-    const limit = parseInt(searchParams.get('limit') || '20');
+    let limit = parseInt(searchParams.get('limit') || '20');
     const stockSymbol = searchParams.get('symbol') || undefined;
+
+    // Check user tier and apply limits
+    const session = await getServerSession(authOptions);
+    let tier = 'guest';
+    if (session?.user) {
+      await connectToDatabase();
+      const user = await User.findById((session.user as any).id).lean();
+      tier = getUserTier(user);
+    }
+    const maxPosts = TIER_LIMITS[tier as keyof typeof TIER_LIMITS].socialPosts;
+    limit = Math.min(limit, maxPosts === Infinity ? 50 : maxPosts);
 
     const posts = await getSocialPosts({
       platform,
@@ -39,6 +53,8 @@ export async function GET(request: NextRequest) {
       success: true,
       posts: formattedPosts,
       count: formattedPosts.length,
+      tier,
+      limit: maxPosts === Infinity ? null : maxPosts,
     });
   } catch (error: any) {
     console.error('Social API error:', error);

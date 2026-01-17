@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase, NewsArticle } from '@/lib/mongodb';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/authOptions';
+import { connectToDatabase, NewsArticle, User } from '@/lib/mongodb';
+import { getUserTier, TIER_LIMITS } from '@/lib/subscription';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,9 +44,20 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const source = searchParams.get('source');
     const symbol = searchParams.get('symbol');
-    const limit = parseInt(searchParams.get('limit') || '50', 10);
+    let limit = parseInt(searchParams.get('limit') || '50', 10);
     const hours = parseInt(searchParams.get('hours') || '168', 10);
     const forceRefresh = searchParams.get('refresh') === 'true';
+    
+    // Check user tier and apply limits
+    const session = await getServerSession(authOptions);
+    let tier = 'guest';
+    if (session?.user) {
+      await connectToDatabase();
+      const user = await User.findById((session.user as any).id).lean();
+      tier = getUserTier(user);
+    }
+    const maxArticles = TIER_LIMITS[tier as keyof typeof TIER_LIMITS].newsArticles;
+    limit = Math.min(limit, maxArticles);
     
     if (forceRefresh) {
       newsCache = null;
@@ -53,7 +67,8 @@ export async function GET(request: Request) {
     
     const hasFilters = source || symbol || limit !== 50 || hours !== 168;
     
-    if (!hasFilters && newsCache && Date.now() - newsCache.timestamp < CACHE_TTL) {
+    // Don't use cache for non-premium users since limit varies
+    if (!hasFilters && newsCache && Date.now() - newsCache.timestamp < CACHE_TTL && tier === 'premium') {
       return NextResponse.json({
         success: true,
         data: newsCache.data,

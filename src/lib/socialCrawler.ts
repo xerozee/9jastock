@@ -325,12 +325,23 @@ export async function runCrawler(): Promise<{ success: boolean; postsProcessed: 
     
     console.log('Starting social media crawler...');
     
-    const [tradingViewPosts, twitterPosts, redditPosts, newsPosts] = await Promise.all([
+    const { crawlXPosts } = await import('./xTwitterCrawler');
+    
+    const [tradingViewPosts, xCrawlResult, redditPosts, newsPosts] = await Promise.all([
       scrapeTradingViewCommunity().catch(e => { errors.push(`TradingView: ${e.message}`); return []; }),
-      scrapeTwitterPublic().catch(e => { errors.push(`Twitter: ${e.message}`); return []; }),
+      crawlXPosts().catch(e => { errors.push(`X/Twitter: ${e.message}`); return { success: false, postsProcessed: 0, errors: [e.message] }; }),
       scrapeReddit().catch(e => { errors.push(`Reddit: ${e.message}`); return []; }),
       scrapeNigerianNews().catch(e => { errors.push(`News: ${e.message}`); return []; }),
     ]);
+    
+    if (xCrawlResult && typeof xCrawlResult === 'object' && 'postsProcessed' in xCrawlResult) {
+      postsProcessed += xCrawlResult.postsProcessed;
+      if (xCrawlResult.errors?.length) {
+        errors.push(...xCrawlResult.errors);
+      }
+    }
+    
+    const twitterPosts: RawPost[] = [];
     
     const allPosts = [...tradingViewPosts, ...twitterPosts, ...redditPosts, ...newsPosts];
     console.log(`Found ${allPosts.length} total posts`);

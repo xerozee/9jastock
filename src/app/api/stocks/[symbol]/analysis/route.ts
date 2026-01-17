@@ -1,7 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth';
-import { cookies } from 'next/headers';
-import { analyzeStock, StockData } from '@/lib/openai';
+import { NextRequest, NextResponse } from "next/server";
+import { getAuthenticatedUser } from "@/lib/server-auth";
+import { analyzeStock, StockData } from "@/lib/openai";
 
 export async function GET(
   request: NextRequest,
@@ -9,38 +8,36 @@ export async function GET(
 ) {
   try {
     const { symbol } = await params;
-    
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get('session_id')?.value;
 
-    if (!sessionId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const authUser = await getAuthenticatedUser();
+
+    if (!authUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const session = await getSession(sessionId);
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const baseUrl = process.env.REPLIT_DEV_DOMAIN
+      ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+      : "http://localhost:5000";
 
-    const baseUrl = process.env.REPLIT_DEV_DOMAIN 
-      ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
-      : 'http://localhost:5000';
-    
     const stocksResponse = await fetch(`${baseUrl}/api/stocks`, {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
-    
+
     if (!stocksResponse.ok) {
-      return NextResponse.json({ error: 'Failed to fetch stock data' }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to fetch stock data" },
+        { status: 500 }
+      );
     }
 
     const stocksData = await stocksResponse.json();
     const stock = stocksData.stocks?.find(
-      (s: any) => s.symbol.toUpperCase() === symbol.toUpperCase()
+      (s: Record<string, unknown>) =>
+        (s.symbol as string).toUpperCase() === symbol.toUpperCase()
     );
 
     if (!stock) {
-      return NextResponse.json({ error: 'Stock not found' }, { status: 404 });
+      return NextResponse.json({ error: "Stock not found" }, { status: 404 });
     }
 
     const stockData: StockData = {
@@ -65,7 +62,10 @@ export async function GET(
       stock: stockData,
     });
   } catch (error) {
-    console.error('Stock analysis error:', error);
-    return NextResponse.json({ error: 'Failed to analyze stock' }, { status: 500 });
+    console.error("Stock analysis error:", error);
+    return NextResponse.json(
+      { error: "Failed to analyze stock" },
+      { status: 500 }
+    );
   }
 }

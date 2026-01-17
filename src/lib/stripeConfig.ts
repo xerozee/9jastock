@@ -1,6 +1,6 @@
 export const STRIPE_PRICE_IDS = {
-  MONTHLY: 'price_1SqB7GAp5MW3PvRq2cKClceh',
-  YEARLY: 'price_1SqB7GAp5MW3PvRqv7Obgscm',
+  MONTHLY: 'price_1SqhNRFdhW4BFiSVP2PuIVqc',
+  YEARLY: 'price_1SqhPaFdhW4BFiSVOo17YrNw',
 } as const;
 
 export const SUBSCRIPTION_PLANS = {

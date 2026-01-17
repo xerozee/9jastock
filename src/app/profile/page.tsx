@@ -15,6 +15,7 @@ import ProfileXPosts from '@/components/ProfileXPosts';
 import NotificationSettings from '@/components/NotificationSettings';
 import PriceAlertManager from '@/components/PriceAlertManager';
 import PortfolioShareImage from '@/components/PortfolioShareImage';
+import ReferralShareImage from '@/components/ReferralShareImage';
 
 interface ProfileData {
   user: {
@@ -600,13 +601,20 @@ export default function ProfilePage() {
                     </p>
                   </div>
                   
-                  <button
-                    onClick={copyReferralLink}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl transition-all"
-                  >
-                    {referralCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    {referralCopied ? 'Link Copied!' : 'Copy Invite Link'}
-                  </button>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={copyReferralLink}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl transition-all"
+                    >
+                      {referralCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      {referralCopied ? 'Link Copied!' : 'Copy Invite Link'}
+                    </button>
+                    
+                    <ReferralShareImage 
+                      referralCode={profile.user.referralCode}
+                      userName={profile.user.firstName || undefined}
+                    />
+                  </div>
                   
                   <div className="flex items-center justify-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                     <Users className="w-4 h-4" />

@@ -183,7 +183,7 @@ export default function PortfolioShareImage() {
       ctx.fillStyle = '#64748b';
       ctx.fillText('Track your Nigerian stocks at 9jastock.com', 60, 600);
 
-      const dataUrl = canvas.toDataURL('image/png');
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
       setImageUrl(dataUrl);
       setIsOpen(true);
     } catch (err: any) {
@@ -197,7 +197,7 @@ export default function PortfolioShareImage() {
     if (!imageUrl) return;
     
     const link = document.createElement('a');
-    link.download = `9jastock-portfolio-${Date.now()}.png`;
+    link.download = `9jastock-portfolio-${Date.now()}.jpg`;
     link.href = imageUrl;
     link.click();
   };
@@ -209,10 +209,10 @@ export default function PortfolioShareImage() {
       const blob = await new Promise<Blob>((resolve) => {
         canvasRef.current!.toBlob((blob) => {
           resolve(blob!);
-        }, 'image/png');
+        }, 'image/jpeg', 0.92);
       });
 
-      const file = new File([blob], 'portfolio.png', { type: 'image/png' });
+      const file = new File([blob], 'portfolio.jpg', { type: 'image/jpeg' });
 
       if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({

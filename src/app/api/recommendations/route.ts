@@ -53,9 +53,12 @@ export async function GET() {
     let stocksFetchError = false;
     
     try {
-      const baseUrl = process.env.REPLIT_DEV_DOMAIN 
-        ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
-        : 'http://localhost:5000';
+      const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
+      const baseUrl = isProduction 
+        ? 'https://9jastocks.app' 
+        : process.env.REPLIT_DEV_DOMAIN 
+          ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+          : 'http://localhost:5000';
       const stocksResponse = await fetch(`${baseUrl}/api/stocks`, {
         headers: { 'Content-Type': 'application/json' },
       });

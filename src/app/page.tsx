@@ -9,7 +9,6 @@ import MarketHours from '@/components/MarketHours';
 import StockCard from '@/components/StockCard';
 import StockGridSkeleton from '@/components/StockGridSkeleton';
 import LandingPage from '@/components/LandingPage';
-import SocialFeed from '@/components/SocialFeed';
 import MarketBuzzX from '@/components/MarketBuzzX';
 import { useLiveStocks, formatLastUpdate } from '@/lib/useLiveStocks';
 import { useAuth } from '@/hooks/useAuth';
@@ -249,10 +248,6 @@ export default function HomePage() {
 
       <section className="mb-8">
         <MarketBuzzX />
-      </section>
-
-      <section className="mb-8">
-        <SocialFeed />
       </section>
 
     </div>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase, User } from "@/lib/mongodb";
-import { getSession } from "@/lib/auth";
-import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
 import crypto from "crypto";
 import mongoose from "mongoose";
 
@@ -9,22 +9,21 @@ function generateShareId(): string {
   return crypto.randomBytes(8).toString("hex");
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get("session_id")?.value;
-
-    if (!sessionId) {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const session = await getSession(sessionId);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const userId = (session.user as any).id;
+    if (!userId) {
+      return NextResponse.json({ error: "User ID not found" }, { status: 401 });
     }
 
     await connectToDatabase();
-    const user = await User.findById(session.userId).lean();
+    const user = await User.findById(userId).lean();
     
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -35,7 +34,7 @@ export async function GET(request: NextRequest) {
     if (!shareId) {
       shareId = generateShareId();
       await User.updateOne(
-        { _id: new mongoose.Types.ObjectId(session.userId) },
+        { _id: new mongoose.Types.ObjectId(userId) },
         { $set: { shareId } }
       );
     }
@@ -47,24 +46,23 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get("session_id")?.value;
-
-    if (!sessionId) {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const session = await getSession(sessionId);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const userId = (session.user as any).id;
+    if (!userId) {
+      return NextResponse.json({ error: "User ID not found" }, { status: 401 });
     }
 
     await connectToDatabase();
     const shareId = generateShareId();
     await User.updateOne(
-      { _id: new mongoose.Types.ObjectId(session.userId) },
+      { _id: new mongoose.Types.ObjectId(userId) },
       { $set: { shareId } }
     );
 

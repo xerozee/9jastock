@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase, User } from '@/lib/mongodb';
-import { getSession } from '@/lib/auth';
-import { cookies } from 'next/headers';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/authOptions';
 import { getAIStockRecommendations, StockData, UserProfile } from '@/lib/openai';
 
 interface Stock {
@@ -21,20 +21,19 @@ interface Stock {
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get('session_id')?.value;
-
-    if (!sessionId) {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const session = await getSession(sessionId);
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const userId = (session.user as any).id;
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID not found' }, { status: 401 });
     }
 
     await connectToDatabase();
-    const user = await User.findById(session.userId).lean();
+    const user = await User.findById(userId).lean();
     
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });

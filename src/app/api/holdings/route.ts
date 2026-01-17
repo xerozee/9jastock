@@ -1,26 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { getSession } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
 import { connectToDatabase, Holding } from "@/lib/mongodb";
 import mongoose from "mongoose";
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get("session_id")?.value;
-
-    if (!sessionId) {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const session = await getSession(sessionId);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const userId = (session.user as any).id;
+    if (!userId) {
+      return NextResponse.json({ error: "User ID not found" }, { status: 401 });
     }
 
     await connectToDatabase();
     const userHoldings = await Holding.find({
-      userId: new mongoose.Types.ObjectId(session.userId),
+      userId: new mongoose.Types.ObjectId(userId),
     })
       .sort({ purchaseDate: -1 })
       .lean();
@@ -45,16 +44,15 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get("session_id")?.value;
-
-    if (!sessionId) {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const session = await getSession(sessionId);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const userId = (session.user as any).id;
+    if (!userId) {
+      return NextResponse.json({ error: "User ID not found" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -76,7 +74,7 @@ export async function POST(request: NextRequest) {
 
     await connectToDatabase();
     const newHolding = await Holding.create({
-      userId: new mongoose.Types.ObjectId(session.userId),
+      userId: new mongoose.Types.ObjectId(userId),
       symbol: symbol.toUpperCase(),
       shares,
       purchasePrice,
@@ -104,36 +102,37 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get("session_id")?.value;
-
-    if (!sessionId) {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const session = await getSession(sessionId);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const userId = (session.user as any).id;
+    if (!userId) {
+      return NextResponse.json({ error: "User ID not found" }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const holdingId = searchParams.get("id");
+    const { id } = await request.json();
 
-    if (!holdingId) {
-      return NextResponse.json({ error: "Missing holding ID" }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ error: "Holding ID is required" }, { status: 400 });
     }
 
     await connectToDatabase();
-    const result = await Holding.deleteOne({
-      _id: new mongoose.Types.ObjectId(holdingId),
-      userId: new mongoose.Types.ObjectId(session.userId),
+
+    const holding = await Holding.findOne({
+      _id: new mongoose.Types.ObjectId(id),
+      userId: new mongoose.Types.ObjectId(userId),
     });
 
-    if (result.deletedCount === 0) {
+    if (!holding) {
       return NextResponse.json({ error: "Holding not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true });
+    await Holding.deleteOne({ _id: new mongoose.Types.ObjectId(id) });
+
+    return NextResponse.json({ message: "Holding deleted successfully" });
   } catch (error) {
     console.error("Failed to delete holding:", error);
     return NextResponse.json({ error: "Failed to delete holding" }, { status: 500 });

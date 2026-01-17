@@ -1,26 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { getSession } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
 import { connectToDatabase, PortfolioItem } from "@/lib/mongodb";
 import mongoose from "mongoose";
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get("session_id")?.value;
-
-    if (!sessionId) {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const session = await getSession(sessionId);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const userId = (session.user as any).id;
+    if (!userId) {
+      return NextResponse.json({ error: "User ID not found" }, { status: 401 });
     }
 
     await connectToDatabase();
     const items = await PortfolioItem.find({ 
-      userId: new mongoose.Types.ObjectId(session.userId) 
+      userId: new mongoose.Types.ObjectId(userId) 
     }).lean();
 
     const formattedItems = items.map(item => ({
@@ -39,16 +38,15 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get("session_id")?.value;
-
-    if (!sessionId) {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const session = await getSession(sessionId);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const userId = (session.user as any).id;
+    if (!userId) {
+      return NextResponse.json({ error: "User ID not found" }, { status: 401 });
     }
 
     const { symbol } = await request.json();
@@ -58,16 +56,16 @@ export async function POST(request: NextRequest) {
     }
 
     await connectToDatabase();
-    const userId = new mongoose.Types.ObjectId(session.userId);
+    const userObjectId = new mongoose.Types.ObjectId(userId);
 
-    const existing = await PortfolioItem.findOne({ userId, symbol });
+    const existing = await PortfolioItem.findOne({ userId: userObjectId, symbol });
 
     if (existing) {
       return NextResponse.json({ message: "Already in portfolio" }, { status: 200 });
     }
 
     const item = await PortfolioItem.create({
-      userId,
+      userId: userObjectId,
       symbol,
     });
 
@@ -85,16 +83,15 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get("session_id")?.value;
-
-    if (!sessionId) {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const session = await getSession(sessionId);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const userId = (session.user as any).id;
+    if (!userId) {
+      return NextResponse.json({ error: "User ID not found" }, { status: 401 });
     }
 
     const { symbol } = await request.json();
@@ -104,10 +101,13 @@ export async function DELETE(request: NextRequest) {
     }
 
     await connectToDatabase();
-    await PortfolioItem.deleteOne({
-      userId: new mongoose.Types.ObjectId(session.userId),
-      symbol,
-    });
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    const result = await PortfolioItem.deleteOne({ userId: userObjectId, symbol });
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ error: "Not found in portfolio" }, { status: 404 });
+    }
 
     return NextResponse.json({ message: "Removed from portfolio" });
   } catch (error) {

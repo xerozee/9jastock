@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase, User, Holding, PortfolioItem } from '@/lib/mongodb';
-import { getSession } from '@/lib/auth';
-import { cookies } from 'next/headers';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/authOptions';
 import crypto from 'crypto';
 
 function generateReferralCode(): string {
@@ -10,28 +10,27 @@ function generateReferralCode(): string {
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get('session_id')?.value;
-
-    if (!sessionId) {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const session = await getSession(sessionId);
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const userId = (session.user as any).id;
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID not found in session' }, { status: 401 });
     }
 
     await connectToDatabase();
-    const user = await User.findById(session.userId).lean();
+    const user = await User.findById(userId).lean();
     
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const holdings = await Holding.find({ userId: session.userId }).lean();
-    const portfolioItems = await PortfolioItem.find({ userId: session.userId }).lean();
-    const referralCount = await User.countDocuments({ referredBy: session.userId });
+    const holdings = await Holding.find({ userId }).lean();
+    const portfolioItems = await PortfolioItem.find({ userId }).lean();
+    const referralCount = await User.countDocuments({ referredBy: userId });
 
     const { password, ...userWithoutPassword } = user as any;
 
@@ -49,16 +48,15 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get('session_id')?.value;
-
-    if (!sessionId) {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const session = await getSession(sessionId);
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const userId = (session.user as any).id;
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID not found in session' }, { status: 401 });
     }
 
     await connectToDatabase();
@@ -84,7 +82,7 @@ export async function PUT(request: NextRequest) {
     }
     updateData.updatedAt = new Date();
 
-    const user = await User.findById(session.userId);
+    const user = await User.findById(userId);
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
@@ -98,7 +96,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const updatedUser = await User.findByIdAndUpdate(
-      session.userId,
+      userId,
       { $set: updateData },
       { new: true, runValidators: true }
     ).lean();

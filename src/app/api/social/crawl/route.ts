@@ -1,34 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { runCrawler } from '@/lib/socialCrawler';
-import { cookies } from 'next/headers';
-import { connectToDatabase, Session, User } from '@/lib/mongodb';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/authOptions';
 
 export const maxDuration = 60;
 
 let lastCrawlTime: number | null = null;
 const CRAWL_COOLDOWN_MS = 60000;
-
-async function getAuthenticatedUser(request: NextRequest) {
-  try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get('session_id')?.value;
-    
-    if (!sessionId) return null;
-    
-    await connectToDatabase();
-    const session = await Session.findOne({ 
-      sid: sessionId, 
-      expiresAt: { $gt: new Date() } 
-    });
-    
-    if (!session) return null;
-    
-    const user = await User.findById(session.userId);
-    return user;
-  } catch {
-    return null;
-  }
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,9 +14,11 @@ export async function POST(request: NextRequest) {
     const adminKey = process.env.ADMIN_API_KEY;
     
     const hasAdminKey = adminKey && authHeader === `Bearer ${adminKey}`;
-    const user = await getAuthenticatedUser(request);
     
-    if (!hasAdminKey && !user) {
+    const session = await getServerSession(authOptions);
+    const isAuthenticated = !!session?.user;
+    
+    if (!hasAdminKey && !isAuthenticated) {
       return NextResponse.json(
         { success: false, error: 'Authentication required. Please log in to use this feature.' },
         { status: 401 }
@@ -65,20 +45,10 @@ export async function POST(request: NextRequest) {
       errors: result.errors.length > 0 ? result.errors.slice(0, 5) : undefined,
     });
   } catch (error: any) {
-    console.error('Crawler API error:', error);
+    console.error('Crawler error:', error);
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: 'Failed to run crawler' },
       { status: 500 }
     );
   }
-}
-
-export async function GET() {
-  return NextResponse.json({
-    message: 'Social media crawler endpoint. Use POST to trigger a crawl.',
-    endpoints: {
-      'POST /api/social/crawl': 'Run the crawler to fetch new posts (requires authentication)',
-      'GET /api/social': 'Get social feed posts',
-    },
-  });
 }

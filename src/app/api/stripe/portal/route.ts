@@ -1,25 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { connectToDatabase, User, Session } from '@/lib/mongodb';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/authOptions';
+import { connectToDatabase, User } from '@/lib/mongodb';
 import { getStripeClient } from '@/lib/stripe';
 
 export async function POST(request: NextRequest) {
   try {
-    await connectToDatabase();
+    const session = await getServerSession(authOptions);
     
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get('session_id')?.value;
-    
-    if (!sessionId) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
-    
-    const session = await Session.findOne({ sid: sessionId, expiresAt: { $gt: new Date() } });
-    if (!session) {
-      return NextResponse.json({ error: 'Session expired' }, { status: 401 });
+
+    const userId = (session.user as any).id;
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID not found' }, { status: 401 });
     }
-    
-    const user = await User.findById(session.userId);
+
+    await connectToDatabase();
+    const user = await User.findById(userId);
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }

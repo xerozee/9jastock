@@ -1,21 +1,33 @@
 'use client';
 
 import { useState } from 'react';
+import { Download } from 'lucide-react';
 
 interface Logo3DProps {
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   variant?: 'full' | 'icon';
   animated?: boolean;
   className?: string;
+  showDownload?: boolean;
 }
 
 export default function Logo3D({ 
   size = 'md', 
   variant = 'full', 
   animated = true,
-  className = '' 
+  className = '',
+  showDownload = false
 }: Logo3DProps) {
   const [isHovered, setIsHovered] = useState(false);
+
+  const handleDownload = () => {
+    const link = document.createElement('a');
+    link.href = '/assets/9jastock-logo.png';
+    link.download = '9jastock-logo.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const sizes = {
     sm: { icon: 32, text: 'text-lg', subtitle: 'text-[8px]' },
@@ -245,6 +257,16 @@ export default function Logo3D({
             NGX Tracker
           </span>
         </div>
+      )}
+      
+      {showDownload && (
+        <button
+          onClick={handleDownload}
+          className="ml-2 p-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 transition-colors"
+          title="Download Logo"
+        >
+          <Download className="w-4 h-4" />
+        </button>
       )}
     </div>
   );

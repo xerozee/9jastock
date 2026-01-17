@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect, useCallback } from "react";
 
 interface User {
@@ -9,6 +10,8 @@ interface User {
   lastName?: string;
   profileImageUrl?: string;
   shareId?: string;
+  subscriptionStatus?: string;
+  onboardingCompleted?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -20,53 +23,61 @@ interface AuthState {
 }
 
 export function useAuth() {
-  const [state, setState] = useState<AuthState>({
-    user: null,
-    isLoading: true,
-    isAuthenticated: false,
-  });
+  const { data: session, status } = useSession();
+  const [extendedUser, setExtendedUser] = useState<User | null>(null);
+  const [fetchingUser, setFetchingUser] = useState(false);
 
   const fetchUser = useCallback(async () => {
-    try {
-      const response = await fetch("/api/auth/user", {
-        credentials: "include",
-      });
+    if (session?.user?.id && !fetchingUser) {
+      setFetchingUser(true);
+      try {
+        const response = await fetch("/api/auth/user", {
+          credentials: "include",
+        });
 
-      if (response.status === 401) {
-        setState({ user: null, isLoading: false, isAuthenticated: false });
-        return;
+        if (response.ok) {
+          const userData = await response.json();
+          setExtendedUser(userData);
+        }
+      } catch (error) {
+        console.error("Failed to fetch extended user data:", error);
+      } finally {
+        setFetchingUser(false);
       }
-
-      if (!response.ok) {
-        throw new Error(`${response.status}: ${response.statusText}`);
-      }
-
-      const user = await response.json();
-      setState({ 
-        user, 
-        isLoading: false, 
-        isAuthenticated: !!user 
-      });
-    } catch (error) {
-      console.error("Failed to fetch user:", error);
-      setState({ user: null, isLoading: false, isAuthenticated: false });
     }
-  }, []);
+  }, [session?.user?.id, fetchingUser]);
 
   useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
+    if (session?.user?.id && !extendedUser) {
+      fetchUser();
+    }
+  }, [session?.user?.id, extendedUser, fetchUser]);
 
-  const logout = useCallback(() => {
-    window.location.href = "/api/auth/logout";
+  const logout = useCallback(async () => {
+    await signOut({ callbackUrl: "/" });
   }, []);
 
   const login = useCallback(() => {
     window.location.href = "/login";
   }, []);
 
+  const isLoading = status === "loading";
+  const isAuthenticated = status === "authenticated" && !!session?.user;
+  
+  const user: User | null = extendedUser || (session?.user ? {
+    id: (session.user as any).id,
+    email: session.user.email || undefined,
+    firstName: session.user.name?.split(' ')[0],
+    lastName: session.user.name?.split(' ').slice(1).join(' '),
+    profileImageUrl: session.user.image || undefined,
+    subscriptionStatus: (session.user as any).subscriptionStatus,
+    onboardingCompleted: (session.user as any).onboardingCompleted,
+  } : null);
+
   return {
-    ...state,
+    user,
+    isLoading,
+    isAuthenticated,
     logout,
     login,
     refetch: fetchUser,

@@ -14,7 +14,7 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
 
 **Key Features:**
 - **Live Data**: Fetches and displays real-time stock data for over 145 NGX stocks from TradingView's scanner API, with background auto-refresh every 5 minutes.
-- **User Authentication**: Custom email/password authentication with bcrypt hashing, session-based login, "Remember Me" functionality, and Google OAuth integration.
+- **User Authentication**: NextAuth.js-based authentication with Google OAuth, Apple Sign-In, and email/password credentials. JWT session strategy with MongoDB user storage.
 - **User Profile & Onboarding**: Comprehensive profile management and a 5-step onboarding questionnaire for new users to define investment goals and preferences.
 - **Portfolio Tracking**: MongoDB-backed portfolio system allowing authenticated users to track individual stock purchases, view grouped holdings, and analyze performance. Includes a portfolio sharing feature.
 - **Watchlist**: Browser localStorage-based watchlist for quick access to preferred stocks.
@@ -28,7 +28,7 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
 - **Frontend**: Next.js 16, React, custom UI components with modern design principles (glassmorphism, 3D effects, animations).
 - **Backend**: Next.js API Routes for data fetching, authentication, and CRUD operations.
 - **Database**: MongoDB Atlas for user data, portfolio, holdings, news articles, and newsletter subscriptions. Mongoose is used for ODM.
-- **Authentication**: Custom session-based authentication and OAuth using Replit Auth.
+- **Authentication**: NextAuth.js with Google OAuth, Apple Sign-In, and email/password credentials. JWT sessions with 7-day expiry.
 - **Data Management**: In-memory caching for news data with automatic background scraping. Stock data has a 5-minute cache TTL.
 
 ## External Dependencies
@@ -36,7 +36,7 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
 - **MongoDB Atlas**: Cloud-hosted NoSQL database for all persistent data.
 - **Resend**: Email API for dispatching automated newsletters.
 - **OpenAI (GPT-4o-mini)**: Used for AI-powered newsletter composition.
-- **Replit Auth**: Integration for Google OAuth.
+- **NextAuth.js**: Authentication framework for Google OAuth, Apple Sign-In, and credentials.
 - **Nairametrics, BusinessDay, Punch**: News sources for web scraping.
 
 ## Recent Updates (January 2026)

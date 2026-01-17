@@ -1,25 +1,18 @@
 import { NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
 import { connectToDatabase, User } from "@/lib/mongodb";
-import { cookies } from "next/headers";
-import mongoose from "mongoose";
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get("session_id")?.value;
-
-    if (!sessionId) {
-      return NextResponse.json(null, { status: 401 });
-    }
-
-    const session = await getSession(sessionId);
-    if (!session) {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.id) {
       return NextResponse.json(null, { status: 401 });
     }
 
     await connectToDatabase();
-    const user = await User.findById(session.userId).lean();
+    const user = await User.findById(session.user.id).lean();
     
     if (!user) {
       return NextResponse.json(null, { status: 401 });
@@ -34,6 +27,10 @@ export async function GET() {
       shareId: user.shareId,
       subscriptionStatus: user.subscriptionStatus || 'free',
       subscriptionCurrentPeriodEnd: user.subscriptionCurrentPeriodEnd,
+      onboardingCompleted: user.onboardingCompleted,
+      investmentGoal: user.investmentGoal,
+      experienceLevel: user.experienceLevel,
+      riskTolerance: user.riskTolerance,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });

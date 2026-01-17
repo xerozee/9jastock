@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import TradingViewWidget from '@/components/TradingViewWidget';
 import LiveIndicator from '@/components/LiveIndicator';
+import PremiumGate from '@/components/PremiumGate';
 import { useWatchlist } from '@/lib/watchlistContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useLiveStock, formatLastUpdate } from '@/lib/useLiveStocks';
@@ -225,7 +226,7 @@ export default function StockDetailPage() {
   const router = useRouter();
   const symbol = (params.symbol as string).toUpperCase();
   const { isInWatchlist, toggleWatchlist } = useWatchlist();
-  const { limits } = useSubscription();
+  const { limits, isPremium } = useSubscription();
   const refreshInterval = limits.refreshInterval;
 
   const { stock: liveStock, isLoading, refresh, lastRefresh } = useLiveStock(symbol, refreshInterval);
@@ -282,6 +283,48 @@ export default function StockDetailPage() {
             <div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-1/2 mx-auto"></div>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  if (!isPremium) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
+          <Link 
+            href="/stocks" 
+            className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+          >
+            <ArrowLeft size={18} className="mr-2" />
+            Back to all stocks
+          </Link>
+        </div>
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-6 mb-6">
+          <div className="flex items-center gap-4 mb-4">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{stock.symbol}</h1>
+            <span className="text-gray-500 dark:text-gray-400">{stock.name}</span>
+          </div>
+          <div className="flex items-baseline gap-4">
+            <span className="text-3xl font-bold text-gray-900 dark:text-white">
+              {formatCurrency(stock.price)}
+            </span>
+            <span className={`text-lg font-semibold ${stock.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {stock.change >= 0 ? '+' : ''}{stock.change.toFixed(2)} ({stock.changePercent >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%)
+            </span>
+          </div>
+        </div>
+        <PremiumGate
+          title="In-Depth Stock Analysis"
+          description="Upgrade to Premium to unlock detailed technical analysis, financial metrics, charts, and more for all 145+ NGX stocks."
+          features={[
+            "Real-time price charts",
+            "Technical indicators (RSI, MACD)",
+            "Financial statements",
+            "Analyst recommendations",
+            "Historical performance",
+            "Unlimited portfolio tracking"
+          ]}
+        />
       </div>
     );
   }

@@ -4,9 +4,13 @@ export type SubscriptionTier = 'guest' | 'free' | 'premium';
 
 export function getUserTier(user: IUser | null): SubscriptionTier {
   if (!user) return 'guest';
-  // For now, all authenticated users get premium access
-  // TODO: Re-enable subscription checks when Stripe is activated
-  return 'premium';
+  
+  const status = user.subscriptionStatus;
+  if (status === 'active' || status === 'trialing') {
+    return 'premium';
+  }
+  
+  return 'free';
 }
 
 export function isPremium(user: IUser | null): boolean {

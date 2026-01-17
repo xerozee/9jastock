@@ -682,7 +682,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                 ))}
               </ul>
               <Link
-                href="/signup"
+                href="/pricing"
                 className="block w-full py-3 text-center bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white font-bold rounded-xl transition-all"
               >
                 Start Premium

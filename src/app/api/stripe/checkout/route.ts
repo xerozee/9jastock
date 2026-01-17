@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { connectToDatabase, User } from '@/lib/mongodb';
 import { getStripeClient } from '@/lib/stripe';
+import { STRIPE_PRICE_IDS } from '@/lib/stripeConfig';
+
+const VALID_PRICE_IDS = [STRIPE_PRICE_IDS.MONTHLY, STRIPE_PRICE_IDS.YEARLY];
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,6 +30,10 @@ export async function POST(request: NextRequest) {
     
     if (!priceId) {
       return NextResponse.json({ error: 'Price ID required' }, { status: 400 });
+    }
+
+    if (!VALID_PRICE_IDS.includes(priceId)) {
+      return NextResponse.json({ error: 'Invalid price ID' }, { status: 400 });
     }
     
     const stripe = await getStripeClient();

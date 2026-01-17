@@ -4,45 +4,29 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PREMIUM_FEATURES } from '@/lib/subscription';
-
-interface Price {
-  id: string;
-  unitAmount: number;
-  currency: string;
-  interval: string;
-}
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  prices: Price[];
-}
+import { STRIPE_PRICE_IDS, SUBSCRIPTION_PLANS, formatNaira } from '@/lib/stripeConfig';
 
 export default function PricingPage() {
   const router = useRouter();
-  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [subscribing, setSubscribing] = useState(false);
   const [selectedInterval, setSelectedInterval] = useState<'month' | 'year'>('month');
   const [user, setUser] = useState<any>(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    Promise.all([
-      fetch('/api/stripe/products').then(r => r.json()),
-      fetch('/api/auth/user').then(r => r.ok ? r.json() : null),
-    ]).then(([productsData, userData]) => {
-      if (productsData.products) {
-        setProducts(productsData.products);
-      }
-      setUser(userData);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    fetch('/api/auth/user')
+      .then(r => r.ok ? r.json() : null)
+      .then(userData => {
+        setUser(userData);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   const handleSubscribe = async (priceId: string) => {
     if (!user) {
-      router.push('/signin?redirect=/pricing');
+      router.push('/signup?redirect=/pricing');
       return;
     }
 
@@ -56,6 +40,7 @@ export default function PricingPage() {
     }
 
     setSubscribing(true);
+    setError('');
     try {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
@@ -63,34 +48,29 @@ export default function PricingPage() {
         body: JSON.stringify({ priceId }),
       });
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to create checkout session');
+      }
       if (data.url) {
         window.location.href = data.url;
       }
-    } catch (error) {
-      console.error('Checkout error:', error);
+    } catch (err: any) {
+      console.error('Checkout error:', err);
+      setError(err.message || 'Something went wrong');
     } finally {
       setSubscribing(false);
     }
   };
 
-  const formatPrice = (amount: number, currency: string) => {
-    if (currency === 'ngn') {
-      return `₦${(amount / 100).toLocaleString()}`;
-    }
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency.toUpperCase(),
-    }).format(amount / 100);
-  };
+  const selectedPriceId = selectedInterval === 'month' 
+    ? STRIPE_PRICE_IDS.MONTHLY 
+    : STRIPE_PRICE_IDS.YEARLY;
+  
+  const selectedPlan = selectedInterval === 'month' 
+    ? SUBSCRIPTION_PLANS.monthly 
+    : SUBSCRIPTION_PLANS.yearly;
 
-  const premiumProduct = products.find(p => p.name.includes('Premium'));
-  const monthlyPrice = premiumProduct?.prices.find(p => p.interval === 'month');
-  const yearlyPrice = premiumProduct?.prices.find(p => p.interval === 'year');
-  const selectedPrice = selectedInterval === 'month' ? monthlyPrice : yearlyPrice;
-
-  const yearlySavings = monthlyPrice && yearlyPrice
-    ? ((monthlyPrice.unitAmount * 12) - yearlyPrice.unitAmount) / 100
-    : 0;
+  const yearlySavings = (SUBSCRIPTION_PLANS.monthly.price * 12) - SUBSCRIPTION_PLANS.yearly.price;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white py-12 px-4">
@@ -200,9 +180,14 @@ export default function PricingPage() {
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Premium</h3>
                 <div className="text-3xl font-bold mb-4">
-                  {selectedPrice ? formatPrice(selectedPrice.unitAmount, selectedPrice.currency) : '₦2,999'}
+                  {formatNaira(selectedPlan.price)}
                   <span className="text-lg text-gray-400">/{selectedInterval}</span>
                 </div>
+                {selectedInterval === 'year' && (
+                  <p className="text-emerald-400 text-sm mb-4">
+                    Save {formatNaira(yearlySavings)} compared to monthly!
+                  </p>
+                )}
                 <p className="text-gray-400 mb-6">Full access for serious investors</p>
                 <ul className="space-y-3 mb-6">
                   {PREMIUM_FEATURES.map((feature, i) => (
@@ -211,9 +196,14 @@ export default function PricingPage() {
                     </li>
                   ))}
                 </ul>
+                {error && (
+                  <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm text-center">
+                    {error}
+                  </div>
+                )}
                 <button
-                  onClick={() => selectedPrice && handleSubscribe(selectedPrice.id)}
-                  disabled={subscribing || !selectedPrice || user?.subscriptionStatus === 'active'}
+                  onClick={() => handleSubscribe(selectedPriceId)}
+                  disabled={subscribing || user?.subscriptionStatus === 'active'}
                   className="w-full bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white px-6 py-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {subscribing ? 'Processing...' : user?.subscriptionStatus === 'active' ? 'Current Plan' : 'Get Premium'}

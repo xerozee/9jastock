@@ -44,3 +44,5 @@ build = ["npm", "run", "build"]
 
 [userenv.shared]
 NEXTAUTH_URL = "https://9jastocks.app"
+VAPID_PUBLIC_KEY = "BKZYl2571m4C5hMoF0XizkLBfvLOyKkBivm3Mo8MZyX6TBWp0MfQps8GJR8IyVjPhrm4NprL9VYt2bEwePRiNQk"
+VAPID_PRIVATE_KEY = "wVEnCnRo0WVJuwiNNxe5eNwAzwYpY2-46WiqtKqQEy0"

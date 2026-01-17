@@ -287,3 +287,71 @@ export type ISocialPost = {
   scrapedAt: Date;
   isActive: boolean;
 };
+
+const pushSubscriptionSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  endpoint: { type: String, required: true },
+  keys: {
+    p256dh: { type: String, required: true },
+    auth: { type: String, required: true },
+  },
+  preferences: {
+    priceAlerts: { type: Boolean, default: true },
+    dailySummary: { type: Boolean, default: true },
+    breakingNews: { type: Boolean, default: true },
+    watchlistUpdates: { type: Boolean, default: true },
+  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+pushSubscriptionSchema.index({ userId: 1 });
+pushSubscriptionSchema.index({ endpoint: 1 }, { unique: true });
+
+export const PushSubscription = mongoose.models.PushSubscription || mongoose.model('PushSubscription', pushSubscriptionSchema);
+
+const priceAlertSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  symbol: { type: String, required: true },
+  targetPrice: { type: Number, required: true },
+  condition: { type: String, enum: ['above', 'below'], required: true },
+  isActive: { type: Boolean, default: true },
+  triggered: { type: Boolean, default: false },
+  triggeredAt: { type: Date },
+  triggeredPrice: { type: Number },
+  createdAt: { type: Date, default: Date.now },
+});
+
+priceAlertSchema.index({ userId: 1 });
+priceAlertSchema.index({ symbol: 1, isActive: 1 });
+priceAlertSchema.index({ isActive: 1, triggered: 1 });
+
+export const PriceAlert = mongoose.models.PriceAlert || mongoose.model('PriceAlert', priceAlertSchema);
+
+export type IPushSubscription = {
+  _id: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+  endpoint: string;
+  keys: { p256dh: string; auth: string };
+  preferences: {
+    priceAlerts: boolean;
+    dailySummary: boolean;
+    breakingNews: boolean;
+    watchlistUpdates: boolean;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type IPriceAlert = {
+  _id: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+  symbol: string;
+  targetPrice: number;
+  condition: 'above' | 'below';
+  isActive: boolean;
+  triggered: boolean;
+  triggeredAt?: Date;
+  triggeredPrice?: number;
+  createdAt: Date;
+};

@@ -11,6 +11,8 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import Avatar from '@/components/Avatar';
 import ProfileXPosts from '@/components/ProfileXPosts';
+import NotificationSettings from '@/components/NotificationSettings';
+import PriceAlertManager from '@/components/PriceAlertManager';
 
 interface ProfileData {
   user: {
@@ -504,6 +506,15 @@ export default function ProfilePage() {
                 </div>
               )}
             </div>
+
+            <NotificationSettings />
+
+            <PriceAlertManager 
+              watchlistSymbols={[
+                ...(profile?.holdings?.map(h => h.symbol) || []),
+                ...(profile?.portfolioItems?.map(p => p.symbol) || [])
+              ].filter((v, i, a) => a.indexOf(v) === i)}
+            />
 
             <ProfileXPosts 
               symbols={[

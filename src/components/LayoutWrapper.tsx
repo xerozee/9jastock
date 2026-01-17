@@ -3,6 +3,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { usePathname } from 'next/navigation';
 import Header from './Header';
+import { PremiumLayoutEnhancer } from './PremiumLayoutEnhancer';
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
@@ -29,8 +30,9 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
 
   return (
     <>
+      <PremiumLayoutEnhancer />
       {showHeader && <Header />}
-      <main className="min-h-screen">
+      <main className="min-h-screen relative z-10">
         {children}
       </main>
       {showFooter && (

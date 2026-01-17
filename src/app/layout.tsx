@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "@/styles/premium.css";
 import { Providers } from "@/components/Providers";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import PWARegister from "@/components/PWARegister";

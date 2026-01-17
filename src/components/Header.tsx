@@ -25,7 +25,11 @@ export default function Header() {
   ];
 
   return (
-    <header className="bg-gradient-to-r from-green-800 via-green-700 to-emerald-700 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-white shadow-lg sticky top-0 z-50 backdrop-blur-sm">
+    <header className={`text-white shadow-lg sticky top-0 z-50 backdrop-blur-sm ${
+      isPremium 
+        ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-amber-500/20' 
+        : 'bg-gradient-to-r from-green-800 via-green-700 to-emerald-700 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900'
+    }`} style={isPremium ? { boxShadow: '0 4px 30px rgba(245, 158, 11, 0.1)' } : undefined}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="group transition-transform active:scale-95">
@@ -69,10 +73,11 @@ export default function Header() {
                 {isPremium ? (
                   <Link
                     href="/profile"
-                    className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 font-semibold shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 transition-all"
+                    className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-500 text-slate-900 font-bold shadow-lg shadow-amber-500/40 hover:shadow-amber-500/60 transition-all premium-button-glow relative overflow-hidden"
                   >
-                    <Crown size={16} className="text-gray-900" />
-                    <span className="text-sm">Premium User</span>
+                    <Crown size={16} className="text-slate-900 premium-sparkle" />
+                    <span className="text-sm">PRO</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-shimmer" style={{ animationDuration: '3s', animationIterationCount: 'infinite' }} />
                   </Link>
                 ) : (
                   <Link

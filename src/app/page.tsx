@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Clock, RefreshCw, AlertCircle } from 'lucide-react';
+import { ArrowRight, Clock, RefreshCw, AlertCircle, Crown, Zap } from 'lucide-react';
 import SearchBar from '@/components/SearchBar';
 import MarketOverview from '@/components/MarketOverview';
 import MarketHours from '@/components/MarketHours';
@@ -15,6 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Stock, MarketSummary } from '@/types/stock';
 import { MARKET_INDEX_BASE_VALUES } from '@/lib/marketConfig';
+import { PremiumBadge } from '@/components/PremiumWrapper';
 
 function formatMarketCap(value: number): string {
   if (value >= 1e12) return `₦${(value / 1e12).toFixed(2)}T`;
@@ -132,12 +133,25 @@ export default function HomePage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className={`text-2xl md:text-3xl font-bold ${
+              isPremium 
+                ? 'bg-gradient-to-r from-amber-400 via-yellow-300 to-orange-400 bg-clip-text text-transparent' 
+                : 'text-gray-900 dark:text-white'
+            }`}>
               Market Overview
             </h1>
-            <div className="flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/40 rounded-full">
-              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-xs font-medium text-green-700 dark:text-green-400">Live</span>
+            {isPremium && <PremiumBadge size="sm" />}
+            <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${
+              isPremium 
+                ? 'bg-amber-500/20 border border-amber-500/30' 
+                : 'bg-green-100 dark:bg-green-900/40'
+            }`}>
+              <span className={`w-2 h-2 rounded-full animate-pulse ${isPremium ? 'bg-amber-400' : 'bg-green-500'}`} />
+              <span className={`text-xs font-medium ${
+                isPremium ? 'text-amber-400' : 'text-green-700 dark:text-green-400'
+              }`}>
+                {isPremium ? '1min Live' : 'Live'}
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-slate-400">
@@ -148,10 +162,14 @@ export default function HomePage() {
             <button
               onClick={() => refresh()}
               disabled={isLoading}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors disabled:opacity-50"
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors disabled:opacity-50 ${
+                isPremium 
+                  ? 'text-amber-400 hover:bg-amber-500/10 border border-amber-500/20' 
+                  : 'text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20'
+              }`}
             >
-              <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
-              Refresh
+              {isPremium ? <Zap size={14} className={isLoading ? 'animate-pulse' : ''} /> : <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />}
+              {isPremium ? 'Ultra Refresh' : 'Refresh'}
             </button>
           </div>
         </div>

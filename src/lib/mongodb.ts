@@ -355,3 +355,127 @@ export type IPriceAlert = {
   triggeredPrice?: number;
   createdAt: Date;
 };
+
+const referralSchema = new mongoose.Schema({
+  referrerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  referredUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  referralCode: { type: String, required: true },
+  status: { 
+    type: String, 
+    enum: ['pending', 'completed', 'rewarded', 'expired'], 
+    default: 'pending' 
+  },
+  referredUserSubscriptionStatus: { 
+    type: String, 
+    enum: ['free', 'active', 'canceled', 'past_due', 'trialing'],
+    default: 'free'
+  },
+  rewardType: { type: String, enum: ['free_month', 'discount', 'credits', 'none'], default: 'none' },
+  rewardAmount: { type: Number, default: 0 },
+  rewardClaimed: { type: Boolean, default: false },
+  rewardClaimedAt: { type: Date },
+  conversionDate: { type: Date },
+  expiresAt: { type: Date },
+  metadata: {
+    signupSource: { type: String },
+    signupDevice: { type: String },
+    signupCountry: { type: String },
+  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+referralSchema.index({ referrerId: 1 });
+referralSchema.index({ referredUserId: 1 }, { unique: true });
+referralSchema.index({ referralCode: 1 });
+referralSchema.index({ status: 1 });
+referralSchema.index({ createdAt: -1 });
+
+const referralRewardSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  referralId: { type: mongoose.Schema.Types.ObjectId, ref: 'Referral', required: true },
+  rewardType: { type: String, enum: ['free_month', 'discount', 'credits'], required: true },
+  rewardAmount: { type: Number, required: true },
+  description: { type: String },
+  status: { type: String, enum: ['pending', 'applied', 'expired'], default: 'pending' },
+  appliedAt: { type: Date },
+  expiresAt: { type: Date },
+  stripePromotionId: { type: String },
+  createdAt: { type: Date, default: Date.now },
+});
+
+referralRewardSchema.index({ userId: 1 });
+referralRewardSchema.index({ status: 1 });
+
+const referralStatsSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+  totalReferrals: { type: Number, default: 0 },
+  pendingReferrals: { type: Number, default: 0 },
+  convertedReferrals: { type: Number, default: 0 },
+  totalRewardsEarned: { type: Number, default: 0 },
+  freeMonthsEarned: { type: Number, default: 0 },
+  currentStreak: { type: Number, default: 0 },
+  longestStreak: { type: Number, default: 0 },
+  tier: { type: String, enum: ['bronze', 'silver', 'gold', 'platinum'], default: 'bronze' },
+  lastReferralAt: { type: Date },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+referralStatsSchema.index({ userId: 1 });
+referralStatsSchema.index({ tier: 1 });
+referralStatsSchema.index({ totalReferrals: -1 });
+
+export const Referral = mongoose.models.Referral || mongoose.model('Referral', referralSchema);
+export const ReferralReward = mongoose.models.ReferralReward || mongoose.model('ReferralReward', referralRewardSchema);
+export const ReferralStats = mongoose.models.ReferralStats || mongoose.model('ReferralStats', referralStatsSchema);
+
+export type IReferral = {
+  _id: mongoose.Types.ObjectId;
+  referrerId: mongoose.Types.ObjectId;
+  referredUserId: mongoose.Types.ObjectId;
+  referralCode: string;
+  status: 'pending' | 'completed' | 'rewarded' | 'expired';
+  referredUserSubscriptionStatus: 'free' | 'active' | 'canceled' | 'past_due' | 'trialing';
+  rewardType: 'free_month' | 'discount' | 'credits' | 'none';
+  rewardAmount: number;
+  rewardClaimed: boolean;
+  rewardClaimedAt?: Date;
+  conversionDate?: Date;
+  expiresAt?: Date;
+  metadata?: {
+    signupSource?: string;
+    signupDevice?: string;
+    signupCountry?: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type IReferralReward = {
+  _id: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+  referralId: mongoose.Types.ObjectId;
+  rewardType: 'free_month' | 'discount' | 'credits';
+  rewardAmount: number;
+  description?: string;
+  status: 'pending' | 'applied' | 'expired';
+  appliedAt?: Date;
+  expiresAt?: Date;
+  stripePromotionId?: string;
+  createdAt: Date;
+};
+
+export type IReferralStats = {
+  _id: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+  totalReferrals: number;
+  pendingReferrals: number;
+  convertedReferrals: number;
+  totalRewardsEarned: number;
+  freeMonthsEarned: number;
+  currentStreak: number;
+  longestStreak: number;
+  tier: 'bronze' | 'silver' | 'gold' | 'platinum';
+  lastReferralAt?: Date;
+  updatedAt: Date;
+};

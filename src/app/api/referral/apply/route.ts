@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
-import { connectToDatabase, User } from '@/lib/mongodb';
+import { connectToDatabase, User, Referral, ReferralStats } from '@/lib/mongodb';
 
 export async function POST(request: NextRequest) {
   try {
@@ -73,6 +73,42 @@ export async function POST(request: NextRequest) {
     await User.findByIdAndUpdate(userId, {
       referredBy: referrer._id,
     });
+
+    const existingReferral = await Referral.findOne({ referredUserId: userId });
+    if (!existingReferral) {
+      try {
+        await Referral.create({
+          referrerId: referrer._id,
+          referredUserId: currentUser._id,
+          referralCode: normalizedCode,
+          status: 'pending',
+          referredUserSubscriptionStatus: currentUser.subscriptionStatus || 'free',
+        });
+
+        await ReferralStats.findOneAndUpdate(
+          { userId: referrer._id },
+          { 
+            $inc: { totalReferrals: 1, pendingReferrals: 1 },
+            $set: { lastReferralAt: new Date(), updatedAt: new Date() },
+            $setOnInsert: {
+              convertedReferrals: 0,
+              totalRewardsEarned: 0,
+              freeMonthsEarned: 0,
+              currentStreak: 0,
+              longestStreak: 0,
+              tier: 'bronze',
+            },
+          },
+          { upsert: true }
+        );
+      } catch (error: any) {
+        if (error.code === 11000) {
+          console.log('Referral already exists for this user, skipping creation');
+        } else {
+          throw error;
+        }
+      }
+    }
 
     return NextResponse.json({
       success: true,

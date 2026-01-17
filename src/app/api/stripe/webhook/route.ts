@@ -1,7 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, User } from '@/lib/mongodb';
+import { connectToDatabase, User, Referral, ReferralStats } from '@/lib/mongodb';
 import { getStripeClient } from '@/lib/stripe';
 import Stripe from 'stripe';
+
+async function updateReferralOnConversion(userId: string, newStatus: string) {
+  if (newStatus === 'active' || newStatus === 'trialing') {
+    const referral = await Referral.findOne({ 
+      referredUserId: userId, 
+      status: 'pending' 
+    });
+    
+    if (referral) {
+      await Referral.findByIdAndUpdate(referral._id, {
+        status: 'completed',
+        referredUserSubscriptionStatus: newStatus,
+        conversionDate: new Date(),
+        rewardType: 'free_month',
+        rewardAmount: 1,
+        updatedAt: new Date(),
+      });
+
+      await ReferralStats.findOneAndUpdate(
+        { userId: referral.referrerId },
+        {
+          $inc: { 
+            pendingReferrals: -1, 
+            convertedReferrals: 1,
+            freeMonthsEarned: 1,
+            totalRewardsEarned: 1,
+          },
+          $set: { updatedAt: new Date() },
+          $setOnInsert: {
+            totalReferrals: 1,
+            currentStreak: 0,
+            longestStreak: 0,
+            tier: 'bronze',
+          },
+        },
+        { upsert: true }
+      );
+      
+      console.log(`Referral converted: User ${userId} upgraded, referrer ${referral.referrerId} earned reward`);
+    }
+  }
+}
 
 function mapStripeStatus(stripeStatus: string): 'free' | 'active' | 'canceled' | 'past_due' | 'trialing' {
   switch (stripeStatus) {
@@ -64,6 +106,8 @@ export async function POST(request: NextRequest) {
             subscriptionCurrentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
             updatedAt: new Date(),
           });
+          
+          await updateReferralOnConversion(userId, status);
         }
         break;
       }
@@ -82,6 +126,8 @@ export async function POST(request: NextRequest) {
             subscriptionCurrentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
             updatedAt: new Date(),
           });
+          
+          await updateReferralOnConversion(user._id.toString(), status);
         }
         break;
       }

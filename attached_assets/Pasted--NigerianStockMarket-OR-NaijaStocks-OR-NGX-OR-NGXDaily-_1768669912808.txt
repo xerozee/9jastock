@@ -1,0 +1,23 @@
+(#NigerianStockMarket OR #NaijaStocks OR #NGX OR #NGXDaily OR #NGXASI OR #StockMarketNigeria OR #NaijaInvestments OR #NaijaFinance OR #NaijaEconomy OR #NaijaBusiness OR #InvestInNigeria OR #NigeriaEconomy OR #NigeriaFinance OR #NigeriaBusiness OR #AfricaMarkets OR "Nigerian Exchange" OR "NGX All Share Index" OR "NGX market" OR "NGX trading floor")
+
+($ZENITHBANK OR $GTCO OR $ACCESSCORP OR $UBA OR $FBNH OR $ETI OR $STANBIC OR $FIDELITYBK OR $FCMB OR $STERLINGNG OR $UNITYBNK OR $WEMABANK OR $JAIZBANK)
+
+($DANGCEM OR $BUACEMENT OR $WAPCO OR $BUAFOODS OR $NESTLE OR $FLOURMILL OR $NASCON OR $CADBURY OR $PZ OR $UNILEVER OR $CHAMPION OR $HONEYFLOUR OR $OKOMUOIL OR $PRESCO OR $OAT)
+
+($MTNN OR $AIRTELAFRICA OR $AIRTEL OR $GLO OR $9MOBILE)
+
+($SEPLAT OR $SEPLATENERGY OR $TOTAL OR $TOTALENERGIES OR $OANDO OR $CONOIL OR $MRS OR $ETERNA)
+
+($TRANSCORP OR $TRANSPOWER OR $TRANSCORPHOT OR $UACN OR $UACNPROP OR $SFSREIT OR $UPDC OR $ARDOVA OR $BUA OR $NEM OR $AIICO OR $MANSARD OR $CORNERSTONE OR $LINKASSURE OR $LAWUNION)
+
+($GEREGU OR $TRANSPOWER OR $EKOELEC OR $IKEJAELEC OR $NBET)
+
+($AFRIPRUD OR $VERITAS OR $REGALINS OR $CAP OR $WAPIC OR $LASACO)
+
+($FBNH OR $GTCO OR $ZENITHBANK OR $UBA OR $ACCESSCORP OR $ETI OR $STANBIC)
+
+(earnings OR results OR dividend OR bonus OR rights OR merger OR acquisition OR takeover OR restructuring OR recapitalization OR listing OR delisting OR suspension OR fine OR SEC OR NGXRegulation OR insider OR profit OR loss OR guidance OR outlook OR rally OR breakout OR selloff OR correction OR crash)
+
+(from:ngxgrp OR from:Nairametrics OR from:ProshareNG OR from:BusinessDayNG OR from:ThisDayBusiness OR from:ngnmarket OR from:FinancialDeriv OR from:ARMEngage OR from:MeristemWealth OR from:CSLStockbrokers OR from:ChapelHillDenham OR from:InvestDataLtd OR from:Afrinvest OR from:CardinalStone OR from:UnitedCapitalPlc OR from:CoronationNig OR from:Vetiva OR from:FBNQuest OR from:StanbicIBTC OR from:FCMBGroup OR from:ARMHoldings)
+
+("NGX" OR "NSE" OR "Nigerian stocks" OR "Nigeria equities" OR "Nigerian shares" OR "NGX investors" OR "NGX traders" OR "NGX bulls" OR "NGX bears")

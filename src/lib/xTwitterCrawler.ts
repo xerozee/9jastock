@@ -139,9 +139,29 @@ function getSearchNameForSymbol(symbol: string): string {
 }
 
 const NIGERIAN_STOCK_ACCOUNTS = [
-  'NGXGroup', 'SECNigeria', 'Nairametrics', 'CardinalStone',
-  'MeristemNg', 'AfrInvestor', 'StanbicIBTC', 'VetivaNigeria',
-  'CSLStockbrokers', 'ChapelHillDen', 'InvestingNG'
+  'ngxgrp', 'Nairametrics', 'ProshareNG', 'BusinessDayNG', 'ThisDayBusiness',
+  'ngnmarket', 'FinancialDeriv', 'ARMEngage', 'MeristemWealth', 'CSLStockbrokers',
+  'ChapelHillDenham', 'InvestDataLtd', 'Afrinvest', 'CardinalStone', 'UnitedCapitalPlc',
+  'CoronationNig', 'Vetiva', 'FBNQuest', 'StanbicIBTC', 'FCMBGroup', 'ARMHoldings'
+];
+
+const NIGERIAN_MARKET_HASHTAGS = [
+  '#NigerianStockMarket', '#NaijaStocks', '#NGX', '#NGXDaily', '#NGXASI',
+  '#StockMarketNigeria', '#NaijaInvestments', '#NaijaFinance', '#NaijaEconomy',
+  '#NaijaBusiness', '#InvestInNigeria', '#NigeriaEconomy', '#NigeriaFinance',
+  '#NigeriaBusiness', '#AfricaMarkets'
+];
+
+const NIGERIAN_MARKET_TERMS = [
+  '"Nigerian Exchange"', '"NGX All Share Index"', '"NGX market"', '"NGX trading floor"',
+  '"Nigerian stocks"', '"Nigeria equities"', '"Nigerian shares"', '"NGX investors"',
+  '"NGX traders"', '"NGX bulls"', '"NGX bears"'
+];
+
+const MARKET_ACTION_KEYWORDS = [
+  'earnings', 'results', 'dividend', 'bonus', 'rights', 'merger', 'acquisition',
+  'takeover', 'restructuring', 'listing', 'profit', 'loss', 'rally', 'breakout',
+  'selloff', 'correction'
 ];
 
 interface XTweet {
@@ -205,13 +225,14 @@ export async function searchXForStocks(symbols: string[], use72Hours: boolean = 
   const allTweets: XTweet[] = [];
   const startTime = use72Hours ? `&start_time=${get72HoursAgo()}` : '';
   
-  const companyNames = symbols.slice(0, 8).map(s => `"${getSearchNameForSymbol(s)}"`).join(' OR ');
-  const query = `(${companyNames}) (Nigeria OR NGX OR Naira) lang:en -is:retweet`;
+  const companyNames = symbols.slice(0, 6).map(s => `"${getSearchNameForSymbol(s)}"`).join(' OR ');
+  const nigerianContext = '(Nigeria OR NGX OR #NGX OR #NigerianStockMarket OR #NaijaStocks OR "Nigerian Exchange")';
+  const query = `(${companyNames}) ${nigerianContext} lang:en -is:retweet`;
   
-  if (query.length <= 500) {
+  if (query.length <= 512) {
     try {
       const encodedQuery = encodeURIComponent(query);
-      const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=20&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
+      const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=25&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
       
       const response: XSearchResponse = await fetchFromXApi(endpoint);
       
@@ -238,6 +259,41 @@ export async function searchXForStocks(symbols: string[], use72Hours: boolean = 
   return allTweets;
 }
 
+export async function searchNigerianMarketBuzz(use72Hours: boolean = true): Promise<XTweet[]> {
+  const allTweets: XTweet[] = [];
+  const startTime = use72Hours ? `&start_time=${get72HoursAgo()}` : '';
+  
+  const trustedSources = NIGERIAN_STOCK_ACCOUNTS.slice(0, 10).map(a => `from:${a}`).join(' OR ');
+  const marketHashtags = '#NGX OR #NigerianStockMarket OR #NaijaStocks OR #NGXDaily OR #NGXASI';
+  
+  const query = `(${trustedSources}) OR (${marketHashtags}) lang:en -is:retweet`;
+  
+  try {
+    const encodedQuery = encodeURIComponent(query);
+    const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=30&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
+    
+    const response: XSearchResponse = await fetchFromXApi(endpoint);
+    
+    if (response.data) {
+      const usersMap = new Map<string, XUser>();
+      if (response.includes?.users) {
+        response.includes.users.forEach(user => {
+          usersMap.set(user.id, user);
+        });
+      }
+      
+      for (const tweet of response.data) {
+        (tweet as any)._user = usersMap.get(tweet.author_id);
+        allTweets.push(tweet);
+      }
+    }
+  } catch (error) {
+    console.error('X Nigerian market buzz search error:', error);
+  }
+
+  return allTweets;
+}
+
 export async function searchXForWatchlistStocks(watchlistSymbols: string[], use72Hours: boolean = true): Promise<XTweet[]> {
   if (!watchlistSymbols.length) return [];
   
@@ -246,14 +302,15 @@ export async function searchXForWatchlistStocks(watchlistSymbols: string[], use7
   
   try {
     const companyNames = watchlistSymbols
-      .slice(0, 6)
+      .slice(0, 5)
       .map(s => `"${getSearchNameForSymbol(s)}"`)
       .join(' OR ');
-    const query = `(${companyNames}) (Nigeria OR NGX OR Naira OR Lagos) lang:en -is:retweet`;
+    const nigerianContext = '(Nigeria OR NGX OR #NGX OR #NigerianStockMarket OR #NaijaStocks OR "Nigerian Exchange" OR Naira)';
+    const query = `(${companyNames}) ${nigerianContext} lang:en -is:retweet`;
     
-    if (query.length <= 500) {
+    if (query.length <= 512) {
       const encodedQuery = encodeURIComponent(query);
-      const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=15&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
+      const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=20&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
       
       const response: XSearchResponse = await fetchFromXApi(endpoint);
       
@@ -279,13 +336,14 @@ export async function searchXForWatchlistStocks(watchlistSymbols: string[], use7
   
   try {
     const companyNames = watchlistSymbols
-      .slice(0, 5)
+      .slice(0, 4)
       .map(s => getSearchNameForSymbol(s))
       .join(' OR ');
     
-    const financeQuery = `(from:NGXGroup OR from:SECNigeria OR from:Nairametrics) (${companyNames}) -is:retweet`;
+    const trustedSources = 'from:ngxgrp OR from:Nairametrics OR from:ProshareNG OR from:BusinessDayNG';
+    const financeQuery = `(${trustedSources}) (${companyNames}) -is:retweet`;
     const encodedQuery = encodeURIComponent(financeQuery);
-    const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=10&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
+    const endpoint = `/tweets/search/recent?query=${encodedQuery}&max_results=15&tweet.fields=created_at,public_metrics,entities,author_id&expansions=author_id&user.fields=name,username,verified,profile_image_url${startTime}`;
     
     const response: XSearchResponse = await fetchFromXApi(endpoint);
     

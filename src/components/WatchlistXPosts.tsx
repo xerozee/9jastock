@@ -158,18 +158,18 @@ export default function WatchlistXPosts({ watchlistSymbols }: WatchlistXPostsPro
         }
       }
       
-      if (fetchedPosts.length < 6) {
-        const generalRes = await fetch('/api/social?platform=twitter&limit=10', { credentials: 'include' });
+      if (fetchedPosts.length < 10) {
+        const generalRes = await fetch('/api/social?platform=twitter&limit=15', { credentials: 'include' });
         if (generalRes.ok) {
           const data = await generalRes.json();
           const generalPosts = data.posts || [];
           const existingIds = new Set(fetchedPosts.map(p => p.id));
           const newPosts = generalPosts.filter((p: XPost) => !existingIds.has(p.id));
-          fetchedPosts = [...fetchedPosts, ...newPosts].slice(0, 6);
+          fetchedPosts = [...fetchedPosts, ...newPosts].slice(0, 10);
         }
       }
       
-      setPosts(fetchedPosts.slice(0, 6));
+      setPosts(fetchedPosts.slice(0, 10));
     } catch (err: any) {
       console.error('Failed to fetch X posts:', err);
       setError('Failed to load posts from X');

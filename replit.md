@@ -34,6 +34,12 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
     - **Market Buzz Social Feed:** Real-time social media aggregation (TradingView, X/Twitter, Reddit) with AI sentiment analysis for Nigerian stocks. Includes official X/Twitter API integration.
     - **Stock Recommendations Engine:** AI-powered suggestions based on user profile and investment goals.
     - **Tiered Access Control:** Differentiates features and data refresh rates for guest, free, and premium users. Implemented with `useSubscription` hook and `PremiumGate` component.
+      - **Tier Limits (src/lib/subscription.ts):**
+        - Guest: 15min refresh, 0 portfolio, 3 watchlist, 20 visible stocks
+        - Free: 5min refresh, 2 portfolio, 3 watchlist, 30 visible stocks
+        - Premium: 1min refresh, unlimited everything
+      - **Stock Detail Pages:** Free users see basic info (price, chart, company overview), premium-only sections gated (Technical Indicators, Financials, Valuation)
+      - **Stocks List Page:** Limited preview for free users with upgrade banner
     - **Push Notifications:** Web Push API with VAPID authentication for price alerts, daily summaries, and breaking news.
     - **Stripe Subscription System:** Integration for managing free and premium tiers, including Stripe Checkout and webhook handling.
 

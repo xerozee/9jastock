@@ -2,8 +2,7 @@
 
 import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { Search, Filter, ArrowUpDown, RefreshCw, Wifi, TrendingUp, Clock, Lock, Crown } from 'lucide-react';
+import { Search, Filter, ArrowUpDown, RefreshCw, Wifi, TrendingUp, Clock } from 'lucide-react';
 import StockTable from '@/components/StockTable';
 import AuthGuard from '@/components/AuthGuard';
 import { nigerianStocks, getAllSectors } from '@/lib/stockData';
@@ -15,7 +14,7 @@ type SortOption = 'name' | 'price' | 'change' | 'volume' | 'marketCap' | 'gainer
 function StocksContent() {
   const searchParams = useSearchParams();
   const initialSort = (searchParams.get('sort') as SortOption) || 'name';
-  const { isPremium, limits, tier } = useSubscription();
+  const { limits, isPremium } = useSubscription();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSector, setSelectedSector] = useState('all');
@@ -27,7 +26,7 @@ function StocksContent() {
   const [liveCount, setLiveCount] = useState(0);
 
   const sectors = getAllSectors();
-  const maxVisibleStocks = limits.maxVisibleStocks === Infinity ? 999 : limits.maxVisibleStocks;
+  const refreshInterval = limits.refreshInterval;
 
   const fetchLiveStocks = async () => {
     try {
@@ -48,9 +47,9 @@ function StocksContent() {
 
   useEffect(() => {
     fetchLiveStocks();
-    const interval = setInterval(fetchLiveStocks, 5 * 60 * 1000);
+    const interval = setInterval(fetchLiveStocks, refreshInterval);
     return () => clearInterval(interval);
-  }, []);
+  }, [refreshInterval]);
 
   const stocks = liveStocks.length > 0 ? liveStocks : nigerianStocks;
 
@@ -207,30 +206,9 @@ function StocksContent() {
         </div>
       </div>
 
-      {/* Stock count and tier indicator */}
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <div className="text-sm text-gray-600 dark:text-slate-400">
-          {isPremium ? (
-            <>Showing {filteredAndSortedStocks.length} of {stocks.length} stocks</>
-          ) : (
-            <>
-              Showing {Math.min(filteredAndSortedStocks.length, maxVisibleStocks)} of {stocks.length} stocks
-              <span className="text-amber-600 dark:text-amber-400 ml-1">
-                (Limited preview)
-              </span>
-            </>
-          )}
-          {selectedSector !== 'all' && ` in ${selectedSector}`}
-        </div>
-        {!isPremium && (
-          <Link 
-            href="/pricing"
-            className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 text-sm font-semibold rounded-full hover:shadow-lg transition-all"
-          >
-            <Crown size={14} />
-            Unlock All {stocks.length}+ Stocks
-          </Link>
-        )}
+      <div className="mb-4 text-sm text-gray-600 dark:text-slate-400">
+        Showing {filteredAndSortedStocks.length} of {stocks.length} stocks
+        {selectedSector !== 'all' && ` in ${selectedSector}`}
       </div>
 
       {isLoading && liveStocks.length === 0 ? (
@@ -239,34 +217,7 @@ function StocksContent() {
           <p className="text-gray-500 dark:text-slate-400">Loading live stock data...</p>
         </div>
       ) : filteredAndSortedStocks.length > 0 ? (
-        <>
-          <StockTable stocks={isPremium ? filteredAndSortedStocks : filteredAndSortedStocks.slice(0, maxVisibleStocks)} />
-          
-          {/* Upgrade banner for free users when there are more stocks */}
-          {!isPremium && filteredAndSortedStocks.length > maxVisibleStocks && (
-            <div className="mt-6 relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 p-8 text-center">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(251,191,36,0.15),transparent_50%)]" />
-              <div className="relative z-10">
-                <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-xl shadow-xl mb-4">
-                  <Lock className="w-7 h-7 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">
-                  {filteredAndSortedStocks.length - maxVisibleStocks}+ More Stocks Available
-                </h3>
-                <p className="text-gray-400 mb-4 max-w-md mx-auto">
-                  Upgrade to Premium to see all {stocks.length}+ NGX stocks with full analysis, technical indicators, and real-time data.
-                </p>
-                <Link
-                  href="/pricing"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all"
-                >
-                  <Crown className="w-5 h-5" />
-                  Upgrade to Premium
-                </Link>
-              </div>
-            </div>
-          )}
-        </>
+        <StockTable stocks={filteredAndSortedStocks} />
       ) : (
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 p-8 text-center">
           <p className="text-gray-500 dark:text-slate-400">No stocks found matching your criteria.</p>

@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import TradingViewWidget from '@/components/TradingViewWidget';
 import LiveIndicator from '@/components/LiveIndicator';
-import PremiumGate, { PremiumBadge } from '@/components/PremiumGate';
 import { useWatchlist } from '@/lib/watchlistContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useLiveStock, formatLastUpdate } from '@/lib/useLiveStocks';
@@ -23,8 +22,6 @@ import {
 } from '@/lib/stockData';
 import { Stock } from '@/types/stock';
 import { YahooFinanceData } from '@/lib/yahooFinance';
-
-const REFRESH_INTERVAL = 5 * 60 * 1000;
 
 function getRecommendationLabel(value: number | undefined): { label: string; color: string; bg: string } {
   if (value === undefined || value === 0) return { label: 'Neutral', color: 'text-gray-600', bg: 'bg-gray-100' };
@@ -228,9 +225,10 @@ export default function StockDetailPage() {
   const router = useRouter();
   const symbol = (params.symbol as string).toUpperCase();
   const { isInWatchlist, toggleWatchlist } = useWatchlist();
-  const { isPremium } = useSubscription();
+  const { limits } = useSubscription();
+  const refreshInterval = limits.refreshInterval;
 
-  const { stock: liveStock, isLoading, refresh, lastRefresh } = useLiveStock(symbol, REFRESH_INTERVAL);
+  const { stock: liveStock, isLoading, refresh, lastRefresh } = useLiveStock(symbol, refreshInterval);
   const staticStock = getStockBySymbol(symbol);
   const stock = liveStock || staticStock;
   
@@ -548,9 +546,7 @@ export default function StockDetailPage() {
         </div>
       </SectionCard>
 
-      {/* Technical Analysis Grid - Premium Only */}
-      {isPremium ? (
-        <>
+      {/* Technical Analysis Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Technical Indicators */}
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-6">
@@ -1083,23 +1079,6 @@ export default function StockDetailPage() {
           )}
         </div>
       </SectionCard>
-        </>
-      ) : (
-        <div className="mb-6">
-          <PremiumGate 
-            title="In-Depth Stock Analysis"
-            description="Unlock detailed technical indicators, financial statements, valuation metrics, and more with Premium."
-            features={[
-              "Technical Indicators (RSI, MACD, etc.)",
-              "Balance Sheet & Income Statement",
-              "Valuation & Profitability Metrics",
-              "Performance History",
-              "Cash Flow Analysis",
-              "Volume Analysis"
-            ]}
-          />
-        </div>
-      )}
 
       {/* Data Refresh Status */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6">

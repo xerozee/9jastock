@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { Search, Filter, ArrowUpDown, RefreshCw, Wifi, TrendingUp, Clock } from 'lucide-react';
 import StockTable from '@/components/StockTable';
 import AuthGuard from '@/components/AuthGuard';
+import PremiumGate from '@/components/PremiumGate';
 import { nigerianStocks, getAllSectors } from '@/lib/stockData';
 import { Stock } from '@/types/stock';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -27,6 +28,23 @@ function StocksContent() {
 
   const sectors = getAllSectors();
   const refreshInterval = limits.refreshInterval;
+
+  if (!isPremium) {
+    return (
+      <PremiumGate
+        title="All Stocks List"
+        description="Upgrade to Premium to browse all 145+ NGX stocks with live prices, filtering, and sorting options."
+        features={[
+          "Browse 145+ NGX stocks",
+          "Real-time price updates",
+          "Filter by sector",
+          "Sort by gainers/losers",
+          "In-depth stock analysis",
+          "Technical indicators"
+        ]}
+      />
+    );
+  }
 
   const fetchLiveStocks = async () => {
     try {

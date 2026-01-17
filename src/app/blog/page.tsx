@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { 
   TrendingUp, TrendingDown, Newspaper, ExternalLink, Clock, 
   Building2, BarChart3, FileText, RefreshCw, ChevronRight, Wifi, WifiOff, Lock, LogIn,
-  MessageCircle, Heart, Share2, Loader2
+  MessageCircle, Heart, Share2, Loader2, Crown
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
 import { Stock } from '@/types/stock';
 
 interface NewsItem {
@@ -59,6 +60,7 @@ const sentimentConfig = {
 
 export default function BlogPage() {
   const { isAuthenticated, isLoading: authLoading, login } = useAuth();
+  const { isPremium } = useSubscription();
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [xPosts, setXPosts] = useState<XPost[]>([]);
@@ -416,7 +418,7 @@ export default function BlogPage() {
             )}
 
             {isAuthenticated && (
-              <div className="mt-8 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+              <div className="mt-8 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden relative">
                 <div className="p-6 border-b border-gray-100 dark:border-slate-700">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -434,22 +436,24 @@ export default function BlogPage() {
                         </p>
                       </div>
                     </div>
-                    <button
-                      onClick={fetchXPosts}
-                      disabled={isXLoading}
-                      className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors disabled:opacity-50"
-                    >
-                      {isXLoading ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <RefreshCw className="w-4 h-4" />
-                      )}
-                      Refresh
-                    </button>
+                    {isPremium && (
+                      <button
+                        onClick={fetchXPosts}
+                        disabled={isXLoading}
+                        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors disabled:opacity-50"
+                      >
+                        {isXLoading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <RefreshCw className="w-4 h-4" />
+                        )}
+                        Refresh
+                      </button>
+                    )}
                   </div>
                 </div>
 
-                <div className="p-6">
+                <div className={`p-6 ${!isPremium ? 'blur-sm pointer-events-none select-none' : ''}`}>
                   {isXLoading && xPosts.length === 0 ? (
                     <div className="flex items-center justify-center py-12">
                       <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
@@ -544,6 +548,26 @@ export default function BlogPage() {
                     </div>
                   )}
                 </div>
+                {!isPremium && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/60 dark:bg-slate-800/60 backdrop-blur-[2px]">
+                    <div className="text-center p-6">
+                      <div className="w-12 h-12 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                        <Lock className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">X Market Buzz</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 max-w-xs">
+                        Upgrade to Premium for real-time social sentiment analysis
+                      </p>
+                      <Link
+                        href="/pricing"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 font-semibold rounded-lg shadow-md hover:shadow-lg transition-all"
+                      >
+                        <Crown className="w-4 h-4" />
+                        Upgrade to Premium
+                      </Link>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -634,67 +658,92 @@ export default function BlogPage() {
 
           {isAuthenticated && (
             <div className="lg:w-80">
-              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-6 sticky top-6">
+              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-6 sticky top-6 relative overflow-hidden">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     <TrendingUp className="text-green-600" size={20} />
                     Top 10 Performers
                   </h2>
-                  <button 
-                    onClick={fetchStocks}
-                    disabled={isLoading}
-                    className="p-2 text-gray-400 hover:text-green-600 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700"
-                  >
-                    <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
-                  </button>
+                  {isPremium && (
+                    <button 
+                      onClick={fetchStocks}
+                      disabled={isLoading}
+                      className="p-2 text-gray-400 hover:text-green-600 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700"
+                    >
+                      <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
+                    </button>
+                  )}
                 </div>
                 
-                {lastUpdated && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-                    Updated: {lastUpdated.toLocaleTimeString()}
-                  </p>
-                )}
+                <div className={!isPremium ? 'blur-sm pointer-events-none select-none' : ''}>
+                  {lastUpdated && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                      Updated: {lastUpdated.toLocaleTimeString()}
+                    </p>
+                  )}
 
-                {isLoading && topPerformers.length === 0 ? (
-                  <div className="flex items-center justify-center py-8">
-                    <RefreshCw size={24} className="animate-spin text-green-600" />
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {topPerformers.map((stock, index) => (
-                      <Link
-                        key={stock.symbol}
-                        href={`/blog/${stock.symbol}`}
-                        className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors group"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                            index < 3 ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-                          }`}>
-                            {index + 1}
-                          </span>
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400">{stock.symbol}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]">{stock.name}</p>
+                  {isLoading && topPerformers.length === 0 ? (
+                    <div className="flex items-center justify-center py-8">
+                      <RefreshCw size={24} className="animate-spin text-green-600" />
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {topPerformers.map((stock, index) => (
+                        <Link
+                          key={stock.symbol}
+                          href={`/stocks/${stock.symbol}`}
+                          className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors group"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                              index < 3 ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                            }`}>
+                              {index + 1}
+                            </span>
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400">{stock.symbol}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]">{stock.name}</p>
+                            </div>
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-green-600 font-semibold">
-                            +{stock.changePercent.toFixed(2)}%
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">₦{stock.price.toLocaleString()}</p>
-                        </div>
+                          <div className="text-right">
+                            <p className="text-green-600 font-semibold">
+                              +{stock.changePercent.toFixed(2)}%
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">₦{stock.price.toLocaleString()}</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  <Link
+                    href="/stocks?sort=gainers"
+                    className="flex items-center justify-center gap-2 mt-4 py-3 text-green-600 font-medium hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
+                  >
+                    View All Stocks <ChevronRight size={16} />
+                  </Link>
+                </div>
+
+                {!isPremium && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/60 dark:bg-slate-800/60 backdrop-blur-[2px]">
+                    <div className="text-center p-4">
+                      <div className="w-10 h-10 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mx-auto mb-2">
+                        <Lock className="w-5 h-5 text-white" />
+                      </div>
+                      <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Top Performers</h3>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
+                        Premium feature
+                      </p>
+                      <Link
+                        href="/pricing"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all"
+                      >
+                        <Crown className="w-3.5 h-3.5" />
+                        Upgrade
                       </Link>
-                    ))}
+                    </div>
                   </div>
                 )}
-
-                <Link
-                  href="/stocks?sort=gainers"
-                  className="flex items-center justify-center gap-2 mt-4 py-3 text-green-600 font-medium hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
-                >
-                  View All Stocks <ChevronRight size={16} />
-                </Link>
               </div>
             </div>
           )}

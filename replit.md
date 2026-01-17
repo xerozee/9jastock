@@ -38,8 +38,8 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
         - Guest: 15min refresh, 0 portfolio, 3 watchlist
         - Free: 5min refresh, 0 portfolio, 3 watchlist
         - Premium: 1min refresh, unlimited portfolio, unlimited watchlist
-      - **Free User Access:** Market Overview (NGX indices, top gainers, top losers), My Profile, Watchlist (3 items max), News
-      - **Premium-only:** Stock detail pages (in-depth analysis), Portfolio tracker, unlimited watchlist, faster data refresh (1min vs 5min)
+      - **Free User Access:** Market Overview (NGX indices, top gainers, top losers), My Profile, Watchlist (3 items max), News articles (main feed only)
+      - **Premium-only:** Stock list page (all 145+ stocks), Stock detail pages (in-depth analysis), Top Performers section, X/Twitter market buzz, Portfolio tracker, unlimited watchlist, faster data refresh (1min vs 5min)
     - **Push Notifications:** Web Push API with VAPID authentication for price alerts, daily summaries, and breaking news.
     - **Stripe Subscription System:** Integration for managing free and premium tiers, including Stripe Checkout and webhook handling.
 

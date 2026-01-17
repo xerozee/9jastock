@@ -42,6 +42,8 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
       - **Premium-only:** Stock list page (all 145+ stocks), Stock detail pages (in-depth analysis), Top Performers section, X/Twitter market buzz, Portfolio tracker, unlimited watchlist, faster data refresh (1min vs 5min)
     - **Push Notifications:** Web Push API with VAPID authentication for price alerts, daily summaries, and breaking news.
     - **Stripe Subscription System:** Integration for managing free and premium tiers, including Stripe Checkout and webhook handling.
+    - **Premium Visual Theme:** Gold/amber neon theme for premium users with glow effects, shimmer animations, and distinctive branding. Uses PremiumThemeContext and PremiumWrapper components (`src/contexts/PremiumThemeContext.tsx`, `src/components/PremiumWrapper.tsx`, `src/styles/premium.css`).
+    - **Referral System:** Database-backed referral tracking with Referral, ReferralReward, and ReferralStats schemas in MongoDB. Tracks referrer/referred relationships, conversion status, and prepares for future reward implementation (bronze/silver/gold/platinum tiers). API endpoints at `/api/referral/stats` and `/api/referral/apply`.
 
 ## External Dependencies
 - **Stock Data API:** Live stock data via backend services (presented as 9jaStocks.app data).

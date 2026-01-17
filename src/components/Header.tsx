@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { TrendingUp, BarChart3, Star, Menu, X, Briefcase, Newspaper, Moon, Sun, LogIn, LogOut, User } from 'lucide-react';
+import { TrendingUp, BarChart3, Star, Menu, X, Briefcase, Newspaper, Moon, Sun, LogIn, LogOut, User, Crown } from 'lucide-react';
 import { useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -64,6 +64,13 @@ export default function Header() {
               <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse" />
             ) : isAuthenticated && user ? (
               <div className="flex items-center space-x-2">
+                <Link
+                  href="/pricing"
+                  className="flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-blue-500/20 hover:from-emerald-500/30 hover:to-blue-500/30 border border-emerald-500/30 transition-all"
+                >
+                  <Crown size={16} className="text-yellow-400" />
+                  <span className="text-sm font-medium">Premium</span>
+                </Link>
                 <Link
                   href="/profile"
                   className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-all"
@@ -154,6 +161,14 @@ export default function Header() {
                 </div>
               ) : isAuthenticated && user ? (
                 <div className="px-4 space-y-2">
+                  <Link
+                    href="/pricing"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="w-full flex items-center justify-center space-x-2 px-3 py-2 rounded-xl bg-gradient-to-r from-emerald-500/20 to-blue-500/20 border border-emerald-500/30 transition-all"
+                  >
+                    <Crown size={16} className="text-yellow-400" />
+                    <span className="text-sm font-medium">Get Premium</span>
+                  </Link>
                   <Link
                     href="/profile"
                     onClick={() => setIsMenuOpen(false)}

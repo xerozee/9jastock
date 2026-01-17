@@ -145,17 +145,31 @@ export default function WatchlistXPosts({ watchlistSymbols }: WatchlistXPostsPro
   const [error, setError] = useState<string | null>(null);
 
   const fetchPosts = async () => {
-    if (!watchlistSymbols.length) return;
-    
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/social/watchlist?symbols=${watchlistSymbols.join(',')}`);
-      const data = await response.json();
+      let fetchedPosts: XPost[] = [];
       
-      if (data.success && data.posts?.length > 0) {
-        setPosts(data.posts);
+      if (watchlistSymbols.length > 0) {
+        const watchlistRes = await fetch(`/api/social/watchlist?symbols=${watchlistSymbols.join(',')}`, { credentials: 'include' });
+        if (watchlistRes.ok) {
+          const data = await watchlistRes.json();
+          fetchedPosts = data.posts || [];
+        }
       }
+      
+      if (fetchedPosts.length < 6) {
+        const generalRes = await fetch('/api/social?platform=twitter&limit=10', { credentials: 'include' });
+        if (generalRes.ok) {
+          const data = await generalRes.json();
+          const generalPosts = data.posts || [];
+          const existingIds = new Set(fetchedPosts.map(p => p.id));
+          const newPosts = generalPosts.filter((p: XPost) => !existingIds.has(p.id));
+          fetchedPosts = [...fetchedPosts, ...newPosts].slice(0, 6);
+        }
+      }
+      
+      setPosts(fetchedPosts.slice(0, 6));
     } catch (err: any) {
       console.error('Failed to fetch X posts:', err);
       setError('Failed to load posts from X');
@@ -165,12 +179,10 @@ export default function WatchlistXPosts({ watchlistSymbols }: WatchlistXPostsPro
   };
 
   useEffect(() => {
-    if (watchlistSymbols.length > 0) {
-      fetchPosts();
-    }
+    fetchPosts();
   }, [watchlistSymbols.join(',')]);
 
-  if (!watchlistSymbols.length) return null;
+  if (!watchlistSymbols.length && posts.length === 0 && !loading) return null;
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">

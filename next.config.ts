@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
     "*.replit.dev",
     "*.replit.app",
     "*.repl.co",
+    "*.janeway.replit.dev",
+    "*.kirk.replit.dev",
+    "*.picard.replit.dev",
   ],
   devIndicators: false,
 };

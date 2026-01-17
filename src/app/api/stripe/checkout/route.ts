@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
       await User.findByIdAndUpdate(user._id, { stripeCustomerId: customerId });
     }
     
-    const host = request.headers.get('host') || '';
+    const replitDomain = process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS;
+    const host = replitDomain || request.headers.get('host') || '';
     const protocol = host.includes('localhost') ? 'http' : 'https';
     const baseUrl = `${protocol}://${host}`;
     

@@ -37,50 +37,50 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
   const features = [
     {
       icon: TrendingUp,
-      title: 'Real-Time Data',
-      description: 'Live prices for 145+ NGX stocks, updated every 5 minutes.',
+      title: 'Real-Time Prices',
+      description: 'Stop refreshing outdated websites. Get live prices for 145+ NGX stocks with auto-updates so you never miss a move.',
       gradient: 'from-emerald-500 to-teal-600',
     },
     {
       icon: Brain,
-      title: 'AI Analysis',
-      description: 'GPT-4 powered stock recommendations based on your investment profile.',
+      title: 'Your Personal AI Advisor',
+      description: 'Not sure what to buy? Our AI learns your goals and risk appetite, then suggests stocks that actually match your investment style.',
       gradient: 'from-purple-500 to-pink-600',
     },
     {
       icon: Twitter,
-      title: 'Market Buzz',
-      description: 'Real-time X/Twitter feed with AI sentiment analysis for each stock.',
+      title: 'What People Are Saying',
+      description: 'See what Nigerian traders are discussing on X in real-time. Our AI reads the mood so you understand market sentiment instantly.',
       gradient: 'from-blue-500 to-indigo-600',
     },
     {
       icon: Bell,
-      title: 'Price Alerts',
-      description: 'Push notifications when stocks hit your target prices.',
+      title: 'Never Miss Your Price',
+      description: 'Set it and forget it. Get instant push notifications the moment your stocks hit the prices you\'re waiting for.',
       gradient: 'from-orange-500 to-red-600',
     },
     {
       icon: Briefcase,
-      title: 'Portfolio Tracking',
-      description: 'Track investments with real-time P&L and shareable portfolio links.',
+      title: 'See Your Gains Grow',
+      description: 'Watch your money work. Track every stock you own, see your profit/loss in real-time, and share your wins with friends.',
       gradient: 'from-cyan-500 to-blue-600',
     },
     {
       icon: BarChart3,
-      title: 'Technical Analysis',
-      description: 'Interactive charts with RSI, MACD, Bollinger Bands & more.',
+      title: 'Charts That Make Sense',
+      description: 'Professional charts with all the indicators serious traders use — RSI, MACD, Bollinger Bands — explained simply.',
       gradient: 'from-rose-500 to-pink-600',
     },
     {
       icon: PieChart,
-      title: 'Fundamental Data',
-      description: 'P/E ratio, EPS, dividends, balance sheet, cash flow & profitability metrics.',
+      title: 'Know What You\'re Buying',
+      description: 'Dividends, P/E ratios, earnings — all the numbers that matter, laid out clearly so you can make confident decisions.',
       gradient: 'from-amber-500 to-orange-600',
     },
     {
       icon: Newspaper,
-      title: 'AI Newsletter',
-      description: 'Daily AI-curated market insights from Nigerian financial news sources.',
+      title: 'Morning Market Brief',
+      description: 'Wake up to an AI-written summary of everything that happened overnight. Nigerian market news, simplified and delivered to your inbox.',
       gradient: 'from-teal-500 to-emerald-600',
     },
   ];
@@ -92,29 +92,29 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
   ];
 
   const stats = [
-    { value: '145+', label: 'NGX Stocks', icon: '📈' },
-    { value: '79', label: 'Data Fields', icon: '📊' },
-    { value: 'AI', label: 'Powered', icon: '🤖' },
-    { value: '24/7', label: 'Access', icon: '🌍' },
+    { value: '145+', label: 'Nigerian Stocks Tracked', icon: '📈' },
+    { value: 'Live', label: 'Auto-Refreshing Data', icon: '⚡' },
+    { value: 'AI', label: 'Powered Insights', icon: '🧠' },
+    { value: 'Free', label: 'To Get Started', icon: '🎯' },
   ];
 
   const testimonials = [
     {
       name: 'Chidi O.',
-      role: 'Retail Investor',
-      text: 'The AI recommendations have helped me discover stocks I never would have found on my own.',
+      role: 'First-time Investor, Lagos',
+      text: 'I was intimidated by the stock market until I found 9jaStock. The AI told me exactly which dividend stocks matched my goals. Now I actually understand what I\'m investing in.',
       rating: 5,
     },
     {
       name: 'Amaka N.',
-      role: 'Day Trader',
-      text: 'Price alerts and real-time data make this my go-to NGX platform.',
+      role: 'Day Trader, Port Harcourt',
+      text: 'I used to check three different websites for prices. Now I just open 9jaStock. The price alerts saved me last week when GTCO hit my target while I was in a meeting.',
       rating: 5,
     },
     {
       name: 'Emeka K.',
-      role: 'Portfolio Manager',
-      text: 'The social sentiment analysis from X gives me an edge in understanding market mood.',
+      role: 'Investment Club Lead, Abuja',
+      text: 'Our investment club uses the portfolio sharing feature to track our group investments. The X sentiment analysis helps us see what the market is feeling before we make decisions.',
       rating: 5,
     },
   ];
@@ -187,22 +187,21 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                 </div>
                 
                 <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-4 md:mb-6 leading-[1.1] tracking-tight">
-                  Track NGX
+                  Invest in Nigeria
                   <br />
                   <span className="relative inline-block">
                     <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-green-300 to-teal-400">
-                      Like a Pro
+                      With Confidence
                     </span>
                     <span className="absolute inset-0 bg-gradient-to-r from-emerald-400/30 via-green-300/30 to-teal-400/30 blur-2xl" />
                   </span>
                 </h1>
                 
                 <p className="text-base md:text-lg lg:text-xl text-slate-300 max-w-xl mb-6 md:mb-8 leading-relaxed mx-auto lg:mx-0">
-                  Nigeria&apos;s most powerful stock tracking platform with
-                  <span className="text-emerald-400 font-medium"> interactive charts</span>, 
-                  <span className="text-purple-400 font-medium"> AI analysis</span>, 
-                  <span className="text-blue-400 font-medium"> X/Twitter sentiment</span>, and
-                  <span className="text-orange-400 font-medium"> price alerts</span>.
+                  Finally, a stock tracker built for Nigerians. 
+                  <span className="text-emerald-400 font-medium"> Real-time prices</span>,
+                  <span className="text-purple-400 font-medium"> AI that explains what to buy</span>, 
+                  <span className="text-blue-400 font-medium"> alerts when your stocks move</span> — all in one beautiful app.
                 </p>
                 
                 <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4 lg:justify-start justify-center mb-8 md:mb-10">
@@ -398,13 +397,13 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
           <div className="text-center mb-10 md:mb-16">
             <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-emerald-500/10 rounded-full text-emerald-400 text-xs md:text-sm mb-3 md:mb-4">
               <Zap size={12} />
-              <span className="font-medium">Powerful Features</span>
+              <span className="font-medium">Built for You</span>
             </div>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 md:mb-4">
-              Everything You Need
+              Stop Guessing, Start Knowing
             </h2>
             <p className="text-sm md:text-lg text-slate-400 max-w-2xl mx-auto px-4">
-              Professional-grade tools built for Nigerian investors
+              Whether you&apos;re just starting or managing millions — 9jaStock gives you the tools the pros use, made simple for everyone
             </p>
           </div>
           
@@ -439,13 +438,13 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
           <div className="text-center mb-10 md:mb-16">
             <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-purple-500/10 rounded-full text-purple-400 text-xs md:text-sm mb-3 md:mb-4">
               <Brain size={12} />
-              <span className="font-medium">AI-Powered Intelligence</span>
+              <span className="font-medium">AI That Actually Helps</span>
             </div>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 md:mb-4">
-              Smart Stock Analysis
+              Your Smart Investment Partner
             </h2>
             <p className="text-sm md:text-lg text-slate-400 max-w-2xl mx-auto px-4">
-              Leverage artificial intelligence for personalized investment insights
+              No more reading hundreds of articles or asking friends for stock tips. Our AI does the hard work and explains everything in plain language
             </p>
           </div>
 
@@ -454,14 +453,14 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
               <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-4 md:mb-6">
                 <Target size={24} className="text-white" />
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-white mb-3">Personalized Recommendations</h3>
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-3">Stocks Picked Just for You</h3>
               <p className="text-sm md:text-base text-slate-300 mb-4">
-                Based on your investment goals, risk tolerance, and interested sectors, our AI suggests stocks tailored to you.
+                Tell us your goals — saving for retirement? Building passive income? The AI finds Nigerian stocks that match YOUR situation, not generic advice.
               </p>
               <ul className="space-y-2 text-sm text-slate-400">
-                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-purple-400" /> Dividend stocks for passive income</li>
-                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-purple-400" /> Blue-chip for beginners</li>
-                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-purple-400" /> Growth stocks for aggressive investors</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-purple-400" /> "I want steady dividends" — sorted</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-purple-400" /> "I'm new, keep it safe" — we've got you</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-purple-400" /> "High risk, high reward" — let's go</li>
               </ul>
             </div>
 
@@ -469,14 +468,14 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
               <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mb-4 md:mb-6">
                 <MessageSquare size={24} className="text-white" />
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-white mb-3">Sentiment Analysis</h3>
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-3">Feel the Market Mood</h3>
               <p className="text-sm md:text-base text-slate-300 mb-4">
-                Every X/Twitter post is analyzed by GPT-4 for bullish, bearish, or neutral sentiment signals.
+                What are Nigerian traders saying on X right now? Are they excited or worried? Our AI reads thousands of posts so you don't have to.
               </p>
               <ul className="space-y-2 text-sm text-slate-400">
-                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-blue-400" /> Real-time social sentiment</li>
-                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-blue-400" /> Nigerian finance accounts monitored</li>
-                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-blue-400" /> Stock mention detection</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-blue-400" /> Live sentiment: Bullish or Bearish?</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-blue-400" /> Top Nigerian finance voices tracked</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-blue-400" /> See buzz before price moves</li>
               </ul>
             </div>
 
@@ -484,14 +483,14 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
               <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center mb-4 md:mb-6">
                 <Newspaper size={24} className="text-white" />
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-white mb-3">AI Newsletter</h3>
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-3">Start Your Day Informed</h3>
               <p className="text-sm md:text-base text-slate-300 mb-4">
-                Daily AI-curated newsletters summarizing Nigerian financial news from top sources.
+                No time to read 10 news sites? Our AI reads them for you and sends a 2-minute summary straight to your inbox every morning.
               </p>
               <ul className="space-y-2 text-sm text-slate-400">
-                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-teal-400" /> Nairametrics, BusinessDay, Punch</li>
-                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-teal-400" /> Real-time market updates</li>
-                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-teal-400" /> Delivered to your inbox</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-teal-400" /> Key news from trusted sources</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-teal-400" /> What moved and why</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-teal-400" /> What to watch today</li>
               </ul>
             </div>
           </div>
@@ -503,13 +502,13 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
           <div className="text-center mb-10 md:mb-16">
             <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-orange-500/10 rounded-full text-orange-400 text-xs md:text-sm mb-3 md:mb-4">
               <Bell size={12} />
-              <span className="font-medium">Stay Informed</span>
+              <span className="font-medium">Set It, Forget It</span>
             </div>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 md:mb-4">
-              Never Miss a Move
+              Your Stocks, Your Rules
             </h2>
             <p className="text-sm md:text-lg text-slate-400 max-w-2xl mx-auto px-4">
-              Push notifications and price alerts keep you ahead of the market
+              You shouldn&apos;t have to stare at your phone all day. Set your targets and we&apos;ll notify you the moment something happens
             </p>
           </div>
 
@@ -520,8 +519,8 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                   <Target size={20} className="text-orange-400" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-white mb-1">Price Alerts</h4>
-                  <p className="text-sm text-slate-400">Set target prices and get notified when stocks hit your levels.</p>
+                  <h4 className="font-bold text-white mb-1">"Tell me when DANGCEM hits ₦300"</h4>
+                  <p className="text-sm text-slate-400">Set any price target. We'll ping you the second it happens.</p>
                 </div>
               </div>
 
@@ -530,8 +529,8 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                   <Clock size={20} className="text-emerald-400" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-white mb-1">Daily Summary</h4>
-                  <p className="text-sm text-slate-400">Market recap and portfolio performance delivered daily.</p>
+                  <h4 className="font-bold text-white mb-1">"How did I do today?"</h4>
+                  <p className="text-sm text-slate-400">Get a daily summary of your portfolio performance without opening the app.</p>
                 </div>
               </div>
 
@@ -540,8 +539,8 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                   <Zap size={20} className="text-red-400" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-white mb-1">Breaking News</h4>
-                  <p className="text-sm text-slate-400">Instant alerts for major market events and announcements.</p>
+                  <h4 className="font-bold text-white mb-1">"Something big is happening"</h4>
+                  <p className="text-sm text-slate-400">Major announcements, earnings reports, market news — know first.</p>
                 </div>
               </div>
 
@@ -550,8 +549,8 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                   <Star size={20} className="text-blue-400" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-white mb-1">Watchlist Updates</h4>
-                  <p className="text-sm text-slate-400">Get notified about significant moves in your watchlist stocks.</p>
+                  <h4 className="font-bold text-white mb-1">"My watchlist moved"</h4>
+                  <p className="text-sm text-slate-400">Stocks you're watching jumped or dropped significantly? We'll let you know.</p>
                 </div>
               </div>
             </div>
@@ -592,13 +591,13 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
           <div className="text-center mb-10 md:mb-16">
             <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-amber-500/10 rounded-full text-amber-400 text-xs md:text-sm mb-3 md:mb-4">
               <Crown size={12} />
-              <span className="font-medium">Premium Plans</span>
+              <span className="font-medium">Simple Pricing</span>
             </div>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 md:mb-4">
-              Choose Your Plan
+              Free Forever, Premium When Ready
             </h2>
             <p className="text-sm md:text-lg text-slate-400 max-w-2xl mx-auto px-4 mb-6">
-              Start free, upgrade when you&apos;re ready
+              Most features are free. Upgrade only when you want faster updates and AI recommendations
             </p>
             
             <div className="inline-flex items-center p-1 bg-slate-800 rounded-xl">
@@ -701,21 +700,21 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                 <span className="font-medium">Install as App</span>
               </div>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4 md:mb-6">
-                Add to Your
+                Use It Like
                 <br />
-                <span className="text-emerald-400">Home Screen</span>
+                <span className="text-emerald-400">A Real App</span>
               </h2>
               <p className="text-sm md:text-lg text-slate-300 mb-6 md:mb-8 leading-relaxed">
-                9jaStock works as a Progressive Web App. Install it on your phone for a native app experience — no app store needed.
+                No need to visit the Play Store or App Store. Just tap "Add to Home Screen" and 9jaStock becomes an app on your phone — fast, beautiful, always ready.
               </p>
               
               <div className="space-y-3 md:space-y-4 mb-6 md:mb-8">
                 {[
-                  'Works offline for portfolio viewing',
-                  'Push notifications for price alerts',
-                  'Fast, app-like experience',
-                  'No storage space needed',
-                  'Always up-to-date',
+                  'Check your portfolio even without internet',
+                  'Get price alerts as push notifications',
+                  'Opens instantly, no loading screens',
+                  'Takes almost no storage on your phone',
+                  'Always shows the latest version',
                 ].map((benefit, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
@@ -787,10 +786,10 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
           <div className="text-center mb-10 md:mb-16">
             <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-blue-500/10 rounded-full text-blue-400 text-xs md:text-sm mb-3 md:mb-4">
               <Star size={12} />
-              <span className="font-medium">Loved by Investors</span>
+              <span className="font-medium">Real People, Real Results</span>
             </div>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 md:mb-4">
-              What Users Say
+              Hear From Nigerian Investors
             </h2>
           </div>
 
@@ -819,19 +818,19 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 rounded-full text-emerald-400 text-sm mb-6">
             <Sparkles size={14} className="animate-pulse" />
-            <span className="font-medium">Join 1,000+ Nigerian Investors</span>
+            <span className="font-medium">Join Thousands of Nigerian Investors</span>
           </div>
           
           <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-6">
-            Start Trading
+            Your Money Deserves
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">
-              Smarter Today
+              Better Tools
             </span>
           </h2>
           
           <p className="text-lg md:text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
-            Free forever. Premium features when you need them. No credit card required to get started.
+            Stop relying on WhatsApp tips and outdated websites. Get the same tools professional traders use — completely free to start.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -860,7 +859,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
             <div>
               <Logo3D size="md" variant="full" animated={false} />
               <p className="text-sm text-slate-400 mt-4">
-                Nigeria&apos;s most powerful stock tracking platform for retail and professional investors.
+                Built by Nigerians, for Nigerians. Track, analyze, and grow your NGX investments with confidence.
               </p>
             </div>
             <div>

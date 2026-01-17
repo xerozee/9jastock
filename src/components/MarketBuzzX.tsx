@@ -73,18 +73,29 @@ export default function MarketBuzzX() {
     const fetchPosts = async (isRefresh = false) => {
       if (isRefresh) setIsRefreshing(true);
       try {
-        let response;
+        let fetchedPosts: XPost[] = [];
+        
         if (userSymbols.length > 0) {
-          response = await fetch(`/api/social/watchlist?symbols=${userSymbols.join(',')}`, { credentials: 'include' });
-        } else {
-          response = await fetch('/api/social?platform=twitter&limit=6', { credentials: 'include' });
+          const watchlistRes = await fetch(`/api/social/watchlist?symbols=${userSymbols.join(',')}`, { credentials: 'include' });
+          if (watchlistRes.ok) {
+            const data = await watchlistRes.json();
+            fetchedPosts = data.posts || [];
+          }
         }
         
-        if (response.ok) {
-          const data = await response.json();
-          setPosts(data.posts?.slice(0, 6) || []);
-          setLastUpdated(new Date());
+        if (fetchedPosts.length < 6) {
+          const generalRes = await fetch('/api/social?platform=twitter&limit=10', { credentials: 'include' });
+          if (generalRes.ok) {
+            const data = await generalRes.json();
+            const generalPosts = data.posts || [];
+            const existingIds = new Set(fetchedPosts.map(p => p.id));
+            const newPosts = generalPosts.filter((p: XPost) => !existingIds.has(p.id));
+            fetchedPosts = [...fetchedPosts, ...newPosts].slice(0, 6);
+          }
         }
+        
+        setPosts(fetchedPosts.slice(0, 6));
+        setLastUpdated(new Date());
       } catch (error) {
         console.error('Failed to fetch market buzz:', error);
       } finally {

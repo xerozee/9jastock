@@ -33,18 +33,30 @@ export default function ProfileXPosts({ symbols, title = "News from X", limit = 
   const symbolsKey = normalizedSymbols.sort().join(',');
 
   useEffect(() => {
-    if (!symbolsKey) {
-      setIsLoading(false);
-      return;
-    }
-
     const fetchPosts = async () => {
       try {
-        const response = await fetch(`/api/social/watchlist?symbols=${symbolsKey}`, { credentials: 'include' });
-        if (response.ok) {
-          const data = await response.json();
-          setPosts(data.posts?.slice(0, limit) || []);
+        let fetchedPosts: XPost[] = [];
+        
+        if (symbolsKey) {
+          const watchlistRes = await fetch(`/api/social/watchlist?symbols=${symbolsKey}`, { credentials: 'include' });
+          if (watchlistRes.ok) {
+            const data = await watchlistRes.json();
+            fetchedPosts = data.posts || [];
+          }
         }
+        
+        if (fetchedPosts.length < limit) {
+          const generalRes = await fetch(`/api/social?platform=twitter&limit=${limit + 5}`, { credentials: 'include' });
+          if (generalRes.ok) {
+            const data = await generalRes.json();
+            const generalPosts = data.posts || [];
+            const existingIds = new Set(fetchedPosts.map(p => p.id));
+            const newPosts = generalPosts.filter((p: XPost) => !existingIds.has(p.id));
+            fetchedPosts = [...fetchedPosts, ...newPosts].slice(0, limit);
+          }
+        }
+        
+        setPosts(fetchedPosts.slice(0, limit));
       } catch (error) {
         console.error('Failed to fetch X posts:', error);
       } finally {

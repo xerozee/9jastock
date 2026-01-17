@@ -43,4 +43,4 @@ build = ["npm", "run", "build"]
 [userenv]
 
 [userenv.shared]
-NEXTAUTH_URL = "https://5870446f-96db-4c00-a216-3e04e2bcf4c6-00-188e857n2koim.janeway.replit.dev"
+NEXTAUTH_URL = "https://9jastocks.app"

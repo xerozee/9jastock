@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { 
   Settings, Share2, Copy, Check, TrendingUp, TrendingDown, 
   Briefcase, Target, Shield, Clock, Building2, Lightbulb, 
-  ChevronRight, Users, Gift, Sparkles
+  ChevronRight, Users, Gift, Sparkles, Crown
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import Avatar from '@/components/Avatar';
@@ -97,6 +97,7 @@ export default function ProfilePage() {
   const [stocksError, setStocksError] = useState(false);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [recommendationsError, setRecommendationsError] = useState(false);
+  const [premiumRequired, setPremiumRequired] = useState(false);
   const [hasProfile, setHasProfile] = useState(true);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -157,11 +158,21 @@ export default function ProfilePage() {
   const fetchRecommendations = async () => {
     try {
       const response = await fetch('/api/recommendations');
+      const data = await response.json();
+      
+      if (response.status === 403 && data.premiumRequired) {
+        setPremiumRequired(true);
+        setRecommendations([]);
+        setHasProfile(true);
+        setRecommendationsError(false);
+        return;
+      }
+      
       if (response.ok) {
-        const data = await response.json();
         setRecommendations(data.recommendations || []);
         setHasProfile(data.hasProfile !== false);
         setRecommendationsError(data.error === true);
+        setPremiumRequired(false);
       } else {
         console.error('Failed to fetch recommendations:', response.status);
         setRecommendationsError(true);
@@ -428,7 +439,26 @@ export default function ProfilePage() {
                 </Link>
               </div>
 
-              {recommendationsError ? (
+              {premiumRequired ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Sparkles className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                    Unlock AI Recommendations
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4 max-w-md mx-auto">
+                    Get personalized stock picks powered by AI based on your investment goals and risk tolerance.
+                  </p>
+                  <Link
+                    href="/pricing"
+                    className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white px-6 py-3 rounded-xl transition-all font-medium"
+                  >
+                    <Crown className="w-5 h-5" />
+                    Upgrade to Premium
+                  </Link>
+                </div>
+              ) : recommendationsError ? (
                 <div className="text-center py-8">
                   <Sparkles className="w-12 h-12 text-amber-400 mx-auto mb-3" />
                   <p className="text-amber-600 dark:text-amber-400 mb-2">

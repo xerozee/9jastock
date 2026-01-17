@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
-import { connectToDatabase, PortfolioItem } from "@/lib/mongodb";
+import { connectToDatabase, PortfolioItem, User } from "@/lib/mongodb";
 import mongoose from "mongoose";
+import { getUserTier, TIER_LIMITS } from "@/lib/subscription";
 
 export async function GET() {
   try {
@@ -57,6 +58,21 @@ export async function POST(request: NextRequest) {
 
     await connectToDatabase();
     const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    const user = await User.findById(userId).lean();
+    const tier = getUserTier(user);
+    const maxItems = TIER_LIMITS[tier].maxPortfolioItems;
+
+    const currentCount = await PortfolioItem.countDocuments({ userId: userObjectId });
+    
+    if (currentCount >= maxItems) {
+      return NextResponse.json({ 
+        error: `Portfolio limit reached (${maxItems} items). Upgrade to Premium for unlimited portfolio tracking.`,
+        limitReached: true,
+        currentCount,
+        maxItems,
+      }, { status: 403 });
+    }
 
     const existing = await PortfolioItem.findOne({ userId: userObjectId, symbol });
 

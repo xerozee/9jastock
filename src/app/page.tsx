@@ -12,11 +12,9 @@ import LandingPage from '@/components/LandingPage';
 import MarketBuzzX from '@/components/MarketBuzzX';
 import { useLiveStocks, formatLastUpdate } from '@/lib/useLiveStocks';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
 import { Stock, MarketSummary } from '@/types/stock';
 import { MARKET_INDEX_BASE_VALUES } from '@/lib/marketConfig';
-
-const REFRESH_INTERVAL_AUTHENTICATED = 5 * 60 * 1000;
-const REFRESH_INTERVAL_GUEST = 6 * 60 * 60 * 1000;
 
 function formatMarketCap(value: number): string {
   if (value >= 1e12) return `₦${(value / 1e12).toFixed(2)}T`;
@@ -94,8 +92,9 @@ function computeMarketSummary(stocks: Stock[]): MarketSummary {
 
 export default function HomePage() {
   const { isAuthenticated, isLoading: authLoading, login } = useAuth();
+  const { limits, isPremium, tier } = useSubscription();
   
-  const refreshInterval = isAuthenticated ? REFRESH_INTERVAL_AUTHENTICATED : REFRESH_INTERVAL_GUEST;
+  const refreshInterval = limits.refreshInterval;
   const { stocks, isLoading, error, liveCount, refresh, lastRefresh } = useLiveStocks(refreshInterval);
 
   const marketSummary = useMemo(() => computeMarketSummary(stocks), [stocks]);

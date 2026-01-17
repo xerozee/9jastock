@@ -3,6 +3,7 @@ import { connectToDatabase, User } from '@/lib/mongodb';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { getAIStockRecommendations, StockData, UserProfile } from '@/lib/openai';
+import { getUserTier, canAccessFeature } from '@/lib/subscription';
 
 interface Stock {
   symbol: string;
@@ -37,6 +38,15 @@ export async function GET() {
     
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    if (!canAccessFeature(user, 'ai_recommendations')) {
+      return NextResponse.json({ 
+        error: 'AI recommendations are a Premium feature',
+        premiumRequired: true,
+        recommendations: [],
+        hasProfile: true,
+      }, { status: 403 });
     }
 
     let stocks: Stock[] = [];

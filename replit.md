@@ -135,3 +135,14 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
   - Webhook handler with signature verification for security
   - User model tracks: stripeCustomerId, subscriptionStatus, subscriptionId, subscriptionPriceId, subscriptionCurrentPeriodEnd
   - Required secret: STRIPE_WEBHOOK_SECRET for webhook verification
+- **Push Notification System**: Web Push API with VAPID authentication
+  - NotificationSettings component on profile page with Enable/Disable toggle
+  - 4 notification preference toggles: Price Alerts, Daily Summary, Breaking News, Watchlist Updates
+  - PriceAlertManager component for user-defined price targets (max 10 active alerts)
+  - Alerts trigger when stock price goes above or below target
+  - MongoDB schemas: PushSubscription (user subscriptions), PriceAlert (price targets)
+  - API endpoints: /api/notifications/subscribe, /api/notifications/preferences, /api/price-alerts
+  - Service worker at /sw.js handles push events and notification clicks
+  - Uses web-push npm package with VAPID keys (VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY)
+  - Preference-aware filtering: notifications respect user's toggle settings
+  - Auto-cleanup of invalid/expired push subscriptions (404/410 responses)

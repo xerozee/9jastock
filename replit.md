@@ -17,6 +17,7 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
 
 **UI/UX Decisions:**
 - **Design:** Modern 3D UI, sci-fi aesthetic, glassmorphism, interactive elements, mobile-first responsive design.
+- **Homepage (Jan 2026 Simplification):** Streamlined landing page focused on value creation - "Invest in Nigeria with Confidence" tagline, 3 core features (real-time data, AI recommendations, portfolio tracking), minimal "What's Coming" teaser without dates, prominent pricing section.
 - **Theming:** Dark mode support with persistence via localStorage.
 - **PWA:** Progressive Web App support with `manifest.json`, service worker for offline capabilities, and device-specific installation prompts.
 - **Market Hours:** Live indicator for NGX trading hours with countdowns.

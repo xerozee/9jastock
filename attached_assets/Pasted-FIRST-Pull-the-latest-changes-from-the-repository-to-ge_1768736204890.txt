@@ -1,0 +1,62 @@
+FIRST: Pull the latest changes from the repository to get the documentation files:
+
+git fetch origin claude/nigerian-stock-features-hu8qh
+git checkout claude/nigerian-stock-features-hu8qh
+git pull origin claude/nigerian-stock-features-hu8qh
+
+Or if you're on main/master:
+git pull origin claude/nigerian-stock-features-hu8qh --allow-unrelated-histories
+
+After pulling, you'll find these files in the root directory:
+- LANDING_PAGE_CONTENT.md (all marketing copy)
+- REPLIT_LANDING_PAGE_PROMPT.md (full technical spec)
+- ROADMAP.md (product roadmap)
+
+---
+
+BUILD A HIGH-CONVERTING MARKETING LANDING PAGE FOR 9JASTOCK
+
+9jastock is a Nigerian stock market investment app. The landing page should tell a compelling story: what the app does TODAY and the exciting vision of what it's BECOMING.
+
+IMPORTANT: All copy and content is in `LANDING_PAGE_CONTENT.md`. All technical specs are in `REPLIT_LANDING_PAGE_PROMPT.md`. Use these files as your source of truth.
+
+KEY REQUIREMENTS:
+
+1. STORY TO TELL:
+   - What the app does TODAY (NGX data, AI analysis, portfolio tracking)
+   - What's COMING (global markets, dividends, education, broker integration)
+   - Financial literacy mission for Nigeria
+
+2. SECTIONS TO BUILD (in order):
+   - Navbar (sticky, mobile hamburger)
+   - Hero (headline, CTAs, app mockup)
+   - Problem (6 pain point cards)
+   - Solution (5 current features with screenshots)
+   - Vision (7 "Coming Soon" features with badges) ⭐ KEY SECTION
+   - Why Join Now (Founding Member benefits)
+   - Mission (financial literacy movement)
+   - Pricing (Premium ₦2,999/mo, Pro ₦7,999/mo)
+   - Testimonials (3 quotes + stats bar)
+   - FAQ (8 questions, accordion style)
+   - Final CTA
+   - Footer
+
+3. DESIGN:
+   - Colors: Green #008751 (primary), Gold #FCD116 (accent)
+   - Mobile-first responsive
+   - Fast loading (< 3 seconds)
+   - Subtle scroll animations
+   - Match existing app styling
+
+4. FUNCTIONALITY:
+   - All "Start Free Trial" buttons → /signup
+   - "See What's Coming" → smooth scroll to Vision section
+   - FAQ accordion
+   - Sticky navbar
+
+5. PRIORITY (if time limited):
+   MVP: Hero + Solution + Pricing + Final CTA + Navbar/Footer
+   Then: Vision + Problem + FAQ + Why Join
+   Last: Testimonials + Mission + Animations
+
+Make it beautiful, fast, and conversion-focused. This page needs to convince Nigerian investors to start their free trial.

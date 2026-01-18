@@ -7,7 +7,7 @@ import {
   Brain, Crown, 
   Star, Menu, X,
   HelpCircle, ChevronDown, ChevronUp,
-  Rocket, Award, Heart, ArrowUp
+  Rocket, Heart, ArrowUp, Target, BarChart3, Shield, Building2, Users, Globe
 } from 'lucide-react';
 import Logo3D from './Logo3D';
 import Link from 'next/link';
@@ -52,29 +52,57 @@ export default function MarketingLandingPage() {
     {
       icon: TrendingUp,
       title: 'Real-Time Stock Prices',
-      description: 'Live prices for 145+ NGX stocks with 1-minute auto-refresh. No more stale data.',
+      description: 'Live prices for 145+ NGX stocks with 1-minute auto-refresh. Accurate, reliable data you can trust.',
       gradient: 'from-emerald-500 to-teal-600',
     },
     {
       icon: Brain,
-      title: 'AI Buy/Sell Recommendations',
-      description: 'Our AI analyzes each stock and gives you clear Buy, Sell, or Hold guidance with explanations.',
+      title: 'AI-Powered Insights',
+      description: 'Intelligent Buy, Sell, or Hold recommendations backed by technical analysis, fundamentals, and market sentiment.',
       gradient: 'from-purple-500 to-pink-600',
     },
     {
       icon: Briefcase,
-      title: 'Portfolio Tracking',
-      description: 'Track your holdings, see your gains/losses in real-time, and share your portfolio with friends.',
+      title: 'Portfolio Management',
+      description: 'Track holdings, monitor performance in real-time, and make data-driven investment decisions.',
       gradient: 'from-amber-500 to-orange-600',
     },
   ];
 
-  const foundingBenefits = [
-    'Lock in launch pricing forever (even as we add features)',
-    'Exclusive "Founding Member" badge on your profile',
-    'Priority access to new features before public release',
-    'Direct line to founders for feedback and requests',
-    'Free upgrade when global markets launch',
+  const problemPoints = [
+    {
+      icon: Target,
+      title: 'Scattered Information',
+      description: 'Stock data spread across multiple websites, apps, and sources with no single source of truth.',
+    },
+    {
+      icon: BarChart3,
+      title: 'Lack of Analysis Tools',
+      description: 'Most platforms show raw data without context, leaving investors to guess what it means.',
+    },
+    {
+      icon: Shield,
+      title: 'No Real-Time Updates',
+      description: 'Delayed prices and outdated information lead to missed opportunities and poor timing.',
+    },
+  ];
+
+  const institutionalValue = [
+    {
+      icon: Building2,
+      title: 'For Banks & Financial Institutions',
+      description: 'Enhance your digital banking experience with embedded market intelligence. Offer clients real-time NGX data and AI-powered insights through white-label integration.',
+    },
+    {
+      icon: Users,
+      title: 'For Stockbrokers & Asset Managers',
+      description: 'Streamline client reporting with automated portfolio analytics. Provide value-added services that differentiate your offerings in a competitive market.',
+    },
+    {
+      icon: Globe,
+      title: 'For the Nigerian Stock Exchange',
+      description: 'Increase market participation by making stock investing accessible and understandable to millions of Nigerians through technology and AI.',
+    },
   ];
 
   const stockCards = [
@@ -106,7 +134,7 @@ export default function MarketingLandingPage() {
     {
       name: 'Emeka K.',
       role: 'Investment Club Lead, Abuja',
-      text: 'Our investment club uses the portfolio sharing feature to track our group investments. The X sentiment analysis helps us see what the market is feeling before we make decisions.',
+      text: 'Our investment club uses the portfolio sharing feature to track our group investments. The sentiment analysis helps us see what the market is feeling before we make decisions.',
       rating: 5,
     },
   ];
@@ -138,7 +166,7 @@ export default function MarketingLandingPage() {
     },
     {
       q: 'How is 9jaStock different from other stock apps?',
-      a: 'We\'re the only NGX platform with AI-powered recommendations, real-time X/Twitter sentiment analysis, and push notifications. Others show you data — we tell you what it means.',
+      a: 'We\'re the only NGX platform with AI-powered recommendations, real-time social sentiment analysis, and push notifications. Others show you data — we tell you what it means.',
     },
     {
       q: 'Is there a free trial?',
@@ -224,9 +252,15 @@ export default function MarketingLandingPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 w-full">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               <div className="text-center lg:text-left order-2 lg:order-1">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#008751]/10 backdrop-blur-sm rounded-full text-[#00a863] text-sm mb-8 border border-[#008751]/20">
-                  <Sparkles size={14} className="animate-pulse" />
-                  <span className="font-medium">Nigeria&apos;s #1 AI-Powered Stock Platform</span>
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-8">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#008751]/10 backdrop-blur-sm rounded-full text-[#00a863] text-sm border border-[#008751]/20">
+                    <Sparkles size={14} className="animate-pulse" />
+                    <span className="font-medium">Nigeria&apos;s #1 AI-Powered Stock Platform</span>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#FCD116]/10 backdrop-blur-sm rounded-full text-[#FCD116] text-xs border border-[#FCD116]/20">
+                    <Star size={12} className="fill-[#FCD116]" />
+                    <span className="font-medium">Early Supporter Access</span>
+                  </div>
                 </div>
                 
                 <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6 leading-[1.1] tracking-tight">
@@ -241,9 +275,10 @@ export default function MarketingLandingPage() {
                 </h1>
                 
                 <p className="text-lg md:text-xl text-slate-300 max-w-xl mb-8 leading-relaxed mx-auto lg:mx-0">
-                  <span className="text-[#00a863] font-medium">Real-time stock data</span>, 
-                  <span className="text-[#FCD116] font-medium"> AI-powered buy/sell recommendations</span>, and 
-                  <span className="text-blue-400 font-medium"> portfolio tracking</span> — all in one place.
+                  The intelligent platform that transforms how Nigerians invest.
+                  <span className="text-[#00a863] font-medium"> Real-time data</span>, 
+                  <span className="text-[#FCD116] font-medium"> AI-powered insights</span>, and 
+                  <span className="text-blue-400 font-medium"> professional-grade tools</span> — accessible to everyone.
                 </p>
                 
                 <div className="flex flex-col sm:flex-row items-center gap-4 lg:justify-start justify-center mb-10">
@@ -345,6 +380,41 @@ export default function MarketingLandingPage() {
       <section className="relative py-20 md:py-28 bg-slate-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 md:mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/10 rounded-full text-red-400 text-sm mb-4">
+              <Target size={14} />
+              <span className="font-medium">The Challenge</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4">
+              Why Nigerian Investors Struggle
+            </h2>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+              Despite a growing economy, access to quality investment tools remains limited.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
+            {problemPoints.map((problem, i) => {
+              const Icon = problem.icon;
+              return (
+                <div
+                  key={i}
+                  className="p-6 rounded-2xl bg-slate-900/50 border border-red-500/10 hover:border-red-500/20 transition-all"
+                >
+                  <div className="inline-flex p-3 rounded-xl bg-red-500/10 mb-4">
+                    <Icon size={24} className="text-red-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">{problem.title}</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed">{problem.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative py-20 md:py-28 bg-gradient-to-b from-slate-950 to-slate-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 md:mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#008751]/10 rounded-full text-[#00a863] text-sm mb-4">
               <Zap size={14} />
               <span className="font-medium">The Solution</span>
@@ -353,7 +423,7 @@ export default function MarketingLandingPage() {
               9jaStock Changes Everything
             </h2>
             <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-              Here&apos;s what you get today — live and ready to use:
+              Professional-grade tools that were once exclusive to institutional investors — now available to everyone.
             </p>
           </div>
 
@@ -363,7 +433,7 @@ export default function MarketingLandingPage() {
               return (
                 <div
                   key={i}
-                  className="group relative p-6 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-[#008751]/30 transition-all duration-300 hover:-translate-y-2 overflow-hidden"
+                  className="group relative p-6 rounded-2xl bg-slate-800/50 border border-slate-700 hover:border-[#008751]/30 transition-all duration-300 hover:-translate-y-2 overflow-hidden"
                 >
                   <div className={`inline-flex p-4 rounded-xl bg-gradient-to-br ${feature.gradient} mb-5 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                     <Icon size={24} className="text-white" />
@@ -377,7 +447,43 @@ export default function MarketingLandingPage() {
         </div>
       </section>
 
-      <section ref={visionRef} className="relative py-16 md:py-20 bg-gradient-to-b from-slate-950 to-slate-900">
+      <section className="relative py-20 md:py-28 bg-slate-900">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-pink-500/10 rounded-full text-pink-400 text-sm mb-6">
+            <Heart size={14} />
+            <span className="font-medium">Our Mission</span>
+          </div>
+          
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-6">
+            Democratizing Wealth Creation in Nigeria
+          </h2>
+          
+          <p className="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-8 leading-relaxed">
+            We believe every Nigerian deserves access to the same tools, data, and insights that drive successful investment decisions. 
+            9jaStock bridges the gap between aspiration and action — turning everyday Nigerians into informed, confident investors.
+          </p>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="p-6 rounded-2xl bg-slate-800/30 border border-slate-700/50">
+              <div className="text-3xl mb-3">&#127475;&#127468;</div>
+              <h3 className="font-bold text-white mb-2">Built in Nigeria</h3>
+              <p className="text-sm text-slate-400">By a team that understands local market dynamics</p>
+            </div>
+            <div className="p-6 rounded-2xl bg-slate-800/30 border border-slate-700/50">
+              <div className="text-3xl mb-3">&#128218;</div>
+              <h3 className="font-bold text-white mb-2">Education First</h3>
+              <p className="text-sm text-slate-400">We explain every insight in plain language</p>
+            </div>
+            <div className="p-6 rounded-2xl bg-slate-800/30 border border-slate-700/50">
+              <div className="text-3xl mb-3">&#127758;</div>
+              <h3 className="font-bold text-white mb-2">Global Ambition</h3>
+              <p className="text-sm text-slate-400">Starting with NGX, expanding worldwide</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section ref={visionRef} className="relative py-16 md:py-20 bg-gradient-to-b from-slate-900 to-slate-950">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#FCD116]/10 rounded-full text-[#FCD116] text-sm mb-6">
             <Rocket size={14} />
@@ -399,79 +505,48 @@ export default function MarketingLandingPage() {
         </div>
       </section>
 
-      <section className="relative py-20 md:py-28 bg-slate-900">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative p-8 md:p-12 rounded-3xl bg-gradient-to-br from-[#FCD116]/10 to-[#008751]/10 border border-[#FCD116]/20 overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#FCD116]/10 rounded-full blur-3xl" />
-            
-            <div className="relative text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#FCD116]/20 rounded-full text-[#FCD116] text-sm mb-6">
-                <Award size={14} />
-                <span className="font-bold">Founding Member Benefits</span>
-              </div>
-              
-              <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
-                Join Now & Lock In These Perks Forever
-              </h2>
-              <p className="text-lg text-slate-300 mb-8">
-                Early supporters get exclusive benefits that never expire.
-              </p>
-              
-              <div className="grid sm:grid-cols-2 gap-4 text-left mb-8">
-                {foundingBenefits.map((benefit, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-[#008751]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <CheckCircle size={14} className="text-[#00a863]" />
-                    </div>
-                    <span className="text-sm text-slate-300">{benefit}</span>
-                  </div>
-                ))}
-              </div>
-              
-              <Link
-                href="/signup"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#FCD116] to-amber-500 text-slate-900 font-bold rounded-2xl hover:scale-105 transition-transform shadow-2xl shadow-[#FCD116]/30"
-              >
-                Become a Founding Member
-                <ArrowRight size={18} />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="relative py-20 md:py-28 bg-slate-950">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-pink-500/10 rounded-full text-pink-400 text-sm mb-6">
-            <Heart size={14} />
-            <span className="font-medium">Our Mission</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 md:mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 rounded-full text-blue-400 text-sm mb-4">
+              <Building2 size={14} />
+              <span className="font-medium">Enterprise Value</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4">
+              Built for Scale, Ready for Partnership
+            </h2>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+              Our infrastructure is designed to serve millions — and we&apos;re open to strategic partnerships that advance financial inclusion in Nigeria.
+            </p>
           </div>
-          
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-6">
-            Financial Literacy for Every Nigerian
-          </h2>
-          
-          <p className="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-8 leading-relaxed">
-            We believe every Nigerian deserves access to the same tools, data, and insights that wealthy investors use. 
-            9jaStock isn&apos;t just an app — it&apos;s a movement to democratize wealth creation in Nigeria.
-          </p>
-          
+
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-2xl bg-slate-800/30 border border-slate-700/50">
-              <div className="text-3xl mb-3">🇳🇬</div>
-              <h3 className="font-bold text-white mb-2">Built in Nigeria</h3>
-              <p className="text-sm text-slate-400">By Nigerians who understand your market</p>
-            </div>
-            <div className="p-6 rounded-2xl bg-slate-800/30 border border-slate-700/50">
-              <div className="text-3xl mb-3">📚</div>
-              <h3 className="font-bold text-white mb-2">Education First</h3>
-              <p className="text-sm text-slate-400">We explain everything in plain language</p>
-            </div>
-            <div className="p-6 rounded-2xl bg-slate-800/30 border border-slate-700/50">
-              <div className="text-3xl mb-3">🌍</div>
-              <h3 className="font-bold text-white mb-2">Global Ambition</h3>
-              <p className="text-sm text-slate-400">Starting with NGX, expanding worldwide</p>
-            </div>
+            {institutionalValue.map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={i}
+                  className="p-6 rounded-2xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-blue-500/10 hover:border-blue-500/20 transition-all"
+                >
+                  <div className="inline-flex p-3 rounded-xl bg-blue-500/10 mb-4">
+                    <Icon size={24} className="text-blue-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">{item.title}</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed">{item.description}</p>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-12 text-center">
+            <p className="text-slate-400 mb-4">Interested in partnering with us?</p>
+            <Link
+              href="mailto:partnerships@9jastocks.app"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500/10 border border-blue-500/30 text-blue-400 font-medium rounded-xl hover:bg-blue-500/20 transition-all"
+            >
+              Contact for Partnerships
+              <ArrowRight size={16} />
+            </Link>
           </div>
         </div>
       </section>
@@ -487,7 +562,7 @@ export default function MarketingLandingPage() {
               Invest in Your Future
             </h2>
             <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-8">
-              Less than a plate of jollof rice per day for tools that could change your financial future.
+              Professional-grade tools at an accessible price point. Less than a plate of jollof rice per day.
             </p>
             
             <div className="inline-flex items-center p-1 bg-slate-800 rounded-xl mb-12">
@@ -526,7 +601,7 @@ export default function MarketingLandingPage() {
               </div>
               
               <ul className="space-y-3 mb-8">
-                {['145+ NGX stocks with live data', 'AI Buy/Sell/Hold recommendations', 'Price alerts & notifications', 'Portfolio tracking', 'X/Twitter sentiment analysis', 'AI morning newsletter'].map((feature, i) => (
+                {['145+ NGX stocks with live data', 'AI Buy/Sell/Hold recommendations', 'Price alerts & notifications', 'Portfolio tracking', 'Social sentiment analysis', 'AI morning newsletter'].map((feature, i) => (
                   <li key={i} className="flex items-center gap-3 text-sm text-slate-300">
                     <CheckCircle size={16} className="text-[#00a863]" />
                     {feature}
@@ -573,12 +648,12 @@ export default function MarketingLandingPage() {
       <section className="relative py-20 md:py-28 bg-slate-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 rounded-full text-blue-400 text-sm mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 rounded-full text-purple-400 text-sm mb-4">
               <Star size={14} />
               <span className="font-medium">Testimonials</span>
             </div>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4">
-              Loved by Nigerian Investors
+              Trusted by Nigerian Investors
             </h2>
           </div>
 
@@ -613,7 +688,7 @@ export default function MarketingLandingPage() {
               <div className="text-sm text-slate-400">Price Alerts Sent</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-black text-purple-400">4.9★</div>
+              <div className="text-2xl md:text-3xl font-black text-purple-400">4.9</div>
               <div className="text-sm text-slate-400">User Rating</div>
             </div>
           </div>
@@ -663,7 +738,7 @@ export default function MarketingLandingPage() {
             Ready to Invest
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#008751] to-[#FCD116]">
-              Like a Pro?
+              with Confidence?
             </span>
           </h2>
           
@@ -691,7 +766,7 @@ export default function MarketingLandingPage() {
           </div>
           
           <p className="text-sm text-slate-500">
-            7-day free trial • No credit card required • Cancel anytime
+            7-day free trial &bull; No credit card required &bull; Cancel anytime
           </p>
         </div>
       </section>
@@ -735,7 +810,7 @@ export default function MarketingLandingPage() {
             <div className="flex items-center gap-2 text-sm text-slate-400">
               <span>Made with</span>
               <Heart size={14} className="text-red-500 fill-red-500" />
-              <span>in Nigeria 🇳🇬</span>
+              <span>in Nigeria &#127475;&#127468;</span>
             </div>
           </div>
         </div>

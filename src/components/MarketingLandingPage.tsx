@@ -390,7 +390,7 @@ export default function MarketingLandingPage() {
             Global Markets, Dividend Tracking, Investment Academy, Broker Integration, and more are on the way.
           </p>
           <Link
-            href="/pricing"
+            href="/roadmap"
             className="inline-flex items-center gap-2 text-[#FCD116] hover:text-[#fde047] font-medium transition-colors"
           >
             See the full roadmap

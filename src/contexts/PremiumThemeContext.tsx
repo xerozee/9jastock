@@ -5,7 +5,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 
 interface PremiumThemeContextType {
   isPremium: boolean;
-  tier: 'guest' | 'free' | 'premium';
+  tier: 'guest' | 'premium';
   theme: {
     primary: string;
     secondary: string;

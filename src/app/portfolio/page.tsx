@@ -247,12 +247,19 @@ export default function PortfolioPage() {
 
   const handleDeleteHolding = async (holdingId: string) => {
     try {
-      const response = await fetch(`/api/holdings?id=${holdingId}`, {
+      const response = await fetch("/api/holdings", {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: holdingId }),
       });
 
       if (response.ok) {
         await fetchHoldings();
+      } else {
+        const data = await response.json();
+        console.error("Delete failed:", data.error);
       }
     } catch (error) {
       console.error("Failed to delete holding:", error);

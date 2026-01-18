@@ -7,11 +7,28 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { generateAppleClientSecret } from "./appleClientSecret";
 
+function getBaseUrl(): string {
+  if (process.env.NEXTAUTH_URL) {
+    return process.env.NEXTAUTH_URL;
+  }
+  if (process.env.REPLIT_DEV_DOMAIN) {
+    return `https://${process.env.REPLIT_DEV_DOMAIN}`;
+  }
+  return 'http://localhost:5000';
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code"
+        }
+      }
     }),
     AppleProvider({
       clientId: process.env.APPLE_ID!,

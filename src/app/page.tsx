@@ -8,7 +8,7 @@ import MarketOverview from '@/components/MarketOverview';
 import MarketHours from '@/components/MarketHours';
 import StockCard from '@/components/StockCard';
 import StockGridSkeleton from '@/components/StockGridSkeleton';
-import LandingPage from '@/components/LandingPage';
+import MarketingLandingPage from '@/components/MarketingLandingPage';
 import MarketBuzzX from '@/components/MarketBuzzX';
 import { useLiveStocks, formatLastUpdate } from '@/lib/useLiveStocks';
 import { useAuth } from '@/hooks/useAuth';
@@ -124,7 +124,7 @@ export default function HomePage() {
   }
 
   if (!isAuthenticated) {
-    return <LandingPage onLogin={login} />;
+    return <MarketingLandingPage />;
   }
 
   return (

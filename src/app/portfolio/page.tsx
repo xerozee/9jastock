@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import Link from "next/link";
 import { 
   TrendingUp, 
@@ -23,9 +23,13 @@ import {
   Copy,
   Check,
   Crown,
-  Sparkles
+  Sparkles,
+  Zap
 } from "lucide-react";
 import AuthGuard from "@/components/AuthGuard";
+import { useSubscription } from "@/hooks/useSubscription";
+import { TIER_LIMITS } from "@/lib/subscription";
+import { PremiumBadge } from "@/components/PremiumWrapper";
 
 interface StockData {
   symbol: string;
@@ -62,6 +66,7 @@ interface GroupedHolding {
 }
 
 export default function PortfolioPage() {
+  const { isPremium, tier } = useSubscription();
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [allStocks, setAllStocks] = useState<StockData[]>([]);
   const [stocksMap, setStocksMap] = useState<Map<string, StockData>>(new Map());
@@ -71,6 +76,8 @@ export default function PortfolioPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSymbols, setExpandedSymbols] = useState<Set<string>>(new Set());
+  const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
+  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const [newHolding, setNewHolding] = useState({
     symbol: "",
@@ -88,6 +95,8 @@ export default function PortfolioPage() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeInfo, setUpgradeInfo] = useState<{ currentCount: number; maxItems: number } | null>(null);
 
+  const refreshInterval = TIER_LIMITS[tier]?.refreshInterval || TIER_LIMITS.free.refreshInterval;
+
   useEffect(() => {
     if (!hasFetched) {
       fetchHoldings();
@@ -95,6 +104,25 @@ export default function PortfolioPage() {
       setHasFetched(true);
     }
   }, [hasFetched]);
+
+  useEffect(() => {
+    if (refreshIntervalRef.current) {
+      clearInterval(refreshIntervalRef.current);
+    }
+
+    if (refreshInterval > 0 && hasFetched) {
+      refreshIntervalRef.current = setInterval(() => {
+        setIsAutoRefreshing(true);
+        fetchStocksData(false).finally(() => setIsAutoRefreshing(false));
+      }, refreshInterval);
+    }
+
+    return () => {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+    };
+  }, [refreshInterval, hasFetched]);
 
   const fetchHoldings = async (showLoading = true) => {
     if (showLoading) setIsLoadingHoldings(true);
@@ -313,17 +341,24 @@ export default function PortfolioPage() {
     <AuthGuard pageName="your portfolio">
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="relative bg-gradient-to-br from-purple-700 via-indigo-600 to-blue-600 dark:from-slate-800 dark:via-purple-900 dark:to-slate-800 rounded-3xl p-8 mb-8 text-white overflow-hidden">
+        <div className={`relative rounded-3xl p-8 mb-8 text-white overflow-hidden ${
+          isPremium 
+            ? 'bg-gradient-to-br from-amber-600 via-orange-600 to-yellow-500 dark:from-slate-900 dark:via-amber-900/50 dark:to-slate-800' 
+            : 'bg-gradient-to-br from-purple-700 via-indigo-600 to-blue-600 dark:from-slate-800 dark:via-purple-900 dark:to-slate-800'
+        }`} style={isPremium ? { boxShadow: '0 0 40px rgba(245, 158, 11, 0.3)' } : undefined}>
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-50" />
           <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-sm mb-4">
-                <Briefcase size={16} />
-                <span>Holdings Tracker</span>
+              <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm mb-4 ${
+                isPremium ? 'bg-amber-500/30 border border-amber-400/50' : 'bg-white/10 backdrop-blur-sm'
+              }`}>
+                {isPremium ? <Crown size={16} className="text-amber-200" /> : <Briefcase size={16} />}
+                <span>{isPremium ? 'Premium Portfolio' : 'Holdings Tracker'}</span>
+                {isPremium && <PremiumBadge size="sm" />}
               </div>
               <h1 className="text-3xl md:text-4xl font-bold mb-2">My Portfolio</h1>
-              <p className="text-purple-100 dark:text-slate-300 text-lg">
-                Track your NGX stock holdings and performance
+              <p className={`text-lg ${isPremium ? 'text-amber-100' : 'text-purple-100 dark:text-slate-300'}`}>
+                {isPremium ? 'Real-time tracking with 1-minute updates' : 'Track your NGX stock holdings and performance'}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -353,9 +388,25 @@ export default function PortfolioPage() {
         </div>
 
         {lastUpdated && (
-          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-500 mb-6">
-            <Clock size={14} />
-            <span>Prices updated: {lastUpdated.toLocaleTimeString()}</span>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-500">
+              <Clock size={14} />
+              <span>Prices updated: {lastUpdated.toLocaleTimeString()}</span>
+              {isAutoRefreshing && (
+                <span className="flex items-center gap-1 text-amber-500">
+                  <RefreshCw size={12} className="animate-spin" />
+                  Updating...
+                </span>
+              )}
+            </div>
+            <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${
+              isPremium 
+                ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30' 
+                : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-400'
+            }`}>
+              {isPremium ? <Zap size={12} /> : <Clock size={12} />}
+              <span>Auto-refresh: {isPremium ? '1 min' : '5 min'}</span>
+            </div>
           </div>
         )}
 

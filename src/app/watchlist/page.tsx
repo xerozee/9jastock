@@ -1,37 +1,92 @@
 'use client';
 
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Star, TrendingUp, TrendingDown, ArrowRight, Clock, RefreshCw } from 'lucide-react';
+import { Star, TrendingUp, TrendingDown, ArrowRight, Clock, RefreshCw, Zap, Crown } from 'lucide-react';
 import StockTable from '@/components/StockTable';
 import StockCard from '@/components/StockCard';
 import AuthGuard from '@/components/AuthGuard';
 import WatchlistXPosts from '@/components/WatchlistXPosts';
 import { useWatchlist } from '@/lib/watchlistContext';
-import { getStocksBySymbols } from '@/lib/stockData';
+import { useLiveStocks } from '@/lib/useLiveStocks';
+import { useSubscription } from '@/hooks/useSubscription';
+import { TIER_LIMITS } from '@/lib/subscription';
+import { PremiumBadge } from '@/components/PremiumWrapper';
 
 export default function WatchlistPage() {
   const { watchlist } = useWatchlist();
-  const watchlistStocks = getStocksBySymbols(watchlist);
+  const { isPremium, tier } = useSubscription();
+  const refreshInterval = TIER_LIMITS[tier]?.refreshInterval || TIER_LIMITS.free.refreshInterval;
+  const { stocks: allStocks, isLoading, lastRefresh, refresh, isRefreshing } = useLiveStocks(refreshInterval);
+  
+  const watchlistStocks = useMemo(() => {
+    return allStocks.filter(stock => watchlist.includes(stock.symbol));
+  }, [allStocks, watchlist]);
 
   const gainers = watchlistStocks.filter((s) => s.change > 0).length;
   const losers = watchlistStocks.filter((s) => s.change < 0).length;
   const unchanged = watchlistStocks.filter((s) => s.change === 0).length;
 
+  const formatLastUpdate = (timestamp: number | null) => {
+    if (!timestamp) return 'Not available';
+    return new Date(timestamp).toLocaleTimeString();
+  };
+
   return (
     <AuthGuard pageName="your watchlist">
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="relative bg-gradient-to-br from-amber-500 via-orange-500 to-yellow-500 dark:from-slate-800 dark:via-amber-900 dark:to-slate-800 rounded-3xl p-8 mb-8 text-white overflow-hidden">
+        <div className={`relative rounded-3xl p-8 mb-8 text-white overflow-hidden ${
+          isPremium 
+            ? 'bg-gradient-to-br from-amber-500 via-orange-500 to-yellow-500 dark:from-slate-900 dark:via-amber-900/50 dark:to-slate-800' 
+            : 'bg-gradient-to-br from-amber-500 via-orange-500 to-yellow-500 dark:from-slate-800 dark:via-amber-900 dark:to-slate-800'
+        }`} style={isPremium ? { boxShadow: '0 0 40px rgba(245, 158, 11, 0.3)' } : undefined}>
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-50" />
-          <div className="relative">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-sm mb-4">
-              <Star size={16} fill="currentColor" />
-              <span>Favorite Stocks</span>
+          <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm mb-4 ${
+                isPremium ? 'bg-amber-600/50 border border-amber-400/50' : 'bg-white/10 backdrop-blur-sm'
+              }`}>
+                {isPremium ? <Crown size={16} className="text-amber-200" /> : <Star size={16} fill="currentColor" />}
+                <span>{isPremium ? 'Premium Watchlist' : 'Favorite Stocks'}</span>
+                {isPremium && <PremiumBadge size="sm" />}
+              </div>
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">My Watchlist</h1>
+              <p className="text-amber-100 dark:text-slate-300 text-lg">
+                {isPremium ? 'Real-time tracking with 1-minute updates' : 'Track your favorite Nigerian stocks in one place'}
+              </p>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">My Watchlist</h1>
-            <p className="text-amber-100 dark:text-slate-300 text-lg">
-              Track your favorite Nigerian stocks in one place
-            </p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={refresh}
+                disabled={isRefreshing}
+                className="flex items-center gap-2 px-4 py-3 bg-white/10 backdrop-blur-sm text-white rounded-xl hover:bg-white/20 transition-all disabled:opacity-50"
+              >
+                <RefreshCw size={18} className={isRefreshing ? "animate-spin" : ""} />
+                <span className="hidden sm:inline">Refresh</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-500">
+            <Clock size={14} />
+            <span>Last update: {formatLastUpdate(lastRefresh)}</span>
+            {isRefreshing && (
+              <span className="flex items-center gap-1 text-amber-500">
+                <RefreshCw size={12} className="animate-spin" />
+                Updating...
+              </span>
+            )}
+          </div>
+          <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${
+            isPremium 
+              ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30' 
+              : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-400'
+          }`}>
+            {isPremium ? <Zap size={12} /> : <Clock size={12} />}
+            <span>Auto-refresh: {isPremium ? '1 min' : '5 min'}</span>
           </div>
         </div>
 

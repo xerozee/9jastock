@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
-import { connectToDatabase, PriceAlert } from '@/lib/mongodb';
+import { connectToDatabase, PriceAlert, User } from '@/lib/mongodb';
+import { isPremium } from '@/lib/subscription';
 
 export async function GET() {
   try {
@@ -75,15 +76,27 @@ export async function POST(request: NextRequest) {
 
     await connectToDatabase();
 
+    const user = await User.findById(userId);
+    const userIsPremium = isPremium(user);
+    const maxAlerts = userIsPremium ? 50 : 10;
+
     const existingAlerts = await PriceAlert.countDocuments({ 
       userId, 
       isActive: true, 
       triggered: false 
     });
 
-    if (existingAlerts >= 10) {
+    if (existingAlerts >= maxAlerts) {
       return NextResponse.json(
-        { success: false, error: 'Maximum 10 active alerts allowed. Please delete some alerts first.' },
+        { 
+          success: false, 
+          error: userIsPremium 
+            ? `Maximum ${maxAlerts} active alerts allowed. Please delete some alerts first.`
+            : `Free users can have up to ${maxAlerts} alerts. Upgrade to Premium for up to 50 alerts!`,
+          isPremiumRequired: !userIsPremium,
+          currentCount: existingAlerts,
+          maxAllowed: maxAlerts
+        },
         { status: 400 }
       );
     }

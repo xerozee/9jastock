@@ -40,6 +40,7 @@ interface XPost {
 }
 
 
+const NEWS_REFRESH_PREMIUM = 2 * 60 * 1000;
 const NEWS_REFRESH_AUTHENTICATED = 10 * 60 * 1000;
 const NEWS_REFRESH_GUEST = 6 * 60 * 60 * 1000;
 const GUEST_ARTICLE_LIMIT = 5;
@@ -53,7 +54,7 @@ const sentimentConfig = {
 
 export default function BlogPage() {
   const { isAuthenticated, isLoading: authLoading, login } = useAuth();
-  const { isPremium } = useSubscription();
+  const { isPremium, tier } = useSubscription();
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [xPosts, setXPosts] = useState<XPost[]>([]);
@@ -65,8 +66,13 @@ export default function BlogPage() {
   const [newsStats, setNewsStats] = useState<{ total: number; last24h: number; lastHour: number } | null>(null);
   const [nextRefresh, setNextRefresh] = useState<number>(0);
   const [isLive, setIsLive] = useState(false);
+  const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
 
-  const refreshInterval = isAuthenticated ? NEWS_REFRESH_AUTHENTICATED : NEWS_REFRESH_GUEST;
+  const refreshInterval = isPremium 
+    ? NEWS_REFRESH_PREMIUM 
+    : isAuthenticated 
+      ? NEWS_REFRESH_AUTHENTICATED 
+      : NEWS_REFRESH_GUEST;
 
   const fetchStocks = useCallback(async () => {
     try {
@@ -122,21 +128,29 @@ export default function BlogPage() {
     }
   }, []);
 
+  const stockRefreshInterval = isPremium 
+    ? 1 * 60 * 1000 
+    : isAuthenticated 
+      ? 5 * 60 * 1000 
+      : 6 * 60 * 60 * 1000;
+
+  const xRefreshInterval = isPremium ? 2 * 60 * 1000 : 10 * 60 * 1000;
+
   useEffect(() => {
     fetchStocks();
     fetchNews();
     if (isAuthenticated) {
       fetchXPosts();
     }
-    const stockInterval = setInterval(fetchStocks, isAuthenticated ? 5 * 60 * 1000 : 6 * 60 * 60 * 1000);
+    const stockInterval = setInterval(fetchStocks, stockRefreshInterval);
     const newsInterval = setInterval(() => fetchNews(), refreshInterval);
-    const xInterval = isAuthenticated ? setInterval(fetchXPosts, 10 * 60 * 1000) : null;
+    const xInterval = isAuthenticated ? setInterval(fetchXPosts, xRefreshInterval) : null;
     return () => {
       clearInterval(stockInterval);
       clearInterval(newsInterval);
       if (xInterval) clearInterval(xInterval);
     };
-  }, [fetchStocks, fetchNews, fetchXPosts, isAuthenticated, refreshInterval]);
+  }, [fetchStocks, fetchNews, fetchXPosts, isAuthenticated, isPremium, refreshInterval, stockRefreshInterval, xRefreshInterval]);
 
   const topPerformers = [...stocks]
     .filter(s => s.changePercent !== undefined)

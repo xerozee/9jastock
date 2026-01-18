@@ -17,6 +17,9 @@ function getBaseUrl(): string {
   return 'http://localhost:5000';
 }
 
+const isProduction = process.env.NODE_ENV === 'production';
+const useSecureCookies = process.env.NEXTAUTH_URL?.startsWith('https://') ?? true;
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -160,48 +163,48 @@ export const authOptions: NextAuthOptions = {
   },
   cookies: {
     sessionToken: {
-      name: "next-auth.session-token",
+      name: useSecureCookies ? "__Secure-next-auth.session-token" : "next-auth.session-token",
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: true,
+        secure: useSecureCookies,
       },
     },
     pkceCodeVerifier: {
-      name: "next-auth.pkce.code_verifier",
+      name: useSecureCookies ? "__Secure-next-auth.pkce.code_verifier" : "next-auth.pkce.code_verifier",
       options: {
         httpOnly: true,
         sameSite: "none",
         path: "/",
-        secure: true,
+        secure: useSecureCookies,
       },
     },
     state: {
-      name: "next-auth.state",
+      name: useSecureCookies ? "__Secure-next-auth.state" : "next-auth.state",
       options: {
         httpOnly: true,
         sameSite: "none",
         path: "/",
-        secure: true,
+        secure: useSecureCookies,
       },
     },
     callbackUrl: {
-      name: "next-auth.callback-url",
+      name: useSecureCookies ? "__Secure-next-auth.callback-url" : "next-auth.callback-url",
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: true,
+        secure: useSecureCookies,
       },
     },
     csrfToken: {
-      name: "next-auth.csrf-token",
+      name: useSecureCookies ? "__Host-next-auth.csrf-token" : "next-auth.csrf-token",
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: true,
+        secure: useSecureCookies,
       },
     },
   },

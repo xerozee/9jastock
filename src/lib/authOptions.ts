@@ -7,31 +7,11 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { generateAppleClientSecret } from "./appleClientSecret";
 
-function getBaseUrl(): string {
-  if (process.env.NEXTAUTH_URL) {
-    return process.env.NEXTAUTH_URL;
-  }
-  if (process.env.REPLIT_DEV_DOMAIN) {
-    return `https://${process.env.REPLIT_DEV_DOMAIN}`;
-  }
-  return 'http://localhost:5000';
-}
-
-const isProduction = process.env.NODE_ENV === 'production';
-const useSecureCookies = process.env.NEXTAUTH_URL?.startsWith('https://') ?? true;
-
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          prompt: "consent",
-          access_type: "offline",
-          response_type: "code"
-        }
-      }
     }),
     AppleProvider({
       clientId: process.env.APPLE_ID!,
@@ -163,51 +143,50 @@ export const authOptions: NextAuthOptions = {
   },
   cookies: {
     sessionToken: {
-      name: useSecureCookies ? "__Secure-next-auth.session-token" : "next-auth.session-token",
+      name: "next-auth.session-token",
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: useSecureCookies,
+        secure: true,
       },
     },
     pkceCodeVerifier: {
-      name: useSecureCookies ? "__Secure-next-auth.pkce.code_verifier" : "next-auth.pkce.code_verifier",
+      name: "next-auth.pkce.code_verifier",
       options: {
         httpOnly: true,
         sameSite: "none",
         path: "/",
-        secure: useSecureCookies,
+        secure: true,
       },
     },
     state: {
-      name: useSecureCookies ? "__Secure-next-auth.state" : "next-auth.state",
+      name: "next-auth.state",
       options: {
         httpOnly: true,
         sameSite: "none",
         path: "/",
-        secure: useSecureCookies,
+        secure: true,
       },
     },
     callbackUrl: {
-      name: useSecureCookies ? "__Secure-next-auth.callback-url" : "next-auth.callback-url",
+      name: "next-auth.callback-url",
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: useSecureCookies,
+        secure: true,
       },
     },
     csrfToken: {
-      name: useSecureCookies ? "__Host-next-auth.csrf-token" : "next-auth.csrf-token",
+      name: "next-auth.csrf-token",
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: useSecureCookies,
+        secure: true,
       },
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === 'development',
 };

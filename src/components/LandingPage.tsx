@@ -1,14 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   TrendingUp, TrendingDown, BarChart3, Bell, Briefcase, LineChart, 
   Shield, Zap, Globe, ArrowRight, CheckCircle, ChevronRight, Sparkles, 
   Smartphone, Play, Twitter, Brain, Crown, Download, PieChart, 
-  Newspaper, Target, Clock, MessageSquare, Star, CreditCard, Menu, X,
-  AlertTriangle, Eye, Search, HelpCircle, ChevronDown, ChevronUp,
-  Rocket, GraduationCap, Building2, Wallet, Users, Award, Heart, ArrowUp,
-  Calendar, TrendingUp as Trend, DollarSign, BookOpen
+  Newspaper, Target, Clock, MessageSquare, Star, CreditCard
 } from 'lucide-react';
 import Logo3D from './Logo3D';
 import Link from 'next/link';
@@ -21,18 +18,6 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
   const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 });
   const [activeCard, setActiveCard] = useState(0);
   const [activePlan, setActivePlan] = useState<'monthly' | 'yearly'>('monthly');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const visionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -49,196 +34,101 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
     });
   };
 
-  const scrollToVision = () => {
-    visionRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const painPoints = [
-    { icon: '😤', title: 'SCATTERED', desc: 'Your portfolio is in Excel, your news is on 5 different apps, your alerts are nowhere.' },
-    { icon: '📉', title: 'NO INSIGHTS', desc: 'You buy stocks based on tips from Twitter with no real analysis to back them up.' },
-    { icon: '🎓', title: 'NO GUIDANCE', desc: 'You want to learn but don\'t know where to start or who to trust.' },
-    { icon: '💸', title: 'MISSED OPPORTUNITIES', desc: 'Rights issues, dividends, and corporate actions happen without you knowing.' },
-    { icon: '🌍', title: 'LIMITED OPTIONS', desc: 'You know the real money is in global markets but have no easy way to access them.' },
-    { icon: '📊', title: 'COMPLEX DATA', desc: 'P/E ratios, RSI, MACD - what does it all mean and how do you use it?' },
-  ];
-
-  const currentFeatures = [
+  const features = [
     {
-      icon: BarChart3,
-      title: 'Real-Time NGX Data',
-      desc: 'All 145 actively traded stocks on the Nigerian Stock Exchange. Live prices, volume, market cap - updated every minute.',
-      bullets: ['Live market indices (ASI, NGX 30, Banking, Oil & Gas)', 'Top gainers, losers, and most active stocks', 'Sector-by-sector breakdown', '52-week highs and lows'],
-      gradient: 'from-[#008751] to-[#00a863]',
+      icon: TrendingUp,
+      title: 'Real-Time Prices',
+      description: 'Stop refreshing outdated websites. Get live prices for 145+ NGX stocks with auto-updates so you never miss a move.',
+      gradient: 'from-emerald-500 to-teal-600',
     },
     {
       icon: Brain,
-      title: 'AI-Powered Stock Analysis',
-      desc: 'Stop guessing. Let AI analyze stocks for you. Our AI examines technical indicators, fundamentals, news sentiment, and market conditions.',
-      bullets: ['Personalized recommendations based on YOUR profile', 'Clear Buy/Hold/Sell signals', 'Risk assessment for every stock', 'Daily AI insights delivered to you'],
+      title: 'Your Personal AI Advisor',
+      description: 'Not sure what to buy? Our AI learns your goals and risk appetite, then suggests stocks that actually match your investment style.',
       gradient: 'from-purple-500 to-pink-600',
     },
     {
-      icon: Briefcase,
-      title: 'Portfolio Tracking',
-      desc: 'Finally, ditch that Excel spreadsheet. Track all your holdings in one place.',
-      bullets: ['See real-time gains and losses', 'Multiple purchase tracking per stock', 'Cost basis and average price calculations', 'Share your portfolio with friends'],
-      gradient: 'from-cyan-500 to-blue-600',
+      icon: Twitter,
+      title: 'What People Are Saying',
+      description: 'See what Nigerian traders are discussing on X in real-time. Our AI reads the mood so you understand market sentiment instantly.',
+      gradient: 'from-blue-500 to-indigo-600',
     },
     {
       icon: Bell,
-      title: 'Price Alerts & News',
-      desc: 'Never miss a market move again. Set alerts for any price target.',
-      bullets: ['Get notified when stocks hit your buy/sell zones', 'Curated news from top Nigerian financial sources', 'Social sentiment from Twitter, Reddit, and TradingView', 'Push notifications to your phone'],
+      title: 'Never Miss Your Price',
+      description: 'Set it and forget it. Get instant push notifications the moment your stocks hit the prices you\'re waiting for.',
       gradient: 'from-orange-500 to-red-600',
     },
     {
-      icon: LineChart,
-      title: 'Professional Technical Analysis',
-      desc: 'Tools that professional traders use, now accessible to you.',
-      bullets: ['RSI, MACD, Bollinger Bands', 'Moving averages (SMA, EMA)', 'Volume analysis', 'Interactive TradingView charts'],
+      icon: Briefcase,
+      title: 'See Your Gains Grow',
+      description: 'Watch your money work. Track every stock you own, see your profit/loss in real-time, and share your wins with friends.',
+      gradient: 'from-cyan-500 to-blue-600',
+    },
+    {
+      icon: BarChart3,
+      title: 'Charts That Make Sense',
+      description: 'Professional charts with all the indicators serious traders use — RSI, MACD, Bollinger Bands — explained simply.',
       gradient: 'from-rose-500 to-pink-600',
+    },
+    {
+      icon: PieChart,
+      title: 'Know What You\'re Buying',
+      description: 'Dividends, P/E ratios, earnings — all the numbers that matter, laid out clearly so you can make confident decisions.',
+      gradient: 'from-amber-500 to-orange-600',
+    },
+    {
+      icon: Newspaper,
+      title: 'Morning Market Brief',
+      description: 'Wake up to an AI-written summary of everything that happened overnight. Nigerian market news, simplified and delivered to your inbox.',
+      gradient: 'from-teal-500 to-emerald-600',
     },
   ];
 
-  const comingSoonFeatures = [
-    { icon: Globe, title: 'Global Market Access', desc: 'Track your US stocks (Tesla, Apple, Amazon), UK stocks, and crypto - all in one unified portfolio view in Naira.', badge: 'Q2 2026' },
-    { icon: DollarSign, title: 'Dividend & Income Tracker', desc: 'Know exactly when dividends are coming and how much. Build an income-generating portfolio.', badge: 'Q1 2026' },
-    { icon: Calendar, title: 'Corporate Actions Hub', desc: 'Never miss a rights issue, bonus, or AGM again. Get alerts for all corporate actions.', badge: 'Q2 2026' },
-    { icon: Building2, title: 'Nigerian Economic Dashboard', desc: 'CBN rates, inflation tracking, FX rates, treasury yields - understand the big picture.', badge: 'Q2 2026' },
-    { icon: Target, title: 'Goal-Based Investing', desc: 'Save for retirement, a house, your children\'s education. Get portfolio recommendations based on your timeline.', badge: 'Q3 2026' },
-    { icon: GraduationCap, title: 'Investment Academy', desc: 'Learn to invest like a pro - for free. Stock Investing 101, financial statements, technical analysis basics.', badge: 'Q2 2026' },
-    { icon: Zap, title: 'Direct Broker Integration', desc: 'One day, you\'ll buy stocks directly from 9jastock. Analysis → Decision → Trade → Track. All in one place.', badge: 'FUTURE' },
-  ];
-
   const stockCards = [
-    { symbol: 'DANGCEM', name: 'Dangote Cement', price: 290.50, change: 2.45 },
-    { symbol: 'GTCO', name: 'GTBank Holdings', price: 45.80, change: 1.23 },
-    { symbol: 'ZENITH', name: 'Zenith Bank', price: 38.90, change: -0.82 },
+    { symbol: 'DANGCEM', name: 'Dangote Cement', price: 290.50, change: 2.45, color: 'emerald' },
+    { symbol: 'GTCO', name: 'GTBank Holdings', price: 45.80, change: 1.23, color: 'blue' },
+    { symbol: 'ZENITH', name: 'Zenith Bank', price: 38.90, change: -0.82, color: 'red' },
   ];
 
   const stats = [
-    { value: '145+', label: 'NGX Stocks' },
-    { value: '1min', label: 'Refresh Rate' },
-    { value: '24/7', label: 'AI Analysis' },
-    { value: '#1', label: 'NGX Platform' },
+    { value: '145+', label: 'Nigerian Stocks Tracked', icon: '📈' },
+    { value: 'Live', label: 'Auto-Refreshing Data', icon: '⚡' },
+    { value: 'AI', label: 'Powered Insights', icon: '🧠' },
+    { value: 'Only', label: 'NGX AI Platform', icon: '🏆' },
   ];
 
   const testimonials = [
     {
-      quote: 'I finally understand my portfolio. The AI analysis helped me see why DANGCEM was a better pick than what my colleague was recommending.',
-      name: 'Adaeze O.',
-      title: 'Software Developer, Lagos',
-      detail: 'Using 9jastock for 3 months',
+      name: 'Chidi O.',
+      role: 'First-time Investor, Lagos',
+      text: 'I was intimidated by the stock market until I found 9jaStock. The AI told me exactly which dividend stocks matched my goals. Now I actually understand what I\'m investing in.',
+      rating: 5,
     },
     {
-      quote: 'The price alerts saved me. I set an alert for GTCO at ₦28 and bought in. It\'s now at ₦41. That single trade paid for years of subscription.',
-      name: 'Emeka N.',
-      title: 'Banker, Abuja',
-      detail: 'Pro subscriber',
+      name: 'Amaka N.',
+      role: 'Day Trader, Port Harcourt',
+      text: 'I used to check three different websites for prices. Now I just open 9jaStock. The price alerts saved me last week when GTCO hit my target while I was in a meeting.',
+      rating: 5,
     },
     {
-      quote: 'As someone in diaspora, I can finally track my NGX investments properly. Can\'t wait for them to add US stocks too!',
-      name: 'Yusuf A.',
-      title: 'Engineer, London',
-      detail: 'Using 9jastock for 6 months',
-    },
-  ];
-
-  const faqs = [
-    {
-      q: 'Is 9jastock a stockbroker? Can I buy stocks through you?',
-      a: 'No, 9jastock is not a stockbroker. We are an investment intelligence platform that helps you analyze, track, and make better decisions. To buy stocks, you\'ll still need a licensed stockbroker. We\'re working on broker integrations for the future.',
-    },
-    {
-      q: 'How accurate is the stock data?',
-      a: 'Our data comes from TradingView and Yahoo Finance - the same sources used by professional traders worldwide. Premium users get 5-minute updates, Pro users get 1-minute real-time data.',
-    },
-    {
-      q: 'What happens after my 7-day trial?',
-      a: 'You\'ll be charged for your selected plan (monthly or annual). You can cancel anytime before the trial ends and you won\'t be charged.',
-    },
-    {
-      q: 'Can I track stocks from other countries?',
-      a: 'Not yet - but it\'s coming! We\'re building global market support (US, UK, crypto) which will launch in the coming months. Subscribe now and you\'ll get it when it\'s ready at no extra cost.',
-    },
-    {
-      q: 'Is my data safe?',
-      a: 'Yes. We use bank-level encryption, never share your data with third parties, and comply with Nigerian Data Protection Regulation (NDPR).',
-    },
-    {
-      q: 'What payment methods do you accept?',
-      a: 'We accept all Nigerian bank cards, bank transfers via Paystack, and international cards via Stripe.',
-    },
-    {
-      q: 'Can I get a refund?',
-      a: 'If you\'re not satisfied within the first 30 days of your paid subscription, contact us for a full refund. No questions asked.',
-    },
-    {
-      q: 'Is this financial advice?',
-      a: 'No. 9jastock provides information and tools for educational purposes. Always do your own research and consult a licensed financial advisor before making investment decisions.',
+      name: 'Emeka K.',
+      role: 'Investment Club Lead, Abuja',
+      text: 'Our investment club uses the portfolio sharing feature to track our group investments. The X sentiment analysis helps us see what the market is feeling before we make decisions.',
+      rating: 5,
     },
   ];
 
   return (
     <div className="min-h-screen bg-slate-950 overflow-hidden" onMouseMove={handleMouseMove}>
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-slate-950/95 backdrop-blur-xl shadow-lg shadow-black/20 border-b border-slate-800' : 'bg-transparent'
-      }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4">
-            <Logo3D size="lg" variant="full" animated={!scrolled} />
-            
-            <div className="hidden md:flex items-center gap-6">
-              <button onClick={scrollToVision} className="text-slate-300 hover:text-white transition-colors text-sm font-medium">
-                What&apos;s Coming
-              </button>
-              <Link href="/pricing" className="text-slate-300 hover:text-white transition-colors text-sm font-medium">
-                Pricing
-              </Link>
-              <Link href="/login" className="px-4 py-2 text-slate-300 hover:text-white font-medium transition-colors">
-                Sign In
-              </Link>
-              <Link href="/signup" className="px-5 py-2.5 bg-gradient-to-r from-[#008751] to-emerald-500 hover:from-[#006741] hover:to-emerald-600 text-white font-semibold rounded-xl transition-all hover:scale-105 shadow-lg shadow-emerald-500/25">
-                Start Free Trial
-              </Link>
-            </div>
-
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-slate-300 hover:text-white"
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-        </div>
-
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-slate-950/98 backdrop-blur-xl border-t border-slate-800">
-            <div className="px-4 py-6 space-y-4">
-              <button onClick={() => { scrollToVision(); setMobileMenuOpen(false); }} className="block w-full text-left text-slate-300 hover:text-white py-2">
-                What&apos;s Coming
-              </button>
-              <Link href="/pricing" className="block text-slate-300 hover:text-white py-2" onClick={() => setMobileMenuOpen(false)}>
-                Pricing
-              </Link>
-              <Link href="/login" className="block text-slate-300 hover:text-white py-2" onClick={() => setMobileMenuOpen(false)}>
-                Sign In
-              </Link>
-              <Link href="/signup" className="block w-full text-center px-5 py-3 bg-gradient-to-r from-[#008751] to-emerald-500 text-white font-semibold rounded-xl" onClick={() => setMobileMenuOpen(false)}>
-                Start Free Trial
-              </Link>
-            </div>
-          </div>
-        )}
-      </nav>
-
-      <section className="relative min-h-screen flex flex-col pt-20">
+      <section className="relative min-h-screen flex flex-col">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
+          
           <div 
             className="absolute w-[800px] h-[800px] rounded-full blur-[150px] transition-all duration-[2000ms] pointer-events-none"
             style={{
-              background: 'radial-gradient(circle, rgba(0,135,81,0.2) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%)',
               left: `${mousePosition.x * 50}%`,
               top: `${mousePosition.y * 50}%`,
             }}
@@ -246,66 +136,100 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
           <div 
             className="absolute w-[600px] h-[600px] rounded-full blur-[120px] transition-all duration-[1500ms] pointer-events-none"
             style={{
-              background: 'radial-gradient(circle, rgba(252,209,22,0.1) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(45,212,191,0.1) 0%, transparent 70%)',
               right: `${(1 - mousePosition.x) * 30}%`,
               bottom: `${(1 - mousePosition.y) * 30}%`,
             }}
           />
+          
+          <div 
+            className="absolute inset-0 opacity-30"
+            style={{
+              backgroundImage: `radial-gradient(circle at 1px 1px, rgba(16,185,129,0.15) 1px, transparent 0)`,
+              backgroundSize: '40px 40px',
+            }}
+          />
         </div>
+
+        <nav className="relative z-50 w-full">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between py-4 md:py-6">
+              <Logo3D size="lg" variant="full" animated={true} />
+              <div className="flex items-center gap-2 md:gap-4">
+                <Link
+                  href="/login"
+                  className="px-3 md:px-5 py-2 md:py-2.5 text-slate-300 hover:text-white font-medium transition-colors text-sm md:text-base"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  className="px-4 md:px-6 py-2 md:py-2.5 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white font-semibold rounded-xl transition-all hover:scale-105 shadow-lg shadow-emerald-500/25 text-sm md:text-base"
+                >
+                  Get Started
+                </Link>
+              </div>
+            </div>
+          </div>
+        </nav>
 
         <div className="relative flex-1 flex items-center">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 w-full">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               <div className="text-center lg:text-left order-2 lg:order-1">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#008751]/10 backdrop-blur-sm rounded-full text-[#00a863] text-sm mb-8 border border-[#008751]/20">
-                  <Sparkles size={14} />
-                  <span className="font-medium">Nigeria&apos;s #1 AI-Powered Stock Platform</span>
+                <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-emerald-500/10 backdrop-blur-sm rounded-full text-emerald-400 text-xs md:text-sm mb-6 md:mb-8 border border-emerald-500/20">
+                  <Sparkles size={14} className="animate-pulse" />
+                  <span className="font-medium">AI-Powered • Real-Time Data • 145+ Stocks</span>
+                  <div className="relative">
+                    <div className="w-2 h-2 bg-emerald-400 rounded-full" />
+                    <div className="absolute inset-0 w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
+                  </div>
                 </div>
                 
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight mb-6">
-                  The Smartest Way to Invest in
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-4 md:mb-6 leading-[1.1] tracking-tight">
+                  Invest in Nigeria
                   <br />
                   <span className="relative inline-block">
-                    <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#008751] via-[#00a863] to-[#FCD116]">
-                      Nigeria&apos;s Future
+                    <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-green-300 to-teal-400">
+                      With Confidence
                     </span>
-                    <span className="absolute inset-0 bg-gradient-to-r from-[#008751]/30 via-[#00a863]/30 to-[#FCD116]/30 blur-2xl" />
+                    <span className="absolute inset-0 bg-gradient-to-r from-emerald-400/30 via-green-300/30 to-teal-400/30 blur-2xl" />
                   </span>
                 </h1>
                 
-                <p className="text-lg md:text-xl text-slate-300 max-w-xl mb-8 leading-relaxed mx-auto lg:mx-0">
-                  Real-time NGX data. AI-powered analysis. Your complete investment companion - today and tomorrow.
+                <p className="text-base md:text-lg lg:text-xl text-slate-300 max-w-xl mb-6 md:mb-8 leading-relaxed mx-auto lg:mx-0">
+                  Finally, a stock tracker built for Nigerians. 
+                  <span className="text-emerald-400 font-medium"> Real-time prices</span>,
+                  <span className="text-purple-400 font-medium"> AI that explains what to buy</span>, 
+                  <span className="text-blue-400 font-medium"> alerts when your stocks move</span> — all in one beautiful app.
                 </p>
                 
-                <div className="flex flex-col sm:flex-row items-center gap-4 lg:justify-start justify-center mb-6">
+                <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4 lg:justify-start justify-center mb-8 md:mb-10">
                   <Link
-                    href="/signup"
-                    className="group relative w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-[#008751] to-[#00a863] text-white font-bold rounded-2xl shadow-2xl shadow-[#008751]/30 hover:shadow-[#008751]/50 hover:scale-105 transition-all duration-300 overflow-hidden"
+                    href="/pricing"
+                    className="group relative w-full sm:w-auto flex items-center justify-center gap-3 px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-2xl shadow-2xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-105 transition-all duration-300 overflow-hidden"
                   >
-                    <span className="relative flex items-center gap-2">
-                      Start 7-Day Free Trial
+                    <span className="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <span className="relative flex items-center gap-2 text-sm md:text-base">
+                      Get Premium Access
                       <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                     </span>
                   </Link>
                   
-                  <button
-                    onClick={scrollToVision}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-4 text-slate-300 hover:text-white font-medium rounded-2xl border border-slate-700/50 hover:border-[#FCD116]/50 hover:bg-slate-800/50 backdrop-blur-sm transition-all"
+                  <Link
+                    href="/stocks"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 md:px-6 py-3 md:py-4 text-slate-300 hover:text-white font-medium rounded-2xl border border-slate-700/50 hover:border-slate-600 hover:bg-slate-800/50 backdrop-blur-sm transition-all text-sm md:text-base"
                   >
-                    <Rocket size={16} className="text-[#FCD116]" />
-                    See What&apos;s Coming
-                  </button>
+                    <Play size={16} className="text-emerald-400" />
+                    Explore Stocks
+                  </Link>
                 </div>
                 
-                <p className="text-sm text-slate-500 mb-8">
-                  ✓ No payment required to explore  ✓ Cancel anytime
-                </p>
-                
-                <div className="grid grid-cols-4 gap-4 max-w-md mx-auto lg:mx-0">
-                  {stats.map((stat, i) => (
-                    <div key={i} className="text-center">
-                      <div className="text-xl md:text-2xl font-black text-white">{stat.value}</div>
-                      <div className="text-xs text-slate-400">{stat.label}</div>
+                <div className="flex flex-wrap items-center gap-4 md:gap-6 text-xs md:text-sm text-slate-400 lg:justify-start justify-center">
+                  {['No competitor in Nigeria', 'Cancel anytime', 'Install as app'].map((text, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <CheckCircle size={14} className="text-emerald-500" />
+                      <span>{text}</span>
                     </div>
                   ))}
                 </div>
@@ -313,55 +237,112 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
               
               <div className="relative order-1 lg:order-2 flex justify-center lg:justify-end">
                 <div className="relative w-full max-w-md lg:max-w-none">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-[#008751]/20 to-[#FCD116]/10 rounded-3xl blur-3xl" />
+                  <div 
+                    className="absolute inset-0 bg-gradient-to-tr from-emerald-500/20 to-transparent rounded-3xl blur-3xl transition-all duration-1000"
+                    style={{
+                      transform: `translate(${(mousePosition.x - 0.5) * 20}px, ${(mousePosition.y - 0.5) * 20}px)`,
+                    }}
+                  />
                   
-                  <div className="relative space-y-4">
-                    {stockCards.map((stock, i) => (
-                      <div
-                        key={stock.symbol}
-                        className={`
-                          relative p-5 rounded-2xl backdrop-blur-xl border transition-all duration-500
-                          ${activeCard === i 
-                            ? 'bg-slate-800/80 border-[#008751]/50 scale-105 shadow-xl shadow-[#008751]/10' 
-                            : 'bg-slate-900/60 border-slate-700/50 scale-100'
-                          }
-                        `}
-                      >
+                  <div className="relative perspective-1000">
+                    <div 
+                      className="transform-gpu transition-transform duration-300"
+                      style={{
+                        transform: `rotateY(${(mousePosition.x - 0.5) * 10}deg) rotateX(${(mousePosition.y - 0.5) * -10}deg)`,
+                      }}
+                    >
+                      <div className="space-y-3 md:space-y-4">
+                        {stockCards.map((stock, i) => (
+                          <div
+                            key={stock.symbol}
+                            className={`
+                              relative p-4 md:p-5 rounded-2xl md:rounded-3xl backdrop-blur-xl border transition-all duration-500
+                              ${activeCard === i 
+                                ? 'bg-slate-800/80 border-emerald-500/50 scale-105 shadow-xl shadow-emerald-500/10' 
+                                : 'bg-slate-900/60 border-slate-700/50 scale-100'
+                              }
+                            `}
+                            style={{
+                              transform: `translateZ(${activeCard === i ? '30px' : '0'}) translateY(${activeCard === i ? '-5px' : '0'})`,
+                            }}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3 md:gap-4">
+                                <div className={`
+                                  w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center font-bold text-white text-xs md:text-sm
+                                  ${stock.change >= 0 ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-gradient-to-br from-red-500 to-rose-600'}
+                                  ${activeCard === i ? 'shadow-lg animate-pulse' : ''}
+                                `}
+                                style={{ animationDuration: '3s' }}
+                                >
+                                  {stock.symbol.slice(0, 2)}
+                                </div>
+                                <div>
+                                  <div className="font-bold text-white text-sm md:text-base">{stock.symbol}</div>
+                                  <div className="text-xs md:text-sm text-slate-400">{stock.name}</div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-bold text-white text-sm md:text-lg">₦{stock.price.toFixed(2)}</div>
+                                <div className={`flex items-center gap-1 text-xs md:text-sm font-semibold ${stock.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  {stock.change >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                                  {stock.change >= 0 ? '+' : ''}{stock.change}%
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {activeCard === i && (
+                              <div className="absolute -inset-px rounded-2xl md:rounded-3xl bg-gradient-to-r from-emerald-500/20 via-transparent to-teal-500/20 pointer-events-none" />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      
+                      <div className="mt-4 md:mt-6 p-4 md:p-5 rounded-2xl md:rounded-3xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 backdrop-blur-xl">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className={`
-                              w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-white text-sm
-                              ${stock.change >= 0 ? 'bg-gradient-to-br from-[#008751] to-[#00a863]' : 'bg-gradient-to-br from-red-500 to-rose-600'}
-                            `}>
-                              {stock.symbol.slice(0, 2)}
-                            </div>
-                            <div>
-                              <div className="font-bold text-white">{stock.symbol}</div>
-                              <div className="text-sm text-slate-400">{stock.name}</div>
-                            </div>
+                          <div>
+                            <div className="text-xs md:text-sm text-slate-400 mb-1">Portfolio Value</div>
+                            <div className="text-xl md:text-2xl font-black text-white">₦4,250,000</div>
                           </div>
                           <div className="text-right">
-                            <div className="font-bold text-white">₦{stock.price.toFixed(2)}</div>
-                            <div className={`text-sm font-medium flex items-center gap-1 justify-end ${
-                              stock.change >= 0 ? 'text-[#00a863]' : 'text-red-400'
-                            }`}>
-                              {stock.change >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                              {stock.change >= 0 ? '+' : ''}{stock.change}%
-                            </div>
+                            <div className="text-xs md:text-sm text-slate-400 mb-1">Today</div>
+                            <div className="text-base md:text-lg font-bold text-emerald-400">+₦125,400</div>
+                            <div className="text-xs text-emerald-400/80">+3.04%</div>
                           </div>
                         </div>
                       </div>
-                    ))}
-                    
-                    <div className="relative p-5 rounded-2xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-xl border border-purple-500/30">
-                      <div className="flex items-center gap-3">
-                        <Brain size={24} className="text-purple-400" />
-                        <div>
-                          <div className="text-xs text-purple-300">AI Recommendation</div>
-                          <div className="text-white font-bold">DANGCEM: Strong Buy</div>
+                    </div>
+                  </div>
+                  
+                  <div className="absolute -top-4 -right-4 md:-top-6 md:-right-6 hidden sm:block">
+                    <div 
+                      className="bg-slate-800/90 backdrop-blur-xl rounded-xl md:rounded-2xl p-3 md:p-4 border border-slate-700/50 shadow-xl animate-float"
+                      style={{ animationDelay: '0s' }}
+                    >
+                      <div className="flex items-center gap-2 md:gap-3">
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-500/20 rounded-lg md:rounded-xl flex items-center justify-center">
+                          <Twitter size={14} className="text-blue-400" />
                         </div>
-                        <div className="ml-auto px-3 py-1 bg-[#00a863]/20 text-[#00a863] text-xs font-bold rounded-full">
-                          +18% potential
+                        <div>
+                          <div className="text-[10px] md:text-xs text-slate-400">Market Sentiment</div>
+                          <div className="text-xs md:text-sm font-bold text-emerald-400">Bullish 📈</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="absolute -bottom-2 -left-2 md:-bottom-4 md:-left-4 hidden sm:block">
+                    <div 
+                      className="bg-slate-800/90 backdrop-blur-xl rounded-xl md:rounded-2xl p-3 md:p-4 border border-slate-700/50 shadow-xl animate-float"
+                      style={{ animationDelay: '1.5s' }}
+                    >
+                      <div className="flex items-center gap-2 md:gap-3">
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-orange-500/20 rounded-lg md:rounded-xl flex items-center justify-center">
+                          <Bell size={14} className="text-orange-400" />
+                        </div>
+                        <div>
+                          <div className="text-[10px] md:text-xs text-slate-400">Price Alert</div>
+                          <div className="text-xs md:text-sm font-bold text-orange-400">MTNN ₦200 🎯</div>
                         </div>
                       </div>
                     </div>
@@ -371,464 +352,486 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
             </div>
           </div>
         </div>
-        
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <ChevronDown size={24} className="text-slate-500" />
+
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none" />
+      </section>
+
+      <section className="relative py-3 md:py-4 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-y border-slate-700/50 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-emerald-500/5" />
+        <div className="flex animate-scroll">
+          <div className="flex items-center gap-6 md:gap-12 px-4 md:px-6 whitespace-nowrap">
+            {[...stockCards, ...stockCards, ...stockCards, ...stockCards].map((stock, i) => (
+              <div key={i} className="flex items-center gap-2 md:gap-3 py-2">
+                <div className={`w-5 h-5 md:w-6 md:h-6 rounded flex items-center justify-center text-[8px] md:text-[10px] font-bold ${stock.change >= 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                  {stock.symbol.slice(0, 2)}
+                </div>
+                <span className="font-semibold text-white text-xs md:text-sm">{stock.symbol}</span>
+                <span className="text-slate-400 text-xs md:text-sm">₦{stock.price.toFixed(2)}</span>
+                <span className={`text-xs md:text-sm ${stock.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {stock.change >= 0 ? '+' : ''}{stock.change}%
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="relative py-20 md:py-28 bg-slate-900/50">
+      <section className="relative py-16 md:py-24 bg-slate-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4">
-              Investing in Nigeria is Hard.
-              <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#008751] to-[#FCD116]">
-                We&apos;re Here to Change That.
-              </span>
-            </h2>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {painPoints.map((point, i) => (
-              <div key={i} className="p-6 rounded-2xl bg-slate-800/50 border border-slate-700/50 hover:border-red-500/30 transition-all">
-                <div className="text-3xl mb-3">{point.icon}</div>
-                <h3 className="font-bold text-red-400 mb-2">{point.title}</h3>
-                <p className="text-sm text-slate-400">{point.desc}</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-16 md:mb-20">
+            {stats.map((stat, i) => (
+              <div
+                key={i}
+                className="group relative p-4 md:p-6 rounded-xl md:rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-emerald-500/50 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-emerald-500/5 rounded-xl md:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative text-center md:text-left">
+                  <div className="text-2xl md:text-3xl mb-1 md:mb-2">{stat.icon}</div>
+                  <div className="text-2xl md:text-4xl font-black text-white mb-0.5 md:mb-1">{stat.value}</div>
+                  <div className="text-xs md:text-sm text-slate-400">{stat.label}</div>
+                </div>
               </div>
             ))}
           </div>
           
-          <div className="mt-12 text-center">
-            <blockquote className="text-lg italic text-slate-300">
-              &ldquo;I was tired of checking 5 apps just to understand what&apos;s happening with my stocks.&rdquo;
-            </blockquote>
-            <p className="text-sm text-slate-500 mt-2">- Chidi, Lagos</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative py-20 md:py-28 bg-slate-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#008751]/10 rounded-full text-[#00a863] text-sm mb-4">
-              <CheckCircle size={14} />
-              <span className="font-medium">Available Now</span>
+          <div className="text-center mb-10 md:mb-16">
+            <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-emerald-500/10 rounded-full text-emerald-400 text-xs md:text-sm mb-3 md:mb-4">
+              <Zap size={12} />
+              <span className="font-medium">Built for You</span>
             </div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4">
-              Everything You Need.
-              <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#008751] to-[#00a863]">
-                One Powerful App.
-              </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 md:mb-4">
+              Stop Guessing, Start Knowing
             </h2>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-              9jastock brings together market data, AI analysis, portfolio tracking, and financial education - finally.
+            <p className="text-sm md:text-lg text-slate-400 max-w-2xl mx-auto px-4">
+              Whether you&apos;re just starting or managing millions — 9jaStock gives you the tools the pros use, made simple for everyone
             </p>
           </div>
           
-          <div className="space-y-16">
-            {currentFeatures.map((feature, i) => (
-              <div key={i} className={`grid lg:grid-cols-2 gap-8 items-center ${i % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}>
-                <div className={i % 2 === 1 ? 'lg:order-2' : ''}>
-                  <div className={`inline-flex p-3 rounded-2xl bg-gradient-to-r ${feature.gradient} mb-4`}>
-                    <feature.icon size={24} className="text-white" />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {features.map((feature, i) => {
+              const Icon = feature.icon;
+              return (
+                <div
+                  key={i}
+                  className="group relative p-5 md:p-6 rounded-2xl md:rounded-3xl bg-slate-900/50 border border-slate-800 hover:border-emerald-500/30 transition-all duration-300 hover:-translate-y-2 overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  
+                  <div className={`relative inline-flex p-3 md:p-4 rounded-xl md:rounded-2xl bg-gradient-to-br ${feature.gradient} mb-4 md:mb-5 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                    <Icon size={20} className="text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">{feature.title}</h3>
-                  <p className="text-slate-400 mb-4">{feature.desc}</p>
-                  <ul className="space-y-2">
-                    {feature.bullets.map((bullet, j) => (
-                      <li key={j} className="flex items-center gap-3 text-sm text-slate-300">
-                        <CheckCircle size={14} className="text-[#00a863] flex-shrink-0" />
-                        {bullet}
-                      </li>
-                    ))}
-                  </ul>
+                  <h3 className="text-base md:text-lg font-bold text-white mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-xs md:text-sm text-slate-400 leading-relaxed">
+                    {feature.description}
+                  </p>
                 </div>
-                <div className={`relative h-64 rounded-2xl bg-slate-800/50 border border-slate-700/50 flex items-center justify-center ${i % 2 === 1 ? 'lg:order-1' : ''}`}>
-                  <feature.icon size={64} className="text-slate-600" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-800/80 to-transparent rounded-2xl" />
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <div className="text-xs text-slate-400">Screenshot coming soon</div>
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
-      <section ref={visionRef} className="relative py-20 md:py-28 bg-gradient-to-b from-slate-900 to-slate-950">
+      <section className="relative py-16 md:py-24 bg-gradient-to-b from-slate-950 to-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#FCD116]/10 rounded-full text-[#FCD116] text-sm mb-4">
-              <Rocket size={14} />
-              <span className="font-medium">Coming Soon</span>
+          <div className="text-center mb-10 md:mb-16">
+            <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-purple-500/10 rounded-full text-purple-400 text-xs md:text-sm mb-3 md:mb-4">
+              <Brain size={12} />
+              <span className="font-medium">AI That Actually Helps</span>
             </div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4">
-              This is Just the Beginning.
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 md:mb-4">
+              Your Smart Investment Partner
             </h2>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-              We&apos;re building the future of investing for every Nigerian. The Nigerian Stock Exchange is where we start - but it&apos;s not where we stop.
+            <p className="text-sm md:text-lg text-slate-400 max-w-2xl mx-auto px-4">
+              No more reading hundreds of articles or asking friends for stock tips. Our AI does the hard work and explains everything in plain language
             </p>
           </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {comingSoonFeatures.map((feature, i) => (
-              <div key={i} className="relative p-6 rounded-2xl bg-slate-800/30 border border-slate-700/50 hover:border-[#FCD116]/30 transition-all group">
-                <div className="absolute top-4 right-4">
-                  <span className={`px-2 py-1 text-xs font-bold rounded-full ${
-                    feature.badge === 'FUTURE' 
-                      ? 'bg-purple-500/20 text-purple-400' 
-                      : 'bg-[#FCD116]/20 text-[#FCD116]'
-                  }`}>
-                    {feature.badge}
-                  </span>
-                </div>
-                <div className="p-3 rounded-xl bg-[#FCD116]/10 w-fit mb-4 group-hover:bg-[#FCD116]/20 transition-colors">
-                  <feature.icon size={24} className="text-[#FCD116]" />
-                </div>
-                <h3 className="font-bold text-white mb-2">{feature.title}</h3>
-                <p className="text-sm text-slate-400">{feature.desc}</p>
+
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+            <div className="relative p-6 md:p-8 rounded-2xl md:rounded-3xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-4 md:mb-6">
+                <Target size={24} className="text-white" />
               </div>
-            ))}
-          </div>
-          
-          <div className="text-center">
-            <div className="inline-block p-8 rounded-3xl bg-gradient-to-r from-[#008751]/20 to-[#FCD116]/20 border border-[#008751]/30">
-              <Crown size={32} className="text-[#FCD116] mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-white mb-2">Become a Founding Member</h3>
-              <p className="text-slate-400 mb-6 max-w-md">
-                Early subscribers get lifetime benefits and help shape what we build next.
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-3">Stocks Picked Just for You</h3>
+              <p className="text-sm md:text-base text-slate-300 mb-4">
+                Tell us your goals — saving for retirement? Building passive income? The AI finds Nigerian stocks that match YOUR situation, not generic advice.
               </p>
-              <Link href="/signup" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#008751] to-[#00a863] text-white font-bold rounded-xl hover:scale-105 transition-transform">
-                Start Your Free Trial
-                <ArrowRight size={16} />
-              </Link>
+              <ul className="space-y-2 text-sm text-slate-400">
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-purple-400" /> "I want steady dividends" — sorted</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-purple-400" /> "I'm new, keep it safe" — we've got you</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-purple-400" /> "High risk, high reward" — let's go</li>
+              </ul>
+            </div>
+
+            <div className="relative p-6 md:p-8 rounded-2xl md:rounded-3xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/20">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mb-4 md:mb-6">
+                <MessageSquare size={24} className="text-white" />
+              </div>
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-3">Feel the Market Mood</h3>
+              <p className="text-sm md:text-base text-slate-300 mb-4">
+                What are Nigerian traders saying on X right now? Are they excited or worried? Our AI reads thousands of posts so you don't have to.
+              </p>
+              <ul className="space-y-2 text-sm text-slate-400">
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-blue-400" /> Live sentiment: Bullish or Bearish?</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-blue-400" /> Top Nigerian finance voices tracked</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-blue-400" /> See buzz before price moves</li>
+              </ul>
+            </div>
+
+            <div className="relative p-6 md:p-8 rounded-2xl md:rounded-3xl bg-gradient-to-br from-teal-500/10 to-emerald-500/10 border border-teal-500/20">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center mb-4 md:mb-6">
+                <Newspaper size={24} className="text-white" />
+              </div>
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-3">Start Your Day Informed</h3>
+              <p className="text-sm md:text-base text-slate-300 mb-4">
+                No time to read 10 news sites? Our AI reads them for you and sends a 2-minute summary straight to your inbox every morning.
+              </p>
+              <ul className="space-y-2 text-sm text-slate-400">
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-teal-400" /> Key news from trusted sources</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-teal-400" /> What moved and why</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-teal-400" /> What to watch today</li>
+              </ul>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="relative py-20 md:py-28 bg-slate-950">
+      <section className="relative py-16 md:py-24 bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
-              Why Join 9jastock Today?
-            </h2>
-          </div>
-          
-          <div className="grid lg:grid-cols-2 gap-8 mb-12">
-            <div className="p-8 rounded-3xl bg-gradient-to-br from-[#FCD116]/10 to-[#008751]/10 border border-[#FCD116]/30">
-              <div className="flex items-center gap-3 mb-6">
-                <Award size={32} className="text-[#FCD116]" />
-                <h3 className="text-2xl font-bold text-white">Founding Member Benefits</h3>
-              </div>
-              <p className="text-slate-300 mb-6">The first 500 subscribers become Founding Members with:</p>
-              <ul className="space-y-3 mb-6">
-                {[
-                  'Price locked forever - never pay more even as we add features',
-                  'Early access to new features before public release',
-                  'Direct input into our product roadmap',
-                  'Founding Member badge on your profile',
-                  'Exclusive Founding Members community group',
-                ].map((benefit, i) => (
-                  <li key={i} className="flex items-center gap-3 text-slate-300">
-                    <CheckCircle size={16} className="text-[#FCD116] flex-shrink-0" />
-                    {benefit}
-                  </li>
-                ))}
-              </ul>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/20 rounded-full text-red-400 text-sm font-bold">
-                🔥 217 founding member spots remaining
-              </div>
+          <div className="text-center mb-10 md:mb-16">
+            <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-orange-500/10 rounded-full text-orange-400 text-xs md:text-sm mb-3 md:mb-4">
+              <Bell size={12} />
+              <span className="font-medium">Set It, Forget It</span>
             </div>
-            
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 md:mb-4">
+              Your Stocks, Your Rules
+            </h2>
+            <p className="text-sm md:text-lg text-slate-400 max-w-2xl mx-auto px-4">
+              You shouldn&apos;t have to stare at your phone all day. Set your targets and we&apos;ll notify you the moment something happens
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             <div className="space-y-6">
-              {[
-                { icon: '📈', title: 'START SMALL, WIN BIG', desc: 'NGX may be small but it\'s where legends like Dangote started. Build your foundation here.' },
-                { icon: '🧠', title: 'LEARN AS YOU GO', desc: 'Use 9jastock to learn investing fundamentals. Master the basics before going global.' },
-                { icon: '🚀', title: 'GROW WITH US', desc: 'As we add global markets, your skills transfer. You\'ll be ready for US, UK, and global stocks.' },
-              ].map((card, i) => (
-                <div key={i} className="p-6 rounded-2xl bg-slate-800/50 border border-slate-700/50">
-                  <div className="text-2xl mb-2">{card.icon}</div>
-                  <h3 className="font-bold text-white mb-2">{card.title}</h3>
-                  <p className="text-sm text-slate-400">{card.desc}</p>
+              <div className="flex gap-4 p-4 md:p-5 rounded-2xl bg-slate-800/50 border border-slate-700/50 hover:border-orange-500/30 transition-colors">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                  <Target size={20} className="text-orange-400" />
                 </div>
-              ))}
+                <div>
+                  <h4 className="font-bold text-white mb-1">"Tell me when DANGCEM hits ₦300"</h4>
+                  <p className="text-sm text-slate-400">Set any price target. We'll ping you the second it happens.</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4 p-4 md:p-5 rounded-2xl bg-slate-800/50 border border-slate-700/50 hover:border-emerald-500/30 transition-colors">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                  <Clock size={20} className="text-emerald-400" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white mb-1">"How did I do today?"</h4>
+                  <p className="text-sm text-slate-400">Get a daily summary of your portfolio performance without opening the app.</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4 p-4 md:p-5 rounded-2xl bg-slate-800/50 border border-slate-700/50 hover:border-red-500/30 transition-colors">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                  <Zap size={20} className="text-red-400" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white mb-1">"Something big is happening"</h4>
+                  <p className="text-sm text-slate-400">Major announcements, earnings reports, market news — know first.</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4 p-4 md:p-5 rounded-2xl bg-slate-800/50 border border-slate-700/50 hover:border-blue-500/30 transition-colors">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                  <Star size={20} className="text-blue-400" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white mb-1">"My watchlist moved"</h4>
+                  <p className="text-sm text-slate-400">Stocks you're watching jumped or dropped significantly? We'll let you know.</p>
+                </div>
+              </div>
             </div>
-          </div>
-          
-          <div className="text-center">
-            <blockquote className="text-xl italic text-slate-300">
-              &ldquo;The best time to start investing was 10 years ago. The second best time is today.&rdquo;
-            </blockquote>
+
+            <div className="relative flex justify-center">
+              <div className="relative w-64 md:w-80">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-3xl blur-3xl" />
+                <div className="relative bg-slate-800 rounded-3xl border border-slate-700 p-6 md:p-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+                      <Bell size={18} className="text-white" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-white">Price Alert</div>
+                      <div className="text-xs text-slate-400">Just now</div>
+                    </div>
+                  </div>
+                  <div className="bg-slate-900/50 rounded-xl p-4 mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-bold text-white">DANGCEM</span>
+                      <span className="text-emerald-400 font-bold">₦295.00</span>
+                    </div>
+                    <p className="text-sm text-slate-300">Hit your target of ₦295.00 ✅</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button className="flex-1 py-2 px-4 bg-emerald-500 text-white text-sm font-bold rounded-xl">View</button>
+                    <button className="flex-1 py-2 px-4 bg-slate-700 text-white text-sm font-bold rounded-xl">Dismiss</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="relative py-20 md:py-28 bg-slate-900/50">
+      <section className="relative py-16 md:py-24 bg-slate-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
-              More Than an App.
-              <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#008751] to-[#FCD116]">
-                A Movement for Financial Freedom.
-              </span>
+          <div className="text-center mb-10 md:mb-16">
+            <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-amber-500/10 rounded-full text-amber-400 text-xs md:text-sm mb-3 md:mb-4">
+              <Crown size={12} />
+              <span className="font-medium">Premium Platform</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 md:mb-4">
+              The Only NGX AI Platform in Nigeria
             </h2>
-            <p className="text-xl text-slate-300 mt-6">
-              &ldquo;Only 3% of Nigerians invest in the stock market. We&apos;re here to change that - one investor at a time.&rdquo;
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <div className="p-6 rounded-2xl bg-red-500/10 border border-red-500/30">
-              <h3 className="font-bold text-red-400 mb-4">THE PROBLEM WITH NIGERIA</h3>
-              <ul className="space-y-2 text-sm text-slate-300">
-                <li>• ₦14 trillion sitting in savings accounts earning 1-3%</li>
-                <li>• Inflation at 20%+ destroying purchasing power yearly</li>
-                <li>• Most &ldquo;investments&rdquo; are Ponzi schemes and MMM reruns</li>
-                <li>• Financial literacy not taught in schools</li>
-                <li>• Generational wealth rarely built</li>
-              </ul>
-            </div>
-            <div className="p-6 rounded-2xl bg-[#008751]/10 border border-[#008751]/30">
-              <h3 className="font-bold text-[#00a863] mb-4">THE 9JASTOCK MISSION</h3>
-              <p className="text-sm text-slate-300 mb-3">We believe every Nigerian deserves:</p>
-              <ul className="space-y-2 text-sm text-slate-300">
-                {[
-                  'Access to the same tools professionals use',
-                  'Clear, honest education about investing',
-                  'A platform that grows with their wealth journey',
-                  'Protection from scams through financial literacy',
-                  'A path to generational wealth',
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-2">
-                    <CheckCircle size={14} className="text-[#00a863] flex-shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative py-20 md:py-28 bg-slate-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#FCD116]/10 rounded-full text-[#FCD116] text-sm mb-4">
-              <Crown size={14} />
-              <span className="font-medium">Simple Pricing</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4">
-              Simple, Transparent Pricing
-            </h2>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-8">
-              Start with a 7-day free trial. Cancel anytime.
+            <p className="text-sm md:text-lg text-slate-400 max-w-2xl mx-auto px-4 mb-6">
+              No other platform offers real-time data, AI recommendations, and social sentiment analysis. Invest in tools that give you an edge.
             </p>
             
-            <div className="inline-flex items-center p-1 bg-slate-800 rounded-xl mb-12">
+            <div className="inline-flex items-center p-1 bg-slate-800 rounded-xl">
               <button
                 onClick={() => setActivePlan('monthly')}
-                className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  activePlan === 'monthly' ? 'bg-[#008751] text-white' : 'text-slate-400 hover:text-white'
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  activePlan === 'monthly' 
+                    ? 'bg-amber-500 text-white' 
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
                 Monthly
               </button>
               <button
                 onClick={() => setActivePlan('yearly')}
-                className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  activePlan === 'yearly' ? 'bg-[#008751] text-white' : 'text-slate-400 hover:text-white'
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  activePlan === 'yearly' 
+                    ? 'bg-amber-500 text-white' 
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
-                Yearly <span className="text-xs text-[#FCD116] ml-1">Save 30%</span>
+                Yearly <span className="text-xs text-emerald-400 ml-1">Save 17%</span>
               </button>
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <div className="relative p-8 rounded-3xl bg-slate-800/50 border border-slate-700">
-              <div className="absolute top-4 right-4 px-3 py-1 bg-[#008751]/20 rounded-full text-[#00a863] text-xs font-bold">
-                ⭐ Most Popular
+          <div className="max-w-xl mx-auto">
+            <div className="relative p-8 md:p-10 rounded-3xl bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-amber-500/10 border-2 border-amber-500/40 shadow-2xl shadow-amber-500/10">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-bold rounded-full shadow-lg">
+                PREMIUM ACCESS
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Premium</h3>
-              <p className="text-slate-400 text-sm mb-6">Everything you need to invest smarter</p>
-              
-              <div className="mb-6">
-                <span className="text-4xl font-black text-white">
-                  ₦{activePlan === 'monthly' ? '2,999' : '24,999'}
-                </span>
-                <span className="text-slate-400">/{activePlan === 'monthly' ? 'mo' : 'yr'}</span>
-              </div>
-              
-              <ul className="space-y-3 mb-8">
-                {['5-minute data refresh', '30 watchlist stocks', '30 portfolio stocks', '20 price alerts', '10 AI analysis/day', 'All technical indicators', '30 days news history', 'Email support (24hr)'].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm text-slate-300">
-                    <CheckCircle size={16} className="text-[#00a863]" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              
-              <Link href="/signup" className="block w-full text-center py-3 bg-gradient-to-r from-[#008751] to-[#00a863] text-white font-bold rounded-xl hover:scale-105 transition-transform">
-                Start Free Trial
-              </Link>
-            </div>
-
-            <div className="relative p-8 rounded-3xl bg-gradient-to-b from-[#FCD116]/10 to-slate-800/50 border border-[#FCD116]/30">
-              <div className="absolute top-4 right-4 px-3 py-1 bg-[#FCD116]/20 rounded-full text-[#FCD116] text-xs font-bold">
-                🚀 Full Access
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Pro</h3>
-              <p className="text-slate-400 text-sm mb-6">For serious investors who want it all</p>
-              
-              <div className="mb-6">
-                <span className="text-4xl font-black text-white">
-                  ₦{activePlan === 'monthly' ? '7,999' : '79,999'}
-                </span>
-                <span className="text-slate-400">/{activePlan === 'monthly' ? 'mo' : 'yr'}</span>
-              </div>
-              
-              <ul className="space-y-3 mb-8">
-                {['1-minute real-time data', 'Unlimited watchlist', 'Unlimited portfolio', '100 price alerts', 'Unlimited AI analysis', 'Stock screener', '90 days news history', 'Priority + WhatsApp support', 'Multi-portfolio (5)', 'Economic dashboard'].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm text-slate-300">
-                    <CheckCircle size={16} className="text-[#FCD116]" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              
-              <Link href="/signup" className="block w-full text-center py-3 bg-gradient-to-r from-[#FCD116] to-amber-500 text-slate-900 font-bold rounded-xl hover:scale-105 transition-transform">
-                Start Free Trial
-              </Link>
-            </div>
-          </div>
-          
-          <div className="mt-8 text-center space-y-2">
-            <p className="text-sm text-slate-500">
-              ✓ 7-day free trial  ✓ No charge until trial ends  ✓ Cancel anytime  ✓ All future features included
-            </p>
-            <Link href="/contact" className="text-sm text-[#FCD116] hover:underline">
-              Need team access? Contact us for Institutional pricing →
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative py-20 md:py-28 bg-slate-900/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
-              What Nigerian Investors Are Saying
-            </h2>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            {testimonials.map((t, i) => (
-              <div key={i} className="p-6 rounded-2xl bg-slate-800/50 border border-slate-700/50">
-                <div className="flex mb-4">
-                  {[...Array(5)].map((_, j) => (
-                    <Star key={j} size={16} className="text-[#FCD116] fill-[#FCD116]" />
-                  ))}
+              <div className="text-center mb-8">
+                <div className="flex items-baseline justify-center gap-1 mb-2">
+                  <span className="text-5xl md:text-6xl font-black text-white">
+                    ₦{activePlan === 'monthly' ? '2,999' : '24,999'}
+                  </span>
+                  <span className="text-slate-400 text-lg">/{activePlan === 'monthly' ? 'month' : 'year'}</span>
                 </div>
-                <p className="text-slate-300 mb-4 text-sm italic">&ldquo;{t.quote}&rdquo;</p>
-                <div>
-                  <div className="font-bold text-white">{t.name}</div>
-                  <div className="text-sm text-slate-400">{t.title}</div>
-                  <div className="text-xs text-[#00a863]">{t.detail}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 rounded-2xl bg-slate-800/30 border border-slate-700/50">
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-black text-[#00a863]">₦2.3B+</div>
-              <div className="text-sm text-slate-400">Portfolio Tracked</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-black text-[#FCD116]">1,200+</div>
-              <div className="text-sm text-slate-400">Active Investors</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-black text-blue-400">145</div>
-              <div className="text-sm text-slate-400">NGX Stocks</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-black text-purple-400">4.8★</div>
-              <div className="text-sm text-slate-400">User Rating</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative py-20 md:py-28 bg-slate-950">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 rounded-full text-purple-400 text-sm mb-4">
-              <HelpCircle size={14} />
-              <span className="font-medium">FAQ</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
-              Frequently Asked Questions
-            </h2>
-          </div>
-
-          <div className="space-y-3">
-            {faqs.map((faq, i) => (
-              <div key={i} className="rounded-xl bg-slate-800/50 border border-slate-700/50 overflow-hidden">
-                <button
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between p-5 text-left"
-                >
-                  <span className="font-medium text-white pr-4">{faq.q}</span>
-                  {openFaq === i ? (
-                    <ChevronUp size={20} className="text-slate-400 flex-shrink-0" />
-                  ) : (
-                    <ChevronDown size={20} className="text-slate-400 flex-shrink-0" />
-                  )}
-                </button>
-                {openFaq === i && (
-                  <div className="px-5 pb-5">
-                    <p className="text-sm text-slate-400 leading-relaxed">{faq.a}</p>
-                  </div>
+                {activePlan === 'yearly' && (
+                  <p className="text-emerald-400 font-medium">Just ₦2,083/month - Save ₦11,000 annually!</p>
                 )}
               </div>
+              <ul className="space-y-4 mb-8">
+                {[
+                  '1-minute real-time data for 145+ stocks',
+                  'AI Buy/Sell/Hold recommendations',
+                  'Unlimited portfolio with live P&L',
+                  'Push notifications & price alerts',
+                  'X/Twitter market buzz with AI sentiment',
+                  'AI-powered morning newsletter',
+                  'Advanced technical analysis tools',
+                  'Priority customer support',
+                ].map((feature, i) => (
+                  <li key={i} className="flex items-center gap-3 text-slate-300">
+                    <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                      <CheckCircle size={12} className="text-emerald-400" />
+                    </div>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/pricing"
+                className="block w-full py-4 text-center bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-lg rounded-xl transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-amber-500/20"
+              >
+                Get Premium Access
+              </Link>
+              <p className="text-center text-slate-500 text-sm mt-4">
+                Secure payment via Stripe. Cancel anytime.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative py-16 md:py-24 bg-slate-900/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
+            <div className="order-2 lg:order-1">
+              <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-emerald-500/10 rounded-full text-emerald-400 text-xs md:text-sm mb-4 md:mb-6">
+                <Download size={12} />
+                <span className="font-medium">Install as App</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4 md:mb-6">
+                Use It Like
+                <br />
+                <span className="text-emerald-400">A Real App</span>
+              </h2>
+              <p className="text-sm md:text-lg text-slate-300 mb-6 md:mb-8 leading-relaxed">
+                No need to visit the Play Store or App Store. Just tap "Add to Home Screen" and 9jaStock becomes an app on your phone — fast, beautiful, always ready.
+              </p>
+              
+              <div className="space-y-3 md:space-y-4 mb-6 md:mb-8">
+                {[
+                  'Check your portfolio even without internet',
+                  'Get price alerts as push notifications',
+                  'Opens instantly, no loading screens',
+                  'Takes almost no storage on your phone',
+                  'Always shows the latest version',
+                ].map((benefit, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                      <CheckCircle size={12} className="text-emerald-400" />
+                    </div>
+                    <span className="text-sm md:text-base text-slate-300">{benefit}</span>
+                  </div>
+                ))}
+              </div>
+              
+              <Link
+                href="/pricing"
+                className="inline-flex items-center gap-2 px-5 md:px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl hover:from-amber-400 hover:to-orange-400 transition-all text-sm md:text-base"
+              >
+                Get Premium Access
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+            
+            <div className="relative order-1 lg:order-2 flex justify-center">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/20 to-purple-500/20 rounded-[2rem] md:rounded-[3rem] blur-3xl" />
+                
+                <div className="relative w-[220px] md:w-[280px] h-[440px] md:h-[560px] bg-slate-900 rounded-[2rem] md:rounded-[3rem] border-4 md:border-8 border-slate-800 shadow-2xl overflow-hidden">
+                  <div className="absolute top-2 md:top-3 left-1/2 -translate-x-1/2 w-16 md:w-20 h-4 md:h-5 bg-slate-800 rounded-full" />
+                  
+                  <div className="h-full pt-6 md:pt-8 pb-4 md:pb-6 px-3 md:px-4 overflow-hidden">
+                    <div className="flex items-center justify-between mb-3 md:mb-4">
+                      <div className="text-white font-bold text-xs md:text-sm">9jaStock</div>
+                      <div className="w-1.5 md:w-2 h-1.5 md:h-2 bg-emerald-400 rounded-full animate-pulse" />
+                    </div>
+                    
+                    <div className="bg-slate-800/50 rounded-lg md:rounded-xl p-2.5 md:p-3 mb-3">
+                      <div className="text-[10px] md:text-xs text-slate-400 mb-1">Portfolio Value</div>
+                      <div className="text-lg md:text-xl font-bold text-white">₦4.25M</div>
+                      <div className="text-xs text-emerald-400">+3.04% today</div>
+                    </div>
+                    
+                    <div className="space-y-2 mb-3">
+                      {stockCards.slice(0, 2).map((stock) => (
+                        <div key={stock.symbol} className="bg-slate-800/30 rounded-lg p-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-white">{stock.symbol}</span>
+                            <span className={`text-xs ${stock.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {stock.change >= 0 ? '+' : ''}{stock.change}%
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-lg p-2.5 border border-emerald-500/20">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Bell size={10} className="text-orange-400" />
+                        <span className="text-[10px] text-slate-400">Alert</span>
+                      </div>
+                      <div className="text-xs text-white font-medium">MTNN hit ₦200 🎯</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative py-16 md:py-24 bg-slate-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10 md:mb-16">
+            <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-blue-500/10 rounded-full text-blue-400 text-xs md:text-sm mb-3 md:mb-4">
+              <Star size={12} />
+              <span className="font-medium">Real People, Real Results</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 md:mb-4">
+              Hear From Nigerian Investors
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+            {testimonials.map((testimonial, i) => (
+              <div key={i} className="p-6 md:p-8 rounded-2xl bg-slate-900/50 border border-slate-800">
+                <div className="flex gap-1 mb-4">
+                  {Array.from({ length: testimonial.rating }).map((_, j) => (
+                    <Star key={j} size={16} className="text-amber-400 fill-amber-400" />
+                  ))}
+                </div>
+                <p className="text-sm md:text-base text-slate-300 mb-6 leading-relaxed">
+                  &ldquo;{testimonial.text}&rdquo;
+                </p>
+                <div>
+                  <div className="font-bold text-white">{testimonial.name}</div>
+                  <div className="text-sm text-slate-400">{testimonial.role}</div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="relative py-20 md:py-28 bg-gradient-to-b from-slate-950 to-slate-900">
+      <section className="relative py-16 md:py-24 bg-gradient-to-b from-slate-950 to-slate-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 rounded-full text-emerald-400 text-sm mb-6">
+            <Sparkles size={14} className="animate-pulse" />
+            <span className="font-medium">Join Thousands of Nigerian Investors</span>
+          </div>
+          
           <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-6">
-            Start Your Investment
+            Your Money Deserves
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#008751] to-[#FCD116]">
-              Journey Today.
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">
+              Better Tools
             </span>
           </h2>
           
           <p className="text-lg md:text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
-            Join thousands of Nigerians building wealth with smarter investment decisions.
+            Stop relying on WhatsApp tips and outdated websites. Join the only AI-powered NGX platform built for Nigerian investors.
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="/signup"
-              className="group flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-[#008751] to-[#00a863] text-white font-bold rounded-2xl shadow-2xl shadow-[#008751]/30 hover:shadow-[#008751]/50 hover:scale-105 transition-all duration-300"
+              href="/pricing"
+              className="group relative flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-2xl shadow-2xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-105 transition-all duration-300"
             >
-              Start Your 7-Day Free Trial
+              Get Premium Access
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </Link>
+            
+            <Link
+              href="/stocks"
+              className="flex items-center justify-center gap-2 px-6 py-4 text-slate-300 hover:text-white font-medium rounded-2xl border border-slate-700/50 hover:border-slate-600 hover:bg-slate-800/50 transition-all"
+            >
+              Explore Stocks
+              <ChevronRight size={18} />
+            </Link>
           </div>
-          
-          <p className="text-sm text-slate-500">
-            No credit card required to explore.
-          </p>
         </div>
       </section>
 
@@ -838,28 +841,24 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
             <div>
               <Logo3D size="md" variant="full" animated={false} />
               <p className="text-sm text-slate-400 mt-4">
-                The smartest way to invest in Nigeria&apos;s future.
+                Built by Nigerians, for Nigerians. Track, analyze, and grow your NGX investments with confidence.
               </p>
-              <div className="flex gap-4 mt-4">
-                <a href="https://twitter.com/9jastock" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">
-                  <Twitter size={20} />
-                </a>
-              </div>
             </div>
             <div>
               <h4 className="font-bold text-white mb-4">Product</h4>
               <ul className="space-y-2 text-sm text-slate-400">
                 <li><Link href="/stocks" className="hover:text-white transition-colors">All Stocks</Link></li>
-                <li><Link href="/blog" className="hover:text-white transition-colors">Market News</Link></li>
-                <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link href="/news" className="hover:text-white transition-colors">Market News</Link></li>
+                <li><Link href="/signup" className="hover:text-white transition-colors">Sign Up</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold text-white mb-4">Company</h4>
+              <h4 className="font-bold text-white mb-4">Features</h4>
               <ul className="space-y-2 text-sm text-slate-400">
-                <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
-                <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
-                <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+                <li>Real-time Data</li>
+                <li>AI Analysis</li>
+                <li>Price Alerts</li>
+                <li>Portfolio Tracking</li>
               </ul>
             </div>
             <div>
@@ -870,23 +869,31 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
               </ul>
             </div>
           </div>
-          <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-slate-400">© {new Date().getFullYear()} 9jastock. All rights reserved.</p>
-            <p className="text-xs text-slate-500">
-              9jastock is not a licensed stockbroker. Investment involves risk. Past performance is not indicative of future results.
-            </p>
+          <div className="pt-8 border-t border-slate-800 text-center text-sm text-slate-400">
+            <p>&copy; {new Date().getFullYear()} 9jaStock. All rights reserved.</p>
           </div>
         </div>
       </footer>
 
-      <button
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className={`fixed bottom-6 right-6 p-3 bg-[#008751] text-white rounded-full shadow-lg transition-all duration-300 hover:scale-110 ${
-          scrolled ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
-        }`}
-      >
-        <ArrowUp size={20} />
-      </button>
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+        @keyframes scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-scroll {
+          animation: scroll 30s linear infinite;
+        }
+        .perspective-1000 {
+          perspective: 1000px;
+        }
+      `}</style>
     </div>
   );
 }

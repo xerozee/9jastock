@@ -1,15 +1,14 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Mail, Lock, ArrowRight, AlertCircle, Smartphone, Shield, Zap } from "lucide-react";
 import Logo from "@/components/Logo";
 
-function LoginForm() {
+export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -25,25 +24,7 @@ function LoginForm() {
       setEmail(savedEmail);
       setRememberMe(true);
     }
-    
-    const urlError = searchParams.get('error');
-    if (urlError) {
-      const errorMessages: Record<string, string> = {
-        'Configuration': 'Google sign-in is temporarily unavailable. Please use email/password or try again later.',
-        'AccessDenied': 'Access denied. Please try a different sign-in method.',
-        'Verification': 'Verification failed. Please try again.',
-        'OAuthSignin': 'Could not start sign-in process. Please try again.',
-        'OAuthCallback': 'Sign-in was interrupted. Please try again.',
-        'OAuthCreateAccount': 'Could not create account. Please try email sign-up.',
-        'EmailCreateAccount': 'Could not create account with this email.',
-        'Callback': 'Sign-in callback error. Please try again.',
-        'OAuthAccountNotLinked': 'This email is already linked to another account. Please sign in with your original method.',
-        'CredentialsSignin': 'Invalid email or password.',
-        'Default': 'An error occurred during sign-in. Please try again.',
-      };
-      setError(errorMessages[urlError] || errorMessages['Default']);
-    }
-  }, [searchParams]);
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -389,17 +370,5 @@ function LoginForm() {
         }
       `}</style>
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    }>
-      <LoginForm />
-    </Suspense>
   );
 }

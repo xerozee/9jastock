@@ -7,7 +7,7 @@ import { TIER_LIMITS, SubscriptionTier } from '@/lib/subscription';
 interface UseSubscriptionReturn {
   tier: SubscriptionTier;
   isPremium: boolean;
-  limits: typeof TIER_LIMITS['guest'];
+  limits: typeof TIER_LIMITS['free'];
   isLoading: boolean;
 }
 
@@ -27,7 +27,7 @@ export function useSubscription(): UseSubscriptionReturn {
     if (status === 'active' || status === 'trialing') {
       setTier('premium');
     } else {
-      setTier('guest');
+      setTier('free');
     }
   }, [user, authLoading, isAuthenticated]);
 

@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { 
-  TrendingUp, TrendingDown, BarChart3, Bell, Briefcase, LineChart, 
-  Shield, Zap, Globe, ArrowRight, CheckCircle, ChevronRight, Sparkles, 
-  Smartphone, Play, Twitter, Brain, Crown, Download, PieChart, 
-  Newspaper, Target, Clock, MessageSquare, Star, CreditCard, Menu, X,
-  AlertTriangle, Eye, Search, HelpCircle, ChevronDown, ChevronUp,
-  Rocket, GraduationCap, Building2, Wallet, Users, Award, Heart, ArrowUp
+  TrendingUp, TrendingDown, Briefcase, 
+  Zap, ArrowRight, CheckCircle, ChevronRight, Sparkles, 
+  Brain, Crown, 
+  Star, Menu, X,
+  HelpCircle, ChevronDown, ChevronUp,
+  Rocket, Award, Heart, ArrowUp
 } from 'lucide-react';
 import Logo3D from './Logo3D';
 import Link from 'next/link';
@@ -48,39 +48,6 @@ export default function MarketingLandingPage() {
     visionRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const painPoints = [
-    {
-      icon: Eye,
-      title: 'Outdated, Delayed Data',
-      description: 'Most NGX websites show prices from hours ago. You\'re making decisions on yesterday\'s news.',
-    },
-    {
-      icon: Search,
-      title: 'Scattered Information',
-      description: 'Stock prices on one site, news on another, financials on a third. Hours wasted just gathering data.',
-    },
-    {
-      icon: AlertTriangle,
-      title: 'No Price Alerts',
-      description: 'You miss your target price because you can\'t watch your phone all day. Opportunities slip away.',
-    },
-    {
-      icon: Brain,
-      title: 'Analysis Paralysis',
-      description: 'Too much information, no clear guidance. Which stocks match YOUR goals? Nobody tells you.',
-    },
-    {
-      icon: Smartphone,
-      title: 'Poor Mobile Experience',
-      description: 'Desktop-only websites that are impossible to use on your phone. In 2025. Really.',
-    },
-    {
-      icon: Shield,
-      title: 'No Portfolio Tracking',
-      description: 'Still using Excel to track your investments? You deserve real-time P&L at a glance.',
-    },
-  ];
-
   const currentFeatures = [
     {
       icon: TrendingUp,
@@ -95,74 +62,10 @@ export default function MarketingLandingPage() {
       gradient: 'from-purple-500 to-pink-600',
     },
     {
-      icon: Twitter,
-      title: 'X/Twitter Market Sentiment',
-      description: 'See what Nigerian traders are saying in real-time. AI-powered sentiment analysis included.',
-      gradient: 'from-blue-500 to-indigo-600',
-    },
-    {
       icon: Briefcase,
       title: 'Portfolio Tracking',
       description: 'Track your holdings, see your gains/losses in real-time, and share your portfolio with friends.',
       gradient: 'from-amber-500 to-orange-600',
-    },
-    {
-      icon: Bell,
-      title: 'Price Alerts & Notifications',
-      description: 'Set price targets and get instant push notifications when your stocks hit them.',
-      gradient: 'from-red-500 to-rose-600',
-    },
-  ];
-
-  const comingSoonFeatures = [
-    {
-      icon: Globe,
-      title: 'Global Markets',
-      description: 'Trade US stocks, crypto, and forex — all from one Nigerian platform. Coming Q2 2026.',
-      badge: 'Q2 2026',
-      badgeColor: 'bg-blue-500',
-    },
-    {
-      icon: Wallet,
-      title: 'Dividend Tracker',
-      description: 'Know exactly when dividends drop and how much you\'re earning passively.',
-      badge: 'Q1 2026',
-      badgeColor: 'bg-emerald-500',
-    },
-    {
-      icon: GraduationCap,
-      title: 'Investment Academy',
-      description: 'Learn investing from scratch with courses designed for Nigerian beginners.',
-      badge: 'Q2 2026',
-      badgeColor: 'bg-purple-500',
-    },
-    {
-      icon: Building2,
-      title: 'Broker Integration',
-      description: 'Execute trades directly from 9jaStock. Connect your Nigerian brokerage account.',
-      badge: 'Q3 2026',
-      badgeColor: 'bg-orange-500',
-    },
-    {
-      icon: Users,
-      title: 'Investment Clubs',
-      description: 'Pool money with friends, track group performance, and grow together.',
-      badge: 'Q2 2026',
-      badgeColor: 'bg-pink-500',
-    },
-    {
-      icon: LineChart,
-      title: 'Technical Analysis AI',
-      description: 'AI that reads charts and explains patterns in plain English.',
-      badge: 'Q1 2026',
-      badgeColor: 'bg-teal-500',
-    },
-    {
-      icon: PieChart,
-      title: 'Portfolio Optimizer',
-      description: 'AI suggests how to rebalance your portfolio for maximum returns.',
-      badge: 'Q3 2026',
-      badgeColor: 'bg-amber-500',
     },
   ];
 
@@ -211,7 +114,7 @@ export default function MarketingLandingPage() {
   const faqs = [
     {
       q: 'Is 9jaStock a brokerage? Can I buy stocks through the app?',
-      a: 'Not yet! Currently, 9jaStock is a research and tracking platform. You\'ll still execute trades through your existing broker. Broker integration is coming in Q3 2026, which will let you trade directly from the app.',
+      a: 'Not yet! Currently, 9jaStock is a research and tracking platform. You\'ll still execute trades through your existing broker. Broker integration is coming soon, which will let you trade directly from the app.',
     },
     {
       q: 'How accurate is the AI\'s Buy/Sell/Hold recommendation?',
@@ -327,21 +230,20 @@ export default function MarketingLandingPage() {
                 </div>
                 
                 <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6 leading-[1.1] tracking-tight">
-                  Invest Smarter.
+                  Invest in Nigeria
                   <br />
                   <span className="relative inline-block">
                     <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#008751] via-[#00a863] to-[#FCD116]">
-                      Grow Faster.
+                      with Confidence
                     </span>
                     <span className="absolute inset-0 bg-gradient-to-r from-[#008751]/30 via-[#00a863]/30 to-[#FCD116]/30 blur-2xl" />
                   </span>
                 </h1>
                 
                 <p className="text-lg md:text-xl text-slate-300 max-w-xl mb-8 leading-relaxed mx-auto lg:mx-0">
-                  The only Nigerian platform with <span className="text-[#00a863] font-medium">real-time NGX data</span>, 
-                  <span className="text-[#FCD116] font-medium"> AI-powered recommendations</span>, and 
-                  <span className="text-blue-400 font-medium"> social sentiment analysis</span>. 
-                  Stop guessing. Start knowing.
+                  <span className="text-[#00a863] font-medium">Real-time stock data</span>, 
+                  <span className="text-[#FCD116] font-medium"> AI-powered buy/sell recommendations</span>, and 
+                  <span className="text-blue-400 font-medium"> portfolio tracking</span> — all in one place.
                 </p>
                 
                 <div className="flex flex-col sm:flex-row items-center gap-4 lg:justify-start justify-center mb-10">
@@ -440,41 +342,6 @@ export default function MarketingLandingPage() {
         </div>
       </section>
 
-      <section className="relative py-20 md:py-28 bg-slate-900/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 md:mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/10 rounded-full text-red-400 text-sm mb-4">
-              <AlertTriangle size={14} />
-              <span className="font-medium">The Problem</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4">
-              Nigerian Investors Deserve Better
-            </h2>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-              The current tools are broken. Here&apos;s what you&apos;re dealing with:
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {painPoints.map((point, i) => {
-              const Icon = point.icon;
-              return (
-                <div
-                  key={i}
-                  className="group p-6 rounded-2xl bg-slate-800/50 border border-slate-700/50 hover:border-red-500/30 transition-all duration-300"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center mb-4 group-hover:bg-red-500/20 transition-colors">
-                    <Icon size={24} className="text-red-400" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white mb-2">{point.title}</h3>
-                  <p className="text-sm text-slate-400">{point.description}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
       <section className="relative py-20 md:py-28 bg-slate-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 md:mb-16">
@@ -510,41 +377,25 @@ export default function MarketingLandingPage() {
         </div>
       </section>
 
-      <section ref={visionRef} className="relative py-20 md:py-28 bg-gradient-to-b from-slate-950 to-slate-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 md:mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#FCD116]/10 rounded-full text-[#FCD116] text-sm mb-4">
-              <Rocket size={14} />
-              <span className="font-medium">The Vision</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4">
-              This Is Just the Beginning
-            </h2>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-              We&apos;re building the future of Nigerian investing. Here&apos;s what&apos;s coming:
-            </p>
+      <section ref={visionRef} className="relative py-16 md:py-20 bg-gradient-to-b from-slate-950 to-slate-900">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#FCD116]/10 rounded-full text-[#FCD116] text-sm mb-6">
+            <Rocket size={14} />
+            <span className="font-medium">What&apos;s Coming</span>
           </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {comingSoonFeatures.map((feature, i) => {
-              const Icon = feature.icon;
-              return (
-                <div
-                  key={i}
-                  className="group relative p-6 rounded-2xl bg-slate-800/30 border border-slate-700/50 hover:border-[#FCD116]/30 transition-all duration-300"
-                >
-                  <div className={`absolute top-4 right-4 px-2 py-1 ${feature.badgeColor} rounded-full text-xs font-bold text-white`}>
-                    {feature.badge}
-                  </div>
-                  <div className="w-12 h-12 rounded-xl bg-slate-700/50 flex items-center justify-center mb-4 group-hover:bg-[#FCD116]/10 transition-colors">
-                    <Icon size={24} className="text-[#FCD116]" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
-                  <p className="text-sm text-slate-400">{feature.description}</p>
-                </div>
-              );
-            })}
-          </div>
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+            We&apos;re Building More
+          </h2>
+          <p className="text-lg text-slate-300 mb-6 leading-relaxed">
+            Global Markets, Dividend Tracking, Investment Academy, Broker Integration, and more are on the way.
+          </p>
+          <Link
+            href="/pricing"
+            className="inline-flex items-center gap-2 text-[#FCD116] hover:text-[#fde047] font-medium transition-colors"
+          >
+            See the full roadmap
+            <ArrowRight size={16} />
+          </Link>
         </div>
       </section>
 
@@ -712,7 +563,7 @@ export default function MarketingLandingPage() {
               </ul>
               
               <button disabled className="block w-full text-center py-3 bg-slate-700 text-slate-400 font-bold rounded-xl cursor-not-allowed">
-                Coming Q2 2026
+                Coming Soon
               </button>
             </div>
           </div>

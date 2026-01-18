@@ -45,7 +45,7 @@ export const FEATURE_ACCESS: Record<PremiumFeature, SubscriptionTier[]> = {
 
 export const TIER_LIMITS = {
   guest: {
-    refreshInterval: 15 * 60 * 1000,
+    refreshInterval: 30 * 60 * 1000,
     maxPortfolioItems: 0,
     maxWatchlistItems: 3,
     maxVisibleStocks: Infinity,
@@ -54,7 +54,7 @@ export const TIER_LIMITS = {
     newsDays: 30,
   },
   free: {
-    refreshInterval: 5 * 60 * 1000,
+    refreshInterval: 30 * 60 * 1000,
     maxPortfolioItems: 0,
     maxWatchlistItems: 3,
     maxVisibleStocks: Infinity,

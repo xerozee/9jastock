@@ -78,7 +78,20 @@ export async function POST(request: NextRequest) {
 
     const user = await User.findById(userId);
     const userIsPremium = isPremium(user);
-    const maxAlerts = userIsPremium ? 50 : 10;
+
+    if (!userIsPremium) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Price alerts are a Premium feature. Upgrade to Premium to set up to 50 price alerts!',
+          isPremiumRequired: true,
+          maxAllowed: 0
+        },
+        { status: 403 }
+      );
+    }
+
+    const maxAlerts = 50;
 
     const existingAlerts = await PriceAlert.countDocuments({ 
       userId, 
@@ -90,10 +103,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           success: false, 
-          error: userIsPremium 
-            ? `Maximum ${maxAlerts} active alerts allowed. Please delete some alerts first.`
-            : `Free users can have up to ${maxAlerts} alerts. Upgrade to Premium for up to 50 alerts!`,
-          isPremiumRequired: !userIsPremium,
+          error: `Maximum ${maxAlerts} active alerts allowed. Please delete some alerts first.`,
           currentCount: existingAlerts,
           maxAllowed: maxAlerts
         },

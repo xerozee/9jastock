@@ -41,7 +41,7 @@ interface XPost {
 
 
 const NEWS_REFRESH_PREMIUM = 2 * 60 * 1000;
-const NEWS_REFRESH_AUTHENTICATED = 10 * 60 * 1000;
+const NEWS_REFRESH_FREE = 6 * 60 * 60 * 1000;
 const NEWS_REFRESH_GUEST = 6 * 60 * 60 * 1000;
 const GUEST_ARTICLE_LIMIT = 5;
 
@@ -70,9 +70,7 @@ export default function BlogPage() {
 
   const refreshInterval = isPremium 
     ? NEWS_REFRESH_PREMIUM 
-    : isAuthenticated 
-      ? NEWS_REFRESH_AUTHENTICATED 
-      : NEWS_REFRESH_GUEST;
+    : NEWS_REFRESH_FREE;
 
   const fetchStocks = useCallback(async () => {
     try {
@@ -130,11 +128,9 @@ export default function BlogPage() {
 
   const stockRefreshInterval = isPremium 
     ? 1 * 60 * 1000 
-    : isAuthenticated 
-      ? 5 * 60 * 1000 
-      : 6 * 60 * 60 * 1000;
+    : 30 * 60 * 1000;
 
-  const xRefreshInterval = isPremium ? 2 * 60 * 1000 : 10 * 60 * 1000;
+  const xRefreshInterval = isPremium ? 2 * 60 * 1000 : 30 * 60 * 1000;
 
   useEffect(() => {
     fetchStocks();

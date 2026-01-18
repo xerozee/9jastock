@@ -187,7 +187,8 @@ const CONFLICTING_TICKERS = ['NB', 'PZ', 'CAP', 'NESTLE', 'UNILEVER', 'TOTAL', '
 
 const NGX_SEARCH_QUERIES = {
   general: '(#NGX OR #NGXASI OR #NigerianStockMarket OR #NaijaStocks OR "Nigerian Exchange" OR "NGX All Share Index" OR "NGX equities" OR "NGX trading" OR "NGX investors")',
-  newsSources: 'from:ngxgrp OR from:Nairametrics OR from:ProshareNG OR from:BusinessDayNG OR from:ngnmarket OR from:AlomolaNG OR from:CardinalStonNG OR from:vetaborker OR from:InvestorNgr OR from:TheNigerianInv OR from:SecaborNGX OR from:APaborker',
+  newsSources: 'from:Nairametrics OR from:ngxgrp OR from:ProshareNG OR from:BusinessDayNG OR from:TheCableNG OR from:premiumtimesng OR from:ChannelsTVBiz OR from:AriseTVNews OR from:VanguardNgrs',
+  financeBlogs: 'from:Nairametrics OR from:BusinessDayNG OR from:ProshareNG OR from:ngxgrp OR from:TheCableNG OR from:VanguardNgrs',
   banking: '($ZENITHBANK OR "Zenith Bank") OR ($GTCO OR "Guaranty Trust") OR ($ACCESSCORP OR "Access Holdings") OR ($UBA OR "United Bank for Africa") OR ($FIRSTHOLDCO OR "First HoldCo") OR ($ETI OR "Ecobank Transnational") OR ($STANBIC OR "Stanbic IBTC") OR ($FIDELITYBK OR "Fidelity Bank") OR ($FCMB OR "FCMB Group") OR ($STERLINGNG OR "Sterling Financial") OR ($WEMABANK OR "Wema Bank") OR ($JAIZBANK OR "Jaiz Bank")',
   telecomBigCaps: '($AIRTELAFRI OR "Airtel Africa") OR ($MTNN OR "MTN Nigeria") OR ($DANGCEM OR "Dangote Cement") OR ($BUACEMENT OR "BUA Cement") OR ($BUAFOODS OR "BUA Foods") OR ($SEPLAT OR "Seplat Energy") OR ($ARADEL OR "Aradel Holdings") OR ($GEREGU OR "Geregu Power") OR ($TRANSPOWER OR "Transcorp Power")',
   consumerGoods: '("Nigerian Breweries" OR $NB) OR ($INTBREW OR "International Breweries") OR ($GUINNESS OR "Guinness Nigeria") OR ("Nestle Nigeria" OR NESTLE) OR ($DANGSUGAR OR "Dangote Sugar") OR ($NASCON OR "Nascon Allied") OR ("Cadbury Nigeria" OR $CADBURY) OR ($HONYFLOUR OR "Honeywell Flour") OR ("Unilever Nigeria" OR $UNILEVER) OR ("PZ Cussons Nigeria")',
@@ -337,10 +338,26 @@ function containsFinanceKeyword(text: string): boolean {
   return FINANCE_KEYWORDS.some(keyword => lowerText.includes(keyword.toLowerCase()));
 }
 
+const TRUSTED_FINANCE_SOURCES = [
+  'nairametrics', 'businessdayng', 'proshareng', 'ngxgrp', 'thecableng',
+  'vanguardngrs', 'premiumtimesng', 'channelstvbiz', 'arisetv', 'secnigeria',
+  'cardinalstone', 'vetivaresearch', 'cabordelasg', 'afrinvest', 'unitedcapitalplc',
+  'meristemng', 'fbnquest', 'stanbicibtc', 'chapelhilldenham', 'cslstockbrokers'
+];
+
+function isTrustedFinanceSource(username: string): boolean {
+  const lowerUsername = username.toLowerCase();
+  return TRUSTED_FINANCE_SOURCES.some(source => lowerUsername.includes(source) || source.includes(lowerUsername));
+}
+
 function filterTweetsForRelevance(tweets: XTweet[], symbols: string[]): XTweet[] {
   return tweets.filter(tweet => {
     const user = (tweet as any)._user as XUser | undefined;
     if (!user) return true;
+    
+    if (isTrustedFinanceSource(user.username)) {
+      return true;
+    }
     
     for (const symbol of symbols) {
       if (isCompanyOfficialAccount(symbol, user.username)) {
@@ -642,19 +659,18 @@ export async function crawlXPosts(): Promise<{ success: boolean; postsProcessed:
     const startTime = `&start_time=${get72HoursAgo()}`;
     
     const sectorQueries = [
-      { name: 'General + Banking', query: `${NGX_SEARCH_QUERIES.general} OR ${NGX_SEARCH_QUERIES.banking}` },
+      { name: 'Finance Blogs', query: NGX_SEARCH_QUERIES.financeBlogs },
+      { name: 'News Sources', query: NGX_SEARCH_QUERIES.newsSources },
+      { name: 'General Market', query: NGX_SEARCH_QUERIES.general },
+      { name: 'Banking Sector', query: NGX_SEARCH_QUERIES.banking },
       { name: 'Telecoms + Big Caps', query: NGX_SEARCH_QUERIES.telecomBigCaps },
       { name: 'Consumer Goods', query: NGX_SEARCH_QUERIES.consumerGoods },
-      { name: 'Oil & Gas + Industrial', query: NGX_SEARCH_QUERIES.oilGasIndustrial },
-      { name: 'Insurance', query: NGX_SEARCH_QUERIES.insurance },
-      { name: 'Agri + Real Estate', query: NGX_SEARCH_QUERIES.agriRealEstate },
-      { name: 'News Sources', query: NGX_SEARCH_QUERIES.newsSources },
     ];
     
     let callCount = 0;
     for (const sector of sectorQueries) {
-      if (callCount >= 4) {
-        console.log(`[X Crawler] Reached API call limit (4 calls), stopping to minimize costs`);
+      if (callCount >= 6) {
+        console.log(`[X Crawler] Reached API call limit (6 calls), stopping to minimize costs`);
         break;
       }
       

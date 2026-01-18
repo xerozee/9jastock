@@ -471,27 +471,22 @@ export default function MarketingLandingPage() {
         </div>
       </section>
 
-      <section className="relative py-20 bg-gradient-to-b from-slate-950 to-slate-900">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
-            Ready to Invest Smarter?
-          </h2>
-          <p className="text-lg text-slate-400 mb-8 max-w-2xl mx-auto">
-            Join thousands of Nigerian investors who trust 9jaStock for their investment decisions.
-          </p>
-          <Link
-            href="/signup"
-            className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#008751] to-[#00a863] text-white font-bold rounded-2xl hover:scale-105 transition-transform shadow-2xl shadow-[#008751]/30"
-          >
-            Start Your Free Trial
-            <ArrowRight size={18} />
-          </Link>
-        </div>
-      </section>
-
-      <footer className="bg-slate-950 border-t border-slate-800 py-12">
+      <footer className="bg-slate-900/50 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="py-12 text-center border-b border-slate-800">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+              Ready to Invest with Confidence?
+            </h2>
+            <Link
+              href="/signup"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#008751] to-[#00a863] text-white font-bold rounded-2xl hover:scale-105 transition-transform shadow-lg shadow-[#008751]/30"
+            >
+              Start Your Free Trial
+              <ArrowRight size={18} />
+            </Link>
+          </div>
+          
+          <div className="py-8 flex flex-col md:flex-row items-center justify-between gap-6">
             <Logo3D size="md" variant="full" />
             
             <div className="flex items-center gap-6 text-sm text-slate-400">
@@ -501,7 +496,7 @@ export default function MarketingLandingPage() {
             </div>
           </div>
           
-          <div className="mt-8 pt-8 border-t border-slate-800 text-center text-sm text-slate-500">
+          <div className="pb-8 text-center text-sm text-slate-500">
             © 2026 9jaStock. All rights reserved. Made with 💚 for Nigerian investors.
           </div>
         </div>

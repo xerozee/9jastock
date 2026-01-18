@@ -18,7 +18,7 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
 **UI/UX Decisions:**
 - **Design:** Modern 3D UI, sci-fi aesthetic, glassmorphism, interactive elements, mobile-first responsive design.
 - **Homepage (Jan 2026 Simplification):** Streamlined landing page focused on value creation - "Invest in Nigeria with Confidence" tagline, 3 core features (real-time data, AI recommendations, portfolio tracking), minimal "What's Coming" teaser without dates, prominent pricing section.
-- **Theming:** Dark mode support with persistence via localStorage.
+- **Theming:** Dark mode as default with persistence via localStorage. Inline script prevents flash of wrong theme on initial load. Theme toggle available in UI.
 - **PWA:** Progressive Web App support with `manifest.json`, service worker for offline capabilities, and device-specific installation prompts.
 - **Market Hours:** Live indicator for NGX trading hours with countdowns.
 - **Launch Polish (Jan 2026):**
@@ -50,7 +50,8 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
         - **Visible (unblurred):** Market Hours, Market Overview (market cap, volume, advancers/decliners, indices, market breadth)
         - **Blurred with subscribe prompt:** Top Gainers, Top Losers, Most Active, X Market Buzz
         - **Profile access:** Referral section, investment profile, notifications work
-        - **Component:** `BlurredPremiumContent.tsx` wraps premium sections with blur overlay and upgrade CTA
+        - **Component:** `BlurredPremiumContent.tsx` wraps premium sections with blur overlay and upgrade CTA. Uses `statusResolved` flag from `useSubscription` hook to prevent content flash during auth loading.
+        - **Profile Page:** X Market Insights section is gated with BlurredPremiumContent
       - **Tier Limits (src/lib/subscription.ts):**
         - Guest: Limited preview only (5 stocks visible, no portfolio/watchlist, blurred premium sections)
         - Premium: Full access - 1min refresh, unlimited portfolio, unlimited watchlist, all features

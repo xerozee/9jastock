@@ -284,13 +284,17 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className={`text-white ${
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+      <div className={`relative overflow-hidden ${
         isPremium 
-          ? 'bg-gradient-to-br from-amber-500 via-yellow-500 to-orange-500' 
-          : 'bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600'
+          ? 'bg-gradient-to-br from-[#008751] via-[#00a863] to-[#006741]' 
+          : 'bg-gradient-to-br from-[#008751] via-[#00a863] to-emerald-600'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-[#FCD116] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-white rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 py-12">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
             <div className="relative">
               <Avatar 
@@ -299,43 +303,43 @@ export default function ProfilePage() {
                 email={profile.user.email}
                 profileImageUrl={profile.user.profileImageUrl}
                 size="xl"
-                className={`ring-4 ${isPremium ? 'ring-yellow-300/50' : 'ring-white/20'}`}
+                className={`ring-4 shadow-xl ${isPremium ? 'ring-[#FCD116]/60' : 'ring-white/30'}`}
               />
               {isPremium && (
-                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full p-1.5 shadow-lg">
-                  <Crown className="w-5 h-5 text-white" />
+                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-[#FCD116] to-amber-500 rounded-full p-1.5 shadow-lg">
+                  <Crown className="w-5 h-5 text-slate-900" />
                 </div>
               )}
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-3xl font-bold text-white">
                   {profile.user.firstName} {profile.user.lastName}
                 </h1>
                 {isPremium && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-white text-sm font-semibold rounded-full shadow-lg animate-pulse">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-[#FCD116] to-amber-500 text-slate-900 text-sm font-bold rounded-full shadow-lg">
                     <Crown className="w-4 h-4" />
                     Premium
                   </span>
                 )}
               </div>
-              <p className="text-white/70 mt-1">{profile.user.email}</p>
+              <p className="text-white/80 mt-1">{profile.user.email}</p>
               {profile.user.bio && (
-                <p className="text-white/80 mt-2 max-w-2xl">{profile.user.bio}</p>
+                <p className="text-white/90 mt-2 max-w-2xl">{profile.user.bio}</p>
               )}
               <div className="flex flex-wrap gap-2 mt-4">
                 {profile.user.investmentGoal && (
-                  <span className="px-3 py-1 bg-white/20 rounded-full text-sm">
+                  <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm text-white font-medium border border-white/10">
                     {goalLabels[profile.user.investmentGoal]}
                   </span>
                 )}
                 {profile.user.experienceLevel && (
-                  <span className="px-3 py-1 bg-white/20 rounded-full text-sm">
+                  <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm text-white font-medium border border-white/10">
                     {experienceLabels[profile.user.experienceLevel]}
                   </span>
                 )}
                 {profile.user.riskTolerance && (
-                  <span className="px-3 py-1 bg-white/20 rounded-full text-sm">
+                  <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm text-white font-medium border border-white/10">
                     {riskLabels[profile.user.riskTolerance]?.label} Risk
                   </span>
                 )}
@@ -344,7 +348,7 @@ export default function ProfilePage() {
             <div className="flex gap-2">
               <Link
                 href="/onboarding"
-                className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl transition-all text-white font-medium border border-white/10"
               >
                 <Settings className="w-4 h-4" />
                 Edit Profile
@@ -357,17 +361,17 @@ export default function ProfilePage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-700">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Briefcase className="w-5 h-5 text-purple-500" />
+                  <Briefcase className="w-5 h-5 text-[#008751]" />
                   Portfolio Summary
                 </h2>
                 <div className="flex flex-wrap items-center gap-2">
                   <PortfolioShareImage />
                   <button
                     onClick={copyShareLink}
-                    className="flex items-center gap-2 px-3 py-2.5 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-colors"
+                    className="flex items-center gap-2 px-3 py-2.5 text-sm bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-colors"
                   >
                     {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                     {copied ? 'Copied!' : 'Copy Link'}
@@ -376,27 +380,27 @@ export default function ProfilePage() {
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 border border-gray-100 dark:border-slate-600">
                   <p className="text-sm text-gray-500 dark:text-gray-400">Total Value</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     ₦{totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </p>
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 border border-gray-100 dark:border-slate-600">
                   <p className="text-sm text-gray-500 dark:text-gray-400">Total Cost</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     ₦{totalCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </p>
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 border border-gray-100 dark:border-slate-600">
                   <p className="text-sm text-gray-500 dark:text-gray-400">Gain/Loss</p>
-                  <p className={`text-2xl font-bold ${totalGainLoss >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  <p className={`text-2xl font-bold ${totalGainLoss >= 0 ? 'text-[#008751]' : 'text-red-500'}`}>
                     {totalGainLoss >= 0 ? '+' : ''}₦{totalGainLoss.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </p>
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 border border-gray-100 dark:border-slate-600">
                   <p className="text-sm text-gray-500 dark:text-gray-400">Return</p>
-                  <p className={`text-2xl font-bold ${totalGainLossPercent >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  <p className={`text-2xl font-bold ${totalGainLossPercent >= 0 ? 'text-[#008751]' : 'text-red-500'}`}>
                     {totalGainLossPercent >= 0 ? '+' : ''}{totalGainLossPercent.toFixed(2)}%
                   </p>
                 </div>
@@ -420,7 +424,7 @@ export default function ProfilePage() {
                   {holdingsWithPrices.slice(0, 5).map((holding) => (
                     <div
                       key={holding.symbol}
-                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl"
+                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700/50 rounded-xl"
                     >
                       <div>
                         <p className="font-medium text-gray-900 dark:text-white">{holding.symbol}</p>
@@ -462,10 +466,10 @@ export default function ProfilePage() {
               )}
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-amber-500" />
+                  <Sparkles className="w-5 h-5 text-[#FCD116]" />
                   Stock Recommendations
                 </h2>
                 <Link
@@ -536,7 +540,7 @@ export default function ProfilePage() {
                     <Link
                       key={index}
                       href={`/stocks/${displaySymbol}`}
-                      className="block bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-gray-100 dark:border-gray-600"
+                      className="block bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-gray-100 dark:border-gray-600"
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
@@ -593,9 +597,9 @@ export default function ProfilePage() {
                         </div>
                       </div>
                       
-                      <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-100 dark:border-gray-600">
+                      <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-100 dark:border-gray-600">
                         <div className="flex items-start gap-2">
-                          <Lightbulb className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                          <Lightbulb className="w-4 h-4 text-[#FCD116] mt-0.5 flex-shrink-0" />
                           <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                             {rec.analysis || rec.reason}
                           </p>
@@ -645,9 +649,9 @@ export default function ProfilePage() {
           </div>
 
           <div className="space-y-6">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
-                <Gift className="w-5 h-5 text-amber-500" />
+                <Gift className="w-5 h-5 text-[#FCD116]" />
                 Invite Friends
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
@@ -656,7 +660,7 @@ export default function ProfilePage() {
               
               {profile.user.referralCode && (
                 <div className="space-y-3">
-                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                  <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4">
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Your Referral Code</p>
                     <p className="text-xl font-mono font-bold text-gray-900 dark:text-white">
                       {profile.user.referralCode}
@@ -686,7 +690,7 @@ export default function ProfilePage() {
               )}
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
                 Investment Profile
               </h3>
@@ -705,7 +709,7 @@ export default function ProfilePage() {
                 
                 {profile.user.riskTolerance && (
                   <div className="flex items-start gap-3">
-                    <Shield className="w-5 h-5 text-blue-500 mt-0.5" />
+                    <Shield className="w-5 h-5 text-[#008751] mt-0.5" />
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400">Risk Tolerance</p>
                       <p className={`text-sm font-medium ${riskLabels[profile.user.riskTolerance]?.color}`}>
@@ -717,7 +721,7 @@ export default function ProfilePage() {
                 
                 {profile.user.investmentHorizon && (
                   <div className="flex items-start gap-3">
-                    <Clock className="w-5 h-5 text-purple-500 mt-0.5" />
+                    <Clock className="w-5 h-5 text-[#008751] mt-0.5" />
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400">Time Horizon</p>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
@@ -729,14 +733,14 @@ export default function ProfilePage() {
 
                 {profile.user.interestedSectors && profile.user.interestedSectors.length > 0 && (
                   <div className="flex items-start gap-3">
-                    <Building2 className="w-5 h-5 text-amber-500 mt-0.5" />
+                    <Building2 className="w-5 h-5 text-[#FCD116] mt-0.5" />
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400">Interested Sectors</p>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {profile.user.interestedSectors.map((sector) => (
                           <span
                             key={sector}
-                            className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-gray-700 dark:text-gray-300"
+                            className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-slate-700 rounded text-gray-700 dark:text-gray-300"
                           >
                             {sector}
                           </span>
@@ -748,28 +752,28 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
                 Quick Links
               </h3>
               <div className="space-y-2">
                 <Link
                   href="/portfolio"
-                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
                   <span className="text-gray-900 dark:text-white">My Portfolio</span>
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </Link>
                 <Link
                   href="/watchlist"
-                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
                   <span className="text-gray-900 dark:text-white">My Watchlist</span>
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </Link>
                 <Link
                   href="/stocks"
-                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
                   <span className="text-gray-900 dark:text-white">Browse Stocks</span>
                   <ChevronRight className="w-4 h-4 text-gray-400" />

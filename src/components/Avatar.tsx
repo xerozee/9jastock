@@ -3,16 +3,16 @@
 import { useMemo } from 'react';
 
 const colors = [
+  { bg: 'bg-[#008751]', text: 'text-white' },
+  { bg: 'bg-emerald-600', text: 'text-white' },
+  { bg: 'bg-teal-600', text: 'text-white' },
+  { bg: 'bg-[#00a863]', text: 'text-white' },
+  { bg: 'bg-green-600', text: 'text-white' },
+  { bg: 'bg-cyan-600', text: 'text-white' },
   { bg: 'bg-emerald-500', text: 'text-white' },
-  { bg: 'bg-blue-500', text: 'text-white' },
-  { bg: 'bg-violet-500', text: 'text-white' },
-  { bg: 'bg-amber-500', text: 'text-white' },
-  { bg: 'bg-rose-500', text: 'text-white' },
-  { bg: 'bg-pink-500', text: 'text-white' },
-  { bg: 'bg-cyan-500', text: 'text-white' },
-  { bg: 'bg-indigo-500', text: 'text-white' },
   { bg: 'bg-teal-500', text: 'text-white' },
-  { bg: 'bg-orange-500', text: 'text-white' },
+  { bg: 'bg-green-500', text: 'text-white' },
+  { bg: 'bg-[#006741]', text: 'text-white' },
 ];
 
 function hashCode(str: string): number {

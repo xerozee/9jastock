@@ -45,9 +45,14 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
     - **AI Newsletter System:** GPT-4o-mini-powered newsletter generation and automated delivery.
     - **Market Buzz Social Feed:** Real-time social media aggregation (TradingView, X/Twitter, Reddit) with AI sentiment analysis for Nigerian stocks. Includes official X/Twitter API integration.
     - **Stock Recommendations Engine:** AI-powered suggestions based on user profile and investment goals.
-    - **Premium-Only Access Control:** All features require premium subscription. No free tier.
+    - **Freemium Gating System:** Users can sign up without payment and browse the app with limited access.
+      - **Free User Experience (Authenticated but not subscribed):**
+        - **Visible (unblurred):** Market Hours, Market Overview (market cap, volume, advancers/decliners, indices, market breadth)
+        - **Blurred with subscribe prompt:** Top Gainers, Top Losers, Most Active, X Market Buzz
+        - **Profile access:** Referral section, investment profile, notifications work
+        - **Component:** `BlurredPremiumContent.tsx` wraps premium sections with blur overlay and upgrade CTA
       - **Tier Limits (src/lib/subscription.ts):**
-        - Guest: Limited preview only (5 stocks visible, no portfolio/watchlist)
+        - Guest: Limited preview only (5 stocks visible, no portfolio/watchlist, blurred premium sections)
         - Premium: Full access - 1min refresh, unlimited portfolio, unlimited watchlist, all features
       - **Premium Features:** All 145+ stocks, AI Buy/Sell/Hold recommendations, portfolio tracking with live P&L, X/Twitter market buzz with sentiment analysis, price alerts, push notifications, 30-day news archive, advanced technical analysis, AI morning newsletter
     - **Push Notifications:** Web Push API with VAPID authentication for price alerts, daily summaries, and breaking news.

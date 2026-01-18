@@ -16,6 +16,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { Stock, MarketSummary } from '@/types/stock';
 import { MARKET_INDEX_BASE_VALUES } from '@/lib/marketConfig';
 import { PremiumBadge } from '@/components/PremiumWrapper';
+import BlurredPremiumContent from '@/components/BlurredPremiumContent';
 
 function formatMarketCap(value: number): string {
   if (value >= 1e12) return `₦${(value / 1e12).toFixed(2)}T`;
@@ -200,72 +201,80 @@ export default function HomePage() {
         <MarketOverview summary={marketSummary} />
       </section>
 
-      <section className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Top Gainers</h2>
-          <Link
-            href="/stocks?sort=gainers"
-            className="flex items-center text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium transition-colors"
-          >
-            View all <ArrowRight size={18} className="ml-1" />
-          </Link>
-        </div>
-        {isLoading && stocks.length === 0 ? (
-          <StockGridSkeleton count={4} />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {topGainers.map((stock) => (
-              <StockCard key={stock.symbol} stock={stock as Stock} />
-            ))}
+      <BlurredPremiumContent title="Top Gainers" description="See which stocks are leading the market today">
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Top Gainers</h2>
+            <Link
+              href="/stocks?sort=gainers"
+              className="flex items-center text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium transition-colors"
+            >
+              View all <ArrowRight size={18} className="ml-1" />
+            </Link>
           </div>
-        )}
-      </section>
+          {isLoading && stocks.length === 0 ? (
+            <StockGridSkeleton count={4} />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {topGainers.map((stock) => (
+                <StockCard key={stock.symbol} stock={stock as Stock} />
+              ))}
+            </div>
+          )}
+        </section>
+      </BlurredPremiumContent>
 
-      <section className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Top Losers</h2>
-          <Link
-            href="/stocks?sort=losers"
-            className="flex items-center text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium transition-colors"
-          >
-            View all <ArrowRight size={18} className="ml-1" />
-          </Link>
-        </div>
-        {isLoading && stocks.length === 0 ? (
-          <StockGridSkeleton count={4} />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {topLosers.map((stock) => (
-              <StockCard key={stock.symbol} stock={stock as Stock} />
-            ))}
+      <BlurredPremiumContent title="Top Losers" description="Track declining stocks to find opportunities">
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Top Losers</h2>
+            <Link
+              href="/stocks?sort=losers"
+              className="flex items-center text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium transition-colors"
+            >
+              View all <ArrowRight size={18} className="ml-1" />
+            </Link>
           </div>
-        )}
-      </section>
+          {isLoading && stocks.length === 0 ? (
+            <StockGridSkeleton count={4} />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {topLosers.map((stock) => (
+                <StockCard key={stock.symbol} stock={stock as Stock} />
+              ))}
+            </div>
+          )}
+        </section>
+      </BlurredPremiumContent>
 
-      <section className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Most Active</h2>
-          <Link
-            href="/stocks?sort=volume"
-            className="flex items-center text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium transition-colors"
-          >
-            View all <ArrowRight size={18} className="ml-1" />
-          </Link>
-        </div>
-        {isLoading && stocks.length === 0 ? (
-          <StockGridSkeleton count={4} />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {mostActive.map((stock) => (
-              <StockCard key={stock.symbol} stock={stock as Stock} showDetails />
-            ))}
+      <BlurredPremiumContent title="Most Active" description="See the highest volume stocks on NGX">
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Most Active</h2>
+            <Link
+              href="/stocks?sort=volume"
+              className="flex items-center text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium transition-colors"
+            >
+              View all <ArrowRight size={18} className="ml-1" />
+            </Link>
           </div>
-        )}
-      </section>
+          {isLoading && stocks.length === 0 ? (
+            <StockGridSkeleton count={4} />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {mostActive.map((stock) => (
+                <StockCard key={stock.symbol} stock={stock as Stock} showDetails />
+              ))}
+            </div>
+          )}
+        </section>
+      </BlurredPremiumContent>
 
-      <section className="mb-8">
-        <MarketBuzzX />
-      </section>
+      <BlurredPremiumContent title="Market Buzz" description="Get real-time social sentiment from Nigerian traders">
+        <section className="mb-8">
+          <MarketBuzzX />
+        </section>
+      </BlurredPremiumContent>
 
     </div>
   );

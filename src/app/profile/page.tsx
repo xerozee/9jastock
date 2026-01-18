@@ -59,8 +59,18 @@ interface StockData {
 }
 
 interface Recommendation {
-  stocks: StockData[];
+  symbol: string;
+  name: string;
+  price: number;
+  changePercent: number;
+  sector?: string;
   reason: string;
+  analysis: string;
+  confidenceScore: number;
+  riskLevel: 'low' | 'medium' | 'high';
+  action: 'buy' | 'hold' | 'sell';
+  targetPrice?: number;
+  timeframe?: string;
 }
 
 const goalLabels: Record<string, string> = {
@@ -518,42 +528,88 @@ export default function ProfilePage() {
                   </Link>
                 </div>
               ) : recommendations.length > 0 ? (
-                <div className="space-y-6">
-                  {recommendations.map((rec, index) => (
-                    <div key={index}>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3 flex items-center gap-2">
-                        <Lightbulb className="w-4 h-4 text-amber-500" />
-                        {rec.reason}
-                      </p>
-                      <div className="space-y-2">
-                        {rec.stocks.map((stock: StockData) => (
-                          <Link
-                            key={stock.symbol}
-                            href={`/stocks/${stock.symbol.replace('NGX:', '')}`}
-                            className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                          >
-                            <div>
-                              <p className="font-medium text-gray-900 dark:text-white">
-                                {stock.symbol.replace('NGX:', '')}
-                              </p>
-                              <p className="text-sm text-gray-500 dark:text-gray-400">
-                                {stock.name}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-medium text-gray-900 dark:text-white">
-                                ₦{stock.price?.toFixed(2) || '0.00'}
-                              </p>
-                              <p className={`text-sm flex items-center justify-end gap-1 ${(stock.changePercent || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                {(stock.changePercent || 0) >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                                {(stock.changePercent || 0) >= 0 ? '+' : ''}{(stock.changePercent || 0).toFixed(2)}%
-                              </p>
-                            </div>
-                          </Link>
-                        ))}
+                <div className="space-y-4">
+                  {recommendations.map((rec, index) => {
+                    const displaySymbol = rec.symbol.includes('NGX:') ? rec.symbol.replace('NGX:', '') : rec.symbol;
+                    return (
+                    <Link
+                      key={index}
+                      href={`/stocks/${displaySymbol}`}
+                      className="block bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-gray-100 dark:border-gray-600"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div>
+                            <p className="font-bold text-gray-900 dark:text-white">
+                              {displaySymbol}
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {rec.name}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
+                            rec.action === 'buy' 
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 
+                              : rec.action === 'sell' 
+                                ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                                : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+                          }`}>
+                            {rec.action}
+                          </span>
+                          <span className={`px-2 py-1 rounded text-xs ${
+                            rec.riskLevel === 'low' 
+                              ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400' 
+                              : rec.riskLevel === 'high'
+                                ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
+                                : 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400'
+                          }`}>
+                            {rec.riskLevel} risk
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                      
+                      <div className="flex items-center gap-4 mb-3">
+                        <div>
+                          <p className="text-lg font-bold text-gray-900 dark:text-white">
+                            ₦{rec.price?.toFixed(2) || '0.00'}
+                          </p>
+                          <p className={`text-sm flex items-center gap-1 ${(rec.changePercent || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                            {(rec.changePercent || 0) >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                            {(rec.changePercent || 0) >= 0 ? '+' : ''}{(rec.changePercent || 0).toFixed(2)}%
+                          </p>
+                        </div>
+                        {rec.targetPrice && (
+                          <div className="text-right">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Target</p>
+                            <p className="font-medium text-gray-900 dark:text-white">₦{rec.targetPrice.toFixed(2)}</p>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1 ml-auto">
+                          <span className="text-xs text-gray-500">Confidence:</span>
+                          <span className="font-medium text-amber-600 dark:text-amber-400">{rec.confidenceScore}%</span>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-100 dark:border-gray-600">
+                        <div className="flex items-start gap-2">
+                          <Lightbulb className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                            {rec.analysis || rec.reason}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {rec.timeframe && (
+                        <div className="mt-2 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                          <Clock className="w-3 h-3" />
+                          {rec.timeframe} outlook
+                        </div>
+                      )}
+                    </Link>
+                  );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-8">

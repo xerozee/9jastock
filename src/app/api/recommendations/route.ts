@@ -147,13 +147,16 @@ function getFallbackRecommendations(stocks: Stock[], profile: UserProfile) {
     .sort((a, b) => (b.volume || 0) - (a.volume || 0))
     .slice(0, 5)
     .map(s => ({
-      symbol: s.symbol,
+      symbol: s.symbol.replace('NGX:', ''),
       name: s.name,
       price: s.price,
       changePercent: s.changePercent,
       sector: s.sector,
       reason: 'Top traded stock matching your investment profile',
+      analysis: `Based on your ${riskTolerance || 'moderate'} risk tolerance and ${investmentGoal || 'general'} investment goals, this stock shows strong trading volume and market stability on the NGX.`,
       confidenceScore: 70,
       riskLevel: 'medium' as const,
+      action: 'hold' as const,
+      timeframe: 'medium-term',
     }));
 }

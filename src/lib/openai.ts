@@ -44,6 +44,10 @@ export interface AIRecommendation {
   reason: string;
   confidenceScore: number;
   riskLevel: 'low' | 'medium' | 'high';
+  action: 'buy' | 'hold' | 'sell';
+  analysis: string;
+  targetPrice?: number;
+  timeframe?: string;
 }
 
 export interface StockAnalysis {
@@ -80,11 +84,18 @@ export async function getAIStockRecommendations(
     rsi: s.rsi?.toFixed(0) || 'N/A',
   }));
 
-  const prompt = `You are an expert Nigerian stock market analyst. Analyze the following NGX stocks and recommend the top 5 best stocks for this investor.
+  const prompt = `You are an expert Nigerian Stock Exchange (NGX) analyst with deep knowledge of the Nigerian economy, sectors, and market dynamics. Analyze the following NGX stocks and provide personalized recommendations for this investor.
+
+NIGERIAN MARKET CONTEXT:
+- Consider Nigeria's economic conditions: inflation, interest rates, forex stability
+- Banking, Oil & Gas, Consumer Goods, and Telecom are key sectors on the NGX
+- Blue-chip stocks like DANGCEM, GTCO, ZENITH, MTNN offer stability
+- Growth stocks in consumer goods and telecoms may offer higher returns
+- Dividend-paying stocks are popular for income-focused Nigerian investors
 
 INVESTOR PROFILE:
 - Investment Goal: ${userProfile.investmentGoal || 'Not specified'}
-- Experience Level: ${userProfile.experienceLevel || 'Not specified'}
+- Experience Level: ${userProfile.experienceLevel || 'Not specified'}  
 - Risk Tolerance: ${userProfile.riskTolerance || 'Not specified'}
 - Investment Horizon: ${userProfile.investmentHorizon || 'Not specified'}
 - Interested Sectors: ${userProfile.interestedSectors?.join(', ') || 'Not specified'}
@@ -92,21 +103,25 @@ INVESTOR PROFILE:
 AVAILABLE STOCKS:
 ${JSON.stringify(stocksSummary, null, 2)}
 
-Provide exactly 5 stock recommendations. For each stock, explain why it matches this investor's profile. Consider:
-1. The investor's risk tolerance and experience
-2. Their investment goals and time horizon
-3. The stock's fundamentals (P/E ratio, dividend yield)
-4. Recent performance and momentum
-5. Sector preferences
+Provide exactly 5 stock recommendations with specific BUY, HOLD, or SELL actions. For each stock:
+1. Match to investor's risk tolerance and experience level
+2. Align with their investment goals and time horizon
+3. Consider Nigerian market-specific factors
+4. Analyze fundamentals (P/E ratio, dividend yield, market cap)
+5. Factor in recent performance, RSI, and momentum
 
-Respond in JSON format:
+RESPONSE FORMAT (JSON):
 {
   "recommendations": [
     {
-      "symbol": "SYMBOL",
-      "reason": "Brief explanation why this stock suits this investor (2-3 sentences)",
-      "confidenceScore": 85,
-      "riskLevel": "low|medium|high"
+      "symbol": "SYMBOL (without NGX: prefix)",
+      "action": "buy|hold|sell",
+      "reason": "2-3 sentence explanation why this action suits this investor",
+      "analysis": "Detailed 3-4 sentence market analysis covering fundamentals, technicals, and Nigerian economic factors affecting this stock",
+      "confidenceScore": 75-95,
+      "riskLevel": "low|medium|high",
+      "targetPrice": 25.50,
+      "timeframe": "short-term|medium-term|long-term"
     }
   ]
 }`;
@@ -116,7 +131,7 @@ Respond in JSON format:
       model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
       response_format: { type: 'json_object' },
-      max_completion_tokens: 1000,
+      max_completion_tokens: 2000,
     });
 
     const content = response.choices[0]?.message?.content;
@@ -124,18 +139,24 @@ Respond in JSON format:
 
     const parsed = JSON.parse(content);
     const stockMap = new Map(stocks.map(s => [s.symbol, s]));
+    const stockMapNoPrefix = new Map(stocks.map(s => [s.symbol.replace('NGX:', ''), s]));
 
     return parsed.recommendations.map((rec: any) => {
-      const stock = stockMap.get(rec.symbol);
+      const cleanSymbol = rec.symbol.replace('NGX:', '');
+      const stock = stockMap.get(rec.symbol) || stockMap.get(`NGX:${cleanSymbol}`) || stockMapNoPrefix.get(cleanSymbol);
       return {
-        symbol: rec.symbol,
-        name: stock?.name || rec.symbol,
+        symbol: cleanSymbol,
+        name: stock?.name || cleanSymbol,
         price: stock?.price || 0,
         changePercent: stock?.changePercent || 0,
         sector: stock?.sector,
         reason: rec.reason,
         confidenceScore: rec.confidenceScore || 75,
         riskLevel: rec.riskLevel || 'medium',
+        action: rec.action || 'hold',
+        analysis: rec.analysis || rec.reason,
+        targetPrice: rec.targetPrice,
+        timeframe: rec.timeframe || 'medium-term',
       };
     }).filter((rec: AIRecommendation) => rec.price > 0);
   } catch (error) {

@@ -74,7 +74,7 @@ export default function RoadmapPage() {
     },
     {
       phase: 'Phase 3',
-      title: 'Bloomberg-Terminal Features',
+      title: 'In-Depth Market Insights',
       color: 'from-purple-500 to-pink-500',
       borderColor: 'border-purple-500/30',
       bgColor: 'bg-purple-500/10',

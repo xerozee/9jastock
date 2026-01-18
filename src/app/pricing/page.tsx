@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PREMIUM_FEATURES, VALUE_PROPOSITIONS } from '@/lib/subscription';
 import { STRIPE_PRICE_IDS, SUBSCRIPTION_PLANS, formatNaira } from '@/lib/stripeConfig';
-import { Check, Crown, Zap, Shield, Star, TrendingUp, Brain, Bell, Sparkles, ArrowRight } from 'lucide-react';
+import { Check, Crown, Zap, Shield, Star, TrendingUp, Brain, Bell, Sparkles, ArrowRight, ArrowLeft, CheckCircle, Clock, Rocket, LineChart, Newspaper, Mail, Smartphone, BarChart3, Globe, GraduationCap } from 'lucide-react';
 
 export default function PricingPage() {
   const router = useRouter();
@@ -73,9 +73,35 @@ export default function PricingPage() {
 
   const yearlySavings = (SUBSCRIPTION_PLANS.monthly.price * 12) - SUBSCRIPTION_PLANS.yearly.price;
 
+  const availableNowFeatures = [
+    { icon: TrendingUp, title: 'Real-Time NGX Data', description: '145+ Nigerian stocks with live prices' },
+    { icon: Brain, title: 'AI Recommendations', description: 'Buy/Sell/Hold signals for every stock' },
+    { icon: Bell, title: 'Price Alerts', description: 'Push notifications for price targets' },
+    { icon: Sparkles, title: 'Market Buzz', description: 'Social sentiment from Nigerian traders' },
+    { icon: LineChart, title: 'Technical Analysis', description: 'RSI, MACD, Moving Averages' },
+    { icon: Newspaper, title: 'News Aggregation', description: 'Curated Nigerian financial news' },
+    { icon: Mail, title: 'AI Newsletter', description: 'Daily market insights to your inbox' },
+    { icon: Smartphone, title: 'Mobile PWA', description: 'Works on any device, even offline' },
+  ];
+
+  const comingSoonFeatures = [
+    { icon: BarChart3, title: 'Advanced Charting', description: 'Interactive tools & custom timeframes' },
+    { icon: Globe, title: 'Global Markets', description: 'US stocks, crypto, African markets' },
+    { icon: Zap, title: 'In-Depth Insights', description: 'Company financials & corporate data' },
+    { icon: GraduationCap, title: 'Investment Academy', description: 'Learn investing the Nigerian way' },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
       <div className="max-w-6xl mx-auto px-4 py-12 md:py-20">
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 mb-8 transition-colors"
+        >
+          <ArrowLeft size={18} />
+          Back to Home
+        </Link>
+
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 rounded-full text-amber-400 text-sm mb-6 border border-amber-500/20">
             <Crown className="w-4 h-4" />
@@ -236,17 +262,66 @@ export default function PricingPage() {
             </div>
 
             <div className="mb-16">
-              <h2 className="text-2xl md:text-3xl font-bold text-center mb-10">
+              <h2 className="text-2xl md:text-3xl font-bold text-center mb-4">
                 Everything You Get With Premium
               </h2>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {PREMIUM_FEATURES.map((feature, i) => (
-                  <div key={i} className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50 hover:border-amber-500/30 transition-colors">
-                    <div className="text-3xl mb-4">{feature.icon}</div>
-                    <h3 className="font-bold text-white mb-2">{feature.title}</h3>
-                    <p className="text-sm text-slate-400">{feature.description}</p>
+              <p className="text-slate-400 text-center max-w-2xl mx-auto mb-10">
+                Full access to all current features plus everything we build next
+              </p>
+              
+              <div className="mb-10">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                    <CheckCircle size={16} className="text-emerald-400" />
                   </div>
-                ))}
+                  <h3 className="text-xl font-bold text-white">Available Now</h3>
+                </div>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {availableNowFeatures.map((feature, i) => {
+                    const Icon = feature.icon;
+                    return (
+                      <div key={i} className="bg-slate-800/50 rounded-xl p-4 border border-emerald-500/20 hover:border-emerald-500/40 transition-colors">
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                            <Icon size={14} className="text-emerald-400" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-white text-sm mb-1">{feature.title}</h4>
+                            <p className="text-xs text-slate-400">{feature.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 rounded-lg bg-[#FCD116]/20 flex items-center justify-center">
+                    <Rocket size={16} className="text-[#FCD116]" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">Coming Soon</h3>
+                  <span className="text-xs text-slate-500">Included with your subscription</span>
+                </div>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {comingSoonFeatures.map((feature, i) => {
+                    const Icon = feature.icon;
+                    return (
+                      <div key={i} className="bg-slate-800/30 rounded-xl p-4 border border-[#FCD116]/20 hover:border-[#FCD116]/40 transition-colors">
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-[#FCD116]/20 flex items-center justify-center flex-shrink-0">
+                            <Icon size={14} className="text-[#FCD116]" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-white text-sm mb-1">{feature.title}</h4>
+                            <p className="text-xs text-slate-400">{feature.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 

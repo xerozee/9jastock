@@ -10,6 +10,8 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Stock } from '@/types/stock';
+import { NewsListSkeleton } from '@/components/ui/Skeleton';
+import EmptyState from '@/components/ui/EmptyState';
 
 interface NewsItem {
   id: number;
@@ -295,24 +297,16 @@ export default function BlogPage() {
             )}
 
             {isNewsLoading && news.length === 0 ? (
-              <div className="flex items-center justify-center py-16">
-                <RefreshCw size={32} className="animate-spin text-green-600" />
-              </div>
+              <NewsListSkeleton count={4} />
             ) : displayedNews.length === 0 ? (
-              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-12 text-center">
-                <Newspaper className="mx-auto text-gray-400 mb-4" size={48} />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No News Available</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  News articles are being updated. Check back soon!
-                </p>
-                {isAuthenticated && (
-                  <button
-                    onClick={() => fetchNews(true)}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                  >
-                    Refresh News
-                  </button>
-                )}
+              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
+                <EmptyState
+                  type="news"
+                  title="No news available"
+                  description="Market news will appear here once available. Check back soon for the latest updates."
+                  actionLabel={isAuthenticated ? "Refresh News" : undefined}
+                  onAction={isAuthenticated ? () => fetchNews(true) : undefined}
+                />
               </div>
             ) : (
               <div className="grid gap-6">

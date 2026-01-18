@@ -89,7 +89,6 @@ const portfolioItemSchema = new mongoose.Schema({
   addedAt: { type: Date, default: Date.now },
 });
 
-portfolioItemSchema.index({ userId: 1 });
 portfolioItemSchema.index({ userId: 1, symbol: 1 }, { unique: true });
 
 const holdingSchema = new mongoose.Schema({
@@ -421,7 +420,6 @@ const referralStatsSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-referralStatsSchema.index({ userId: 1 });
 referralStatsSchema.index({ tier: 1 });
 referralStatsSchema.index({ totalReferrals: -1 });
 

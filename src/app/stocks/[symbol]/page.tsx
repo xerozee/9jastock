@@ -2,14 +2,32 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { 
   ArrowLeft, TrendingUp, TrendingDown, Star, RefreshCw, Clock, 
   Activity, BarChart3, PieChart, DollarSign, Percent, TrendingDown as TrendDown,
   ChevronRight, Building2, LineChart, Scale, Wallet, Users, BarChart2, Plus, Check,
   Target, AlertTriangle, Briefcase, FileText, Globe, Phone, MapPin, Info
 } from 'lucide-react';
-import TradingViewWidget from '@/components/TradingViewWidget';
+
+const TradingViewWidget = lazy(() => import('@/components/TradingViewWidget'));
+
+function ChartSkeleton() {
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg dark:shadow-slate-900/50 border border-gray-100 dark:border-slate-700 overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+        <div className="w-6 h-6 rounded bg-slate-200 dark:bg-slate-700 animate-pulse" />
+        <div className="h-5 w-48 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+      </div>
+      <div className="h-[500px] bg-slate-100 dark:bg-slate-700/50 animate-pulse flex items-center justify-center">
+        <div className="text-center">
+          <BarChart3 className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+          <p className="text-slate-400 dark:text-slate-500">Loading chart...</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 import LiveIndicator from '@/components/LiveIndicator';
 import PremiumGate from '@/components/PremiumGate';
 import { useWatchlist } from '@/lib/watchlistContext';
@@ -421,9 +439,11 @@ export default function StockDetailPage() {
         </div>
       </div>
 
-      {/* Live Chart */}
+      {/* Live Chart - Lazy loaded for performance */}
       <div className="mb-6">
-        <TradingViewWidget symbol={stock.symbol} height={500} />
+        <Suspense fallback={<ChartSkeleton />}>
+          <TradingViewWidget symbol={stock.symbol} height={500} />
+        </Suspense>
       </div>
 
       {/* Company Overview Section - TradingView Primary */}

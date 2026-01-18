@@ -5,6 +5,7 @@ import { Providers } from "@/components/Providers";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import PWARegister from "@/components/PWARegister";
 import InstallPrompt from "@/components/InstallPrompt";
+import OfflineBanner from "@/components/ui/OfflineBanner";
 
 export const metadata: Metadata = {
   title: "9jaStock - Nigerian Stock Exchange Tracker",
@@ -48,6 +49,7 @@ export default function RootLayout({
             {children}
           </LayoutWrapper>
           <InstallPrompt />
+          <OfflineBanner />
         </Providers>
       </body>
     </html>

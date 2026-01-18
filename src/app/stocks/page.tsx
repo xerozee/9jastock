@@ -1,14 +1,18 @@
 'use client';
 
-import { useState, useMemo, useEffect, Suspense } from 'react';
+import { useState, useMemo, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Search, Filter, ArrowUpDown, RefreshCw, Wifi, TrendingUp, Clock } from 'lucide-react';
+import { Search, Filter, ArrowUpDown, RefreshCw, Wifi, TrendingUp, Clock, WifiOff } from 'lucide-react';
 import StockTable from '@/components/StockTable';
 import AuthGuard from '@/components/AuthGuard';
 import PremiumGate from '@/components/PremiumGate';
 import { nigerianStocks, getAllSectors } from '@/lib/stockData';
 import { Stock } from '@/types/stock';
 import { useSubscription } from '@/hooks/useSubscription';
+import { TableSkeleton } from '@/components/ui/Skeleton';
+import EmptyState from '@/components/ui/EmptyState';
+import { ApiErrorFallback } from '@/components/ui/ErrorBoundary';
+import { useOnlineStatus } from '@/components/ui/OfflineBanner';
 
 type SortOption = 'name' | 'price' | 'change' | 'volume' | 'marketCap' | 'gainers' | 'losers';
 
@@ -25,53 +29,44 @@ function StocksContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [liveCount, setLiveCount] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const isOnline = useOnlineStatus();
 
   const sectors = getAllSectors();
   const refreshInterval = limits.refreshInterval;
 
-  if (!isPremium) {
-    return (
-      <PremiumGate
-        title="All Stocks List"
-        description="Upgrade to Premium to browse all 145+ NGX stocks with live prices, filtering, and sorting options."
-        features={[
-          "Browse 145+ NGX stocks",
-          "Real-time price updates",
-          "Filter by sector",
-          "Sort by gainers/losers",
-          "In-depth stock analysis",
-          "Technical indicators"
-        ]}
-      />
-    );
-  }
-
-  const fetchLiveStocks = async () => {
+  const fetchLiveStocks = useCallback(async () => {
+    if (!isPremium) return;
     try {
       setIsLoading(true);
+      setError(null);
       const response = await fetch('/api/stocks');
-      if (response.ok) {
-        const data = await response.json();
-        setLiveStocks(data.data || []);
-        setLiveCount(data.liveCount || 0);
-        setLastUpdated(new Date());
+      if (!response.ok) {
+        throw new Error('Failed to fetch stock data');
       }
-    } catch (error) {
-      console.error('Failed to fetch live stocks:', error);
+      const data = await response.json();
+      setLiveStocks(data.data || []);
+      setLiveCount(data.liveCount || 0);
+      setLastUpdated(new Date());
+    } catch (err) {
+      console.error('Failed to fetch live stocks:', err);
+      setError('Unable to load stock data. Please check your connection.');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isPremium]);
 
   useEffect(() => {
+    if (!isPremium) return;
     fetchLiveStocks();
     const interval = setInterval(fetchLiveStocks, refreshInterval);
     return () => clearInterval(interval);
-  }, [refreshInterval]);
+  }, [refreshInterval, isPremium, fetchLiveStocks]);
 
   const stocks = liveStocks.length > 0 ? liveStocks : nigerianStocks;
 
   const filteredAndSortedStocks = useMemo(() => {
+    if (!isPremium) return [];
     let result = [...stocks];
 
     if (searchQuery) {
@@ -124,16 +119,33 @@ function StocksContent() {
     });
 
     return result;
-  }, [stocks, searchQuery, selectedSector, sortBy, sortOrder]);
+  }, [isPremium, stocks, searchQuery, selectedSector, sortBy, sortOrder]);
 
-  const handleSort = (option: SortOption) => {
+  const handleSort = useCallback((option: SortOption) => {
     if (sortBy === option) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
       setSortBy(option);
       setSortOrder('desc');
     }
-  };
+  }, [sortBy, sortOrder]);
+
+  if (!isPremium) {
+    return (
+      <PremiumGate
+        title="All Stocks List"
+        description="Upgrade to Premium to browse all 145+ NGX stocks with live prices, filtering, and sorting options."
+        features={[
+          "Browse 145+ NGX stocks",
+          "Real-time price updates",
+          "Filter by sector",
+          "Sort by gainers/losers",
+          "In-depth stock analysis",
+          "Technical indicators"
+        ]}
+      />
+    );
+  }
 
   return (
     <>
@@ -229,25 +241,38 @@ function StocksContent() {
         {selectedSector !== 'all' && ` in ${selectedSector}`}
       </div>
 
-      {isLoading && liveStocks.length === 0 ? (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 p-8 text-center">
-          <RefreshCw size={32} className="animate-spin text-green-600 mx-auto mb-4" />
-          <p className="text-gray-500 dark:text-slate-400">Loading live stock data...</p>
+      {!isOnline && (
+        <div className="mb-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl p-4 flex items-center gap-3">
+          <WifiOff className="w-5 h-5 text-orange-500 flex-shrink-0" />
+          <p className="text-sm text-orange-800 dark:text-orange-200">
+            You're offline. Showing cached data.
+          </p>
         </div>
+      )}
+
+      {error && liveStocks.length === 0 ? (
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 p-4">
+          <ApiErrorFallback message={error} onRetry={fetchLiveStocks} />
+        </div>
+      ) : isLoading && liveStocks.length === 0 ? (
+        <TableSkeleton rows={8} cols={6} />
       ) : filteredAndSortedStocks.length > 0 ? (
         <StockTable stocks={filteredAndSortedStocks} />
       ) : (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 p-8 text-center">
-          <p className="text-gray-500 dark:text-slate-400">No stocks found matching your criteria.</p>
-          <button
-            onClick={() => {
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
+          <EmptyState 
+            type="search"
+            title="No stocks found"
+            description={searchQuery || selectedSector !== 'all' 
+              ? "No stocks match your current filters. Try adjusting your search."
+              : "No stock data available at the moment."
+            }
+            actionLabel="Clear Filters"
+            onAction={() => {
               setSearchQuery('');
               setSelectedSector('all');
             }}
-            className="mt-4 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-medium"
-          >
-            Clear filters
-          </button>
+          />
         </div>
       )}
     </>
@@ -273,12 +298,7 @@ export default function StocksPage() {
             </div>
           </div>
 
-          <Suspense fallback={
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 p-8 text-center">
-              <RefreshCw size={32} className="animate-spin text-green-600 mx-auto mb-4" />
-              <p className="text-gray-500 dark:text-slate-400">Loading stocks...</p>
-            </div>
-          }>
+          <Suspense fallback={<TableSkeleton rows={8} cols={6} />}>
             <StocksContent />
           </Suspense>
         </div>

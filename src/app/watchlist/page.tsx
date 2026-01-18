@@ -12,11 +12,13 @@ import { useLiveStocks } from '@/lib/useLiveStocks';
 import { useSubscription } from '@/hooks/useSubscription';
 import { TIER_LIMITS } from '@/lib/subscription';
 import { PremiumBadge } from '@/components/PremiumWrapper';
+import { WatchlistSkeleton } from '@/components/ui/Skeleton';
+import EmptyState from '@/components/ui/EmptyState';
 
 export default function WatchlistPage() {
   const { watchlist } = useWatchlist();
   const { isPremium, tier } = useSubscription();
-  const refreshInterval = TIER_LIMITS[tier]?.refreshInterval || TIER_LIMITS.free.refreshInterval;
+  const refreshInterval = TIER_LIMITS[tier]?.refreshInterval || TIER_LIMITS.guest.refreshInterval;
   const { stocks: allStocks, isLoading, lastRefresh, refresh, isRefreshing } = useLiveStocks(refreshInterval);
   
   const watchlistStocks = useMemo(() => {
@@ -164,27 +166,17 @@ export default function WatchlistPage() {
               <WatchlistXPosts watchlistSymbols={watchlist} />
             </div>
           </>
+        ) : isLoading ? (
+          <WatchlistSkeleton count={5} />
         ) : (
-          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 p-12 text-center">
-            <div className="max-w-md mx-auto">
-              <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900/30 dark:to-yellow-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Star className="text-amber-500" size={40} fill="currentColor" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                Your watchlist is empty
-              </h2>
-              <p className="text-gray-600 dark:text-slate-400 mb-8">
-                Start building your watchlist by clicking the star icon on any stock you want to track.
-              </p>
-              <Link
-                href="/stocks"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
-              >
-                <TrendingUp size={18} />
-                Browse Stocks
-                <ArrowRight size={18} />
-              </Link>
-            </div>
+          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700">
+            <EmptyState
+              type="watchlist"
+              title="Your watchlist is empty"
+              description="Start building your watchlist by clicking the star icon on any stock you want to track."
+              actionLabel="Browse Stocks"
+              actionHref="/stocks"
+            />
           </div>
         )}
       </div>

@@ -30,6 +30,9 @@ import AuthGuard from "@/components/AuthGuard";
 import { useSubscription } from "@/hooks/useSubscription";
 import { TIER_LIMITS } from "@/lib/subscription";
 import { PremiumBadge } from "@/components/PremiumWrapper";
+import { PortfolioSkeleton } from "@/components/ui/Skeleton";
+import EmptyState from "@/components/ui/EmptyState";
+import { ApiErrorFallback } from "@/components/ui/ErrorBoundary";
 
 interface StockData {
   symbol: string;
@@ -96,7 +99,7 @@ export default function PortfolioPage() {
   const [upgradeInfo, setUpgradeInfo] = useState<{ currentCount: number; maxItems: number } | null>(null);
   const [showNonPremiumNotice, setShowNonPremiumNotice] = useState(false);
 
-  const refreshInterval = TIER_LIMITS[tier]?.refreshInterval || TIER_LIMITS.free.refreshInterval;
+  const refreshInterval = TIER_LIMITS[tier]?.refreshInterval || TIER_LIMITS.guest.refreshInterval;
 
   useEffect(() => {
     if (!hasFetched) {
@@ -465,25 +468,16 @@ export default function PortfolioPage() {
         )}
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
-          </div>
+          <PortfolioSkeleton />
         ) : holdings.length === 0 ? (
-          <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700">
-            <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Briefcase className="w-10 h-10 text-purple-600 dark:text-purple-400" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Your portfolio is empty</h2>
-            <p className="text-gray-600 dark:text-slate-400 mb-8 max-w-md mx-auto">
-              Start tracking your holdings by adding your first stock position with shares and purchase details
-            </p>
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
-            >
-              <Plus size={20} />
-              <span>Add Your First Position</span>
-            </button>
+          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700">
+            <EmptyState
+              type="portfolio"
+              title="Your portfolio is empty"
+              description="Start tracking your holdings by adding your first stock position with shares and purchase details."
+              actionLabel="Add Your First Position"
+              onAction={() => setShowAddModal(true)}
+            />
           </div>
         ) : (
           <div className="space-y-4">

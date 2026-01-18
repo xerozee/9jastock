@@ -9,17 +9,23 @@ interface UseSubscriptionReturn {
   isPremium: boolean;
   limits: typeof TIER_LIMITS['guest'];
   isLoading: boolean;
+  statusResolved: boolean;
 }
 
 export function useSubscription(): UseSubscriptionReturn {
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const [tier, setTier] = useState<SubscriptionTier>('guest');
+  const [statusResolved, setStatusResolved] = useState(false);
 
   useEffect(() => {
-    if (authLoading) return;
+    if (authLoading) {
+      setStatusResolved(false);
+      return;
+    }
     
     if (!isAuthenticated || !user) {
       setTier('guest');
+      setStatusResolved(true);
       return;
     }
 
@@ -29,6 +35,7 @@ export function useSubscription(): UseSubscriptionReturn {
     } else {
       setTier('guest');
     }
+    setStatusResolved(true);
   }, [user, authLoading, isAuthenticated]);
 
   return {
@@ -36,5 +43,6 @@ export function useSubscription(): UseSubscriptionReturn {
     isPremium: tier === 'premium',
     limits: TIER_LIMITS[tier],
     isLoading: authLoading,
+    statusResolved,
   };
 }

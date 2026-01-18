@@ -16,9 +16,11 @@ export default function BlurredPremiumContent({
   title,
   description = "Subscribe to unlock premium features and get real-time market insights"
 }: BlurredPremiumContentProps) {
-  const { isPremium } = useSubscription();
+  const { isPremium, statusResolved } = useSubscription();
 
-  if (isPremium) {
+  // Only show unblurred content when we've confirmed user is premium
+  // During loading (statusResolved=false), show blurred content as safe default
+  if (statusResolved && isPremium) {
     return <>{children}</>;
   }
 

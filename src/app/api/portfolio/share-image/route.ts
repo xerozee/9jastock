@@ -24,8 +24,11 @@ async function fetchStockPrice(symbol: string): Promise<number> {
     });
     
     if (response.ok) {
-      const data = await response.json();
-      return data.price || data.close || 0;
+      const result = await response.json();
+      if (result.success && result.data) {
+        return result.data.price || result.data.close || 0;
+      }
+      return result.price || result.close || 0;
     }
     return 0;
   } catch {

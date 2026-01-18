@@ -1,7 +1,10 @@
 # 9jaStock - Nigerian Stock Exchange (NGX) Tracker
 
 ## Overview
-9jaStock is a Next.js application designed to track Nigerian Stock Exchange (NGX) stocks in real-time. It provides live market data, stock prices, volume, and various financial metrics sourced primarily from TradingView. The platform features custom email/password and Google OAuth authentication, enabling users to track portfolios, manage watchlists, and access market news. The project aims to be a comprehensive, intuitive, and AI-powered platform for Nigerian stock market participants, enhancing user experience with modern web technologies and advanced analytical tools. Key ambitions include providing personalized recommendations, real-time market buzz, and a PWA-enabled experience for mobile users, with a freemium model for monetization.
+9jaStock is a Next.js application designed to track Nigerian Stock Exchange (NGX) stocks in real-time. It provides live market data, stock prices, volume, and various financial metrics sourced primarily from TradingView. The platform features custom email/password and Google OAuth authentication, enabling users to track portfolios, manage watchlists, and access market news. The project aims to be a comprehensive, intuitive, and AI-powered platform for Nigerian stock market participants, enhancing user experience with modern web technologies and advanced analytical tools.
+
+**Business Model: Premium-Only Subscription**
+The platform operates as a premium-only service (no free tier) given its unique value proposition and lack of competitors in the Nigerian market. This includes AI-powered Buy/Sell/Hold recommendations, portfolio tracking with real-time returns, price alerts, and comprehensive market analysis.
 
 ## User Preferences
 - Real-time data preferred over mock data
@@ -33,13 +36,11 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
     - **AI Newsletter System:** GPT-4o-mini-powered newsletter generation and automated delivery.
     - **Market Buzz Social Feed:** Real-time social media aggregation (TradingView, X/Twitter, Reddit) with AI sentiment analysis for Nigerian stocks. Includes official X/Twitter API integration.
     - **Stock Recommendations Engine:** AI-powered suggestions based on user profile and investment goals.
-    - **Tiered Access Control:** Differentiates features for guest, free, and premium users. Implemented with `useSubscription` hook.
+    - **Premium-Only Access Control:** All features require premium subscription. No free tier.
       - **Tier Limits (src/lib/subscription.ts):**
-        - Guest: 15min refresh, 0 portfolio, 3 watchlist
-        - Free: 5min refresh, 0 portfolio, 3 watchlist
-        - Premium: 1min refresh, unlimited portfolio, unlimited watchlist
-      - **Free User Access:** Market Overview (NGX indices, top gainers, top losers), My Profile, Watchlist (3 items max), News articles (main feed only)
-      - **Premium-only:** Stock list page (all 145+ stocks), Stock detail pages (in-depth analysis), Top Performers section, X/Twitter market buzz, Portfolio tracker, unlimited watchlist, faster data refresh (1min vs 5min)
+        - Guest: Limited preview only (5 stocks visible, no portfolio/watchlist)
+        - Premium: Full access - 1min refresh, unlimited portfolio, unlimited watchlist, all features
+      - **Premium Features:** All 145+ stocks, AI Buy/Sell/Hold recommendations, portfolio tracking with live P&L, X/Twitter market buzz with sentiment analysis, price alerts, push notifications, 30-day news archive, advanced technical analysis, AI morning newsletter
     - **Push Notifications:** Web Push API with VAPID authentication for price alerts, daily summaries, and breaking news.
     - **Stripe Subscription System:** Integration for managing free and premium tiers, including Stripe Checkout and webhook handling.
     - **Premium Visual Theme:** Gold/amber neon theme for premium users with glow effects, shimmer animations, and distinctive branding. Uses PremiumThemeContext and PremiumWrapper components (`src/contexts/PremiumThemeContext.tsx`, `src/components/PremiumWrapper.tsx`, `src/styles/premium.css`).

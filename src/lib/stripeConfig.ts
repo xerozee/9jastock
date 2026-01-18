@@ -4,31 +4,20 @@ export const STRIPE_PRICE_IDS = {
 } as const;
 
 export const SUBSCRIPTION_PLANS = {
-  free: {
-    name: 'Free',
-    price: 0,
-    interval: 'forever',
-    features: [
-      '5-minute data refresh',
-      'Up to 10 portfolio stocks',
-      'Basic watchlist',
-      'Market overview',
-      'Technical indicators',
-    ],
-  },
   monthly: {
     name: 'Premium Monthly',
     price: 2999,
     priceId: STRIPE_PRICE_IDS.MONTHLY,
     interval: 'month',
     features: [
-      '1-minute real-time data',
-      'Unlimited portfolio stocks',
-      'AI stock recommendations',
+      '1-minute real-time data for 145+ stocks',
+      'Unlimited portfolio tracking with live P&L',
+      'AI Buy/Sell/Hold recommendations',
       'Push notifications & price alerts',
-      'Priority support',
-      'Full market sentiment analysis',
-      'Advanced technical analysis',
+      'X/Twitter market buzz with AI sentiment',
+      'Full 30-day news archive',
+      'Advanced technical analysis tools',
+      'AI morning newsletter',
     ],
   },
   yearly: {
@@ -37,14 +26,16 @@ export const SUBSCRIPTION_PLANS = {
     priceId: STRIPE_PRICE_IDS.YEARLY,
     interval: 'year',
     savings: '17%',
+    monthlyEquivalent: 2083,
     features: [
-      '1-minute real-time data',
-      'Unlimited portfolio stocks',
-      'AI stock recommendations',
+      '1-minute real-time data for 145+ stocks',
+      'Unlimited portfolio tracking with live P&L',
+      'AI Buy/Sell/Hold recommendations',
       'Push notifications & price alerts',
-      'Priority support',
-      'Full market sentiment analysis',
-      'Advanced technical analysis',
+      'X/Twitter market buzz with AI sentiment',
+      'Full 30-day news archive',
+      'Advanced technical analysis tools',
+      'AI morning newsletter',
     ],
   },
 } as const;

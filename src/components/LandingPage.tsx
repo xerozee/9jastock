@@ -95,7 +95,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
     { value: '145+', label: 'Nigerian Stocks Tracked', icon: '📈' },
     { value: 'Live', label: 'Auto-Refreshing Data', icon: '⚡' },
     { value: 'AI', label: 'Powered Insights', icon: '🧠' },
-    { value: 'Free', label: 'To Get Started', icon: '🎯' },
+    { value: 'Only', label: 'NGX AI Platform', icon: '🏆' },
   ];
 
   const testimonials = [
@@ -206,12 +206,12 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                 
                 <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4 lg:justify-start justify-center mb-8 md:mb-10">
                   <Link
-                    href="/signup"
-                    className="group relative w-full sm:w-auto flex items-center justify-center gap-3 px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold rounded-2xl shadow-2xl shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105 transition-all duration-300 overflow-hidden"
+                    href="/pricing"
+                    className="group relative w-full sm:w-auto flex items-center justify-center gap-3 px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-2xl shadow-2xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-105 transition-all duration-300 overflow-hidden"
                   >
-                    <span className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <span className="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                     <span className="relative flex items-center gap-2 text-sm md:text-base">
-                      Start Free Today
+                      Get Premium Access
                       <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                     </span>
                   </Link>
@@ -226,7 +226,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                 </div>
                 
                 <div className="flex flex-wrap items-center gap-4 md:gap-6 text-xs md:text-sm text-slate-400 lg:justify-start justify-center">
-                  {['No credit card', 'Free tier available', 'Install as app'].map((text, i) => (
+                  {['No competitor in Nigeria', 'Cancel anytime', 'Install as app'].map((text, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <CheckCircle size={14} className="text-emerald-500" />
                       <span>{text}</span>
@@ -591,13 +591,13 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
           <div className="text-center mb-10 md:mb-16">
             <div className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-amber-500/10 rounded-full text-amber-400 text-xs md:text-sm mb-3 md:mb-4">
               <Crown size={12} />
-              <span className="font-medium">Simple Pricing</span>
+              <span className="font-medium">Premium Platform</span>
             </div>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 md:mb-4">
-              Free Forever, Premium When Ready
+              The Only NGX AI Platform in Nigeria
             </h2>
             <p className="text-sm md:text-lg text-slate-400 max-w-2xl mx-auto px-4 mb-6">
-              Most features are free. Upgrade only when you want faster updates and AI recommendations
+              No other platform offers real-time data, AI recommendations, and social sentiment analysis. Invest in tools that give you an edge.
             </p>
             
             <div className="inline-flex items-center p-1 bg-slate-800 rounded-xl">
@@ -605,7 +605,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                 onClick={() => setActivePlan('monthly')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   activePlan === 'monthly' 
-                    ? 'bg-emerald-500 text-white' 
+                    ? 'bg-amber-500 text-white' 
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -615,7 +615,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                 onClick={() => setActivePlan('yearly')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   activePlan === 'yearly' 
-                    ? 'bg-emerald-500 text-white' 
+                    ? 'bg-amber-500 text-white' 
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -624,68 +624,50 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
-            <div className="relative p-6 md:p-8 rounded-2xl md:rounded-3xl bg-slate-900/50 border border-slate-700">
-              <h3 className="text-xl md:text-2xl font-bold text-white mb-2">Free</h3>
-              <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-3xl md:text-4xl font-black text-white">₦0</span>
-                <span className="text-slate-400">/forever</span>
+          <div className="max-w-xl mx-auto">
+            <div className="relative p-8 md:p-10 rounded-3xl bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-amber-500/10 border-2 border-amber-500/40 shadow-2xl shadow-amber-500/10">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-bold rounded-full shadow-lg">
+                PREMIUM ACCESS
               </div>
-              <ul className="space-y-3 mb-8">
+              <div className="text-center mb-8">
+                <div className="flex items-baseline justify-center gap-1 mb-2">
+                  <span className="text-5xl md:text-6xl font-black text-white">
+                    ₦{activePlan === 'monthly' ? '2,999' : '24,999'}
+                  </span>
+                  <span className="text-slate-400 text-lg">/{activePlan === 'monthly' ? 'month' : 'year'}</span>
+                </div>
+                {activePlan === 'yearly' && (
+                  <p className="text-emerald-400 font-medium">Just ₦2,083/month - Save ₦11,000 annually!</p>
+                )}
+              </div>
+              <ul className="space-y-4 mb-8">
                 {[
-                  '5-minute data refresh',
-                  'Up to 10 portfolio stocks',
-                  'Basic watchlist',
-                  'Market overview',
-                  'Technical indicators',
-                ].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm text-slate-300">
-                    <CheckCircle size={16} className="text-emerald-400" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/signup"
-                className="block w-full py-3 text-center bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-colors"
-              >
-                Get Started
-              </Link>
-            </div>
-
-            <div className="relative p-6 md:p-8 rounded-2xl md:rounded-3xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/30">
-              <div className="absolute -top-3 right-6 px-3 py-1 bg-emerald-500 text-white text-xs font-bold rounded-full">
-                POPULAR
-              </div>
-              <h3 className="text-xl md:text-2xl font-bold text-white mb-2">Premium</h3>
-              <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-3xl md:text-4xl font-black text-white">
-                  ₦{activePlan === 'monthly' ? '2,999' : '24,999'}
-                </span>
-                <span className="text-slate-400">/{activePlan === 'monthly' ? 'month' : 'year'}</span>
-              </div>
-              <ul className="space-y-3 mb-8">
-                {[
-                  '1-minute real-time data',
-                  'Unlimited portfolio stocks',
-                  'AI stock recommendations',
+                  '1-minute real-time data for 145+ stocks',
+                  'AI Buy/Sell/Hold recommendations',
+                  'Unlimited portfolio with live P&L',
                   'Push notifications & price alerts',
-                  'Priority support',
-                  'Full market sentiment analysis',
-                  'Advanced technical analysis',
+                  'X/Twitter market buzz with AI sentiment',
+                  'AI-powered morning newsletter',
+                  'Advanced technical analysis tools',
+                  'Priority customer support',
                 ].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm text-slate-300">
-                    <CheckCircle size={16} className="text-emerald-400" />
+                  <li key={i} className="flex items-center gap-3 text-slate-300">
+                    <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                      <CheckCircle size={12} className="text-emerald-400" />
+                    </div>
                     {feature}
                   </li>
                 ))}
               </ul>
               <Link
                 href="/pricing"
-                className="block w-full py-3 text-center bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white font-bold rounded-xl transition-all"
+                className="block w-full py-4 text-center bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-lg rounded-xl transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-amber-500/20"
               >
-                Start Premium
+                Get Premium Access
               </Link>
+              <p className="text-center text-slate-500 text-sm mt-4">
+                Secure payment via Stripe. Cancel anytime.
+              </p>
             </div>
           </div>
         </div>
@@ -726,10 +708,10 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
               </div>
               
               <Link
-                href="/signup"
-                className="inline-flex items-center gap-2 px-5 md:px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold rounded-xl hover:from-emerald-400 hover:to-green-400 transition-all text-sm md:text-base"
+                href="/pricing"
+                className="inline-flex items-center gap-2 px-5 md:px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl hover:from-amber-400 hover:to-orange-400 transition-all text-sm md:text-base"
               >
-                Get Started Free
+                Get Premium Access
                 <ArrowRight size={16} />
               </Link>
             </div>
@@ -830,15 +812,15 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
           </h2>
           
           <p className="text-lg md:text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
-            Stop relying on WhatsApp tips and outdated websites. Get the same tools professional traders use — completely free to start.
+            Stop relying on WhatsApp tips and outdated websites. Join the only AI-powered NGX platform built for Nigerian investors.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="/signup"
-              className="group relative flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold rounded-2xl shadow-2xl shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105 transition-all duration-300"
+              href="/pricing"
+              className="group relative flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-2xl shadow-2xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-105 transition-all duration-300"
             >
-              Create Free Account
+              Get Premium Access
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </Link>
             

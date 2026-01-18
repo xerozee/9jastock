@@ -94,6 +94,7 @@ export default function PortfolioPage() {
   const [copied, setCopied] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeInfo, setUpgradeInfo] = useState<{ currentCount: number; maxItems: number } | null>(null);
+  const [showNonPremiumNotice, setShowNonPremiumNotice] = useState(false);
 
   const refreshInterval = TIER_LIMITS[tier]?.refreshInterval || TIER_LIMITS.free.refreshInterval;
 
@@ -123,6 +124,12 @@ export default function PortfolioPage() {
       }
     };
   }, [refreshInterval, hasFetched]);
+
+  useEffect(() => {
+    if (!isLoadingHoldings && holdings.length > 0 && !isPremium) {
+      setShowNonPremiumNotice(true);
+    }
+  }, [holdings, isLoadingHoldings, isPremium]);
 
   const fetchHoldings = async (showLoading = true) => {
     if (showLoading) setIsLoadingHoldings(true);
@@ -271,11 +278,24 @@ export default function PortfolioPage() {
     setExpandedSymbols(newExpanded);
   };
 
+  const findStockBySymbol = (symbol: string): StockData | undefined => {
+    const exactMatch = stocksMap.get(symbol);
+    if (exactMatch) return exactMatch;
+    
+    const withPrefix = stocksMap.get(`NGX:${symbol}`);
+    if (withPrefix) return withPrefix;
+    
+    for (const [key, stock] of stocksMap) {
+      if (key.replace('NGX:', '') === symbol) return stock;
+    }
+    return undefined;
+  };
+
   const groupedHoldings = useMemo(() => {
     const groups = new Map<string, GroupedHolding>();
 
     holdings.forEach(holding => {
-      const stock = stocksMap.get(holding.symbol);
+      const stock = findStockBySymbol(holding.symbol);
       const currentPrice = stock?.price || holding.purchasePrice;
       const holdingValue = holding.shares * currentPrice;
       const holdingCost = holding.shares * holding.purchasePrice;
@@ -791,6 +811,60 @@ export default function PortfolioPage() {
                   <p className="text-gray-600 dark:text-gray-400">Failed to generate share link. Please try again.</p>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showNonPremiumNotice && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-md w-full border border-gray-100 dark:border-slate-700 overflow-hidden">
+            <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white text-center">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Crown className="w-8 h-8" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Premium Feature</h2>
+              <p className="text-white/90">
+                Portfolio tracking is now a Premium feature
+              </p>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-gray-600 dark:text-gray-300 text-center">
+                Your existing portfolio with {holdings.length} position{holdings.length > 1 ? 's' : ''} is safely stored. Upgrade to Premium to:
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                  <TrendingUp className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                  <span>View real-time portfolio returns</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                  <Clock className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                  <span>1-minute live price updates</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                  <Sparkles className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                  <span>Add unlimited positions</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                  <Share2 className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                  <span>Share your portfolio performance</span>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowNonPremiumNotice(false)}
+                  className="flex-1 py-3 px-4 rounded-xl font-medium border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Maybe Later
+                </button>
+                <Link
+                  href="/pricing"
+                  className="flex-1 py-3 px-4 rounded-xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white text-center hover:from-amber-600 hover:to-orange-600 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Crown className="w-4 h-4" />
+                  Upgrade Now
+                </Link>
+              </div>
             </div>
           </div>
         </div>

@@ -1,10 +1,12 @@
 {
+  "id": "com.9jastock.app",
   "name": "9jastock - Nigerian Stock Investment Companion",
   "short_name": "9jastock",
   "description": "Track Nigerian stocks, get AI-powered analysis, and build your portfolio. The smartest way to invest in Nigeria.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#0f172a",
   "theme_color": "#008751",

@@ -89,6 +89,13 @@
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Portfolio tracking dashboard"
+    },
+    {
+      "src": "/screenshots/desktop.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Desktop view of market dashboard"
     }
   ],
   "shortcuts": [

@@ -477,3 +477,127 @@ export type IReferralStats = {
   lastReferralAt?: Date;
   updatedAt: Date;
 };
+
+const companyProfileSchema = new mongoose.Schema({
+  symbol: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
+  description: { type: String },
+  sector: { type: String },
+  industry: { type: String },
+  founded: { type: Number },
+  headquarters: { type: String },
+  ceo: { type: String },
+  employees: { type: Number },
+  website: { type: String },
+  phone: { type: String },
+  email: { type: String },
+  address: { type: String },
+  registrationNumber: { type: String },
+  listingDate: { type: Date },
+  stockExchange: { type: String, default: 'NGX' },
+  isin: { type: String },
+  fiscalYearEnd: { type: String },
+  auditor: { type: String },
+  registrar: { type: String },
+  businessSummary: { type: String },
+  keyProducts: [{ type: String }],
+  competitors: [{ type: String }],
+  subsidiaries: [{ type: String }],
+  boardOfDirectors: [{
+    name: { type: String },
+    position: { type: String },
+    since: { type: Number }
+  }],
+  lastUpdated: { type: Date, default: Date.now },
+  dataSource: { type: String },
+  isVerified: { type: Boolean, default: false },
+});
+
+companyProfileSchema.index({ sector: 1 });
+companyProfileSchema.index({ industry: 1 });
+companyProfileSchema.index({ name: 'text', description: 'text' });
+
+export const CompanyProfile = mongoose.models.CompanyProfile || mongoose.model('CompanyProfile', companyProfileSchema);
+
+const dividendHistorySchema = new mongoose.Schema({
+  symbol: { type: String, required: true },
+  declarationDate: { type: Date },
+  exDividendDate: { type: Date },
+  recordDate: { type: Date },
+  paymentDate: { type: Date },
+  dividendAmount: { type: Number, required: true },
+  dividendType: { type: String, enum: ['interim', 'final', 'special', 'bonus'], default: 'final' },
+  currency: { type: String, default: 'NGN' },
+  dividendYield: { type: Number },
+  fiscalYear: { type: Number },
+  fiscalQuarter: { type: Number },
+  qualificationDate: { type: Date },
+  closureStart: { type: Date },
+  closureEnd: { type: Date },
+  source: { type: String },
+  sourceUrl: { type: String },
+  scrapedAt: { type: Date, default: Date.now },
+});
+
+dividendHistorySchema.index({ paymentDate: -1 });
+dividendHistorySchema.index({ symbol: 1, paymentDate: -1 });
+dividendHistorySchema.index({ fiscalYear: 1 });
+
+export const DividendHistory = mongoose.models.DividendHistory || mongoose.model('DividendHistory', dividendHistorySchema);
+
+export type ICompanyProfile = {
+  _id: mongoose.Types.ObjectId;
+  symbol: string;
+  name: string;
+  description?: string;
+  sector?: string;
+  industry?: string;
+  founded?: number;
+  headquarters?: string;
+  ceo?: string;
+  employees?: number;
+  website?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  registrationNumber?: string;
+  listingDate?: Date;
+  stockExchange: string;
+  isin?: string;
+  fiscalYearEnd?: string;
+  auditor?: string;
+  registrar?: string;
+  businessSummary?: string;
+  keyProducts?: string[];
+  competitors?: string[];
+  subsidiaries?: string[];
+  boardOfDirectors?: Array<{
+    name: string;
+    position: string;
+    since?: number;
+  }>;
+  lastUpdated: Date;
+  dataSource?: string;
+  isVerified: boolean;
+};
+
+export type IDividendHistory = {
+  _id: mongoose.Types.ObjectId;
+  symbol: string;
+  declarationDate?: Date;
+  exDividendDate?: Date;
+  recordDate?: Date;
+  paymentDate?: Date;
+  dividendAmount: number;
+  dividendType: 'interim' | 'final' | 'special' | 'bonus';
+  currency: string;
+  dividendYield?: number;
+  fiscalYear?: number;
+  fiscalQuarter?: number;
+  qualificationDate?: Date;
+  closureStart?: Date;
+  closureEnd?: Date;
+  source?: string;
+  sourceUrl?: string;
+  scrapedAt: Date;
+};

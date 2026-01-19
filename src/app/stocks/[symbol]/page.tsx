@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 
 const TradingViewWidget = lazy(() => import('@/components/TradingViewWidget'));
+const TradingViewTechnicalAnalysis = lazy(() => import('@/components/TradingViewTechnicalAnalysis'));
+const TradingViewFinancials = lazy(() => import('@/components/TradingViewFinancials'));
 
 function ChartSkeleton() {
   return (
@@ -28,8 +30,26 @@ function ChartSkeleton() {
     </div>
   );
 }
+
+function WidgetSkeleton({ title, height = 450 }: { title: string; height?: number }) {
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg dark:shadow-slate-900/50 border border-gray-100 dark:border-slate-700 overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+        <div className="w-6 h-6 rounded bg-slate-200 dark:bg-slate-700 animate-pulse" />
+        <div className="h-5 w-48 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+      </div>
+      <div style={{ height: `${height}px` }} className="bg-slate-100 dark:bg-slate-700/50 animate-pulse flex items-center justify-center">
+        <div className="text-center">
+          <Activity className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+          <p className="text-slate-400 dark:text-slate-500">Loading {title}...</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 import LiveIndicator from '@/components/LiveIndicator';
 import PremiumGate from '@/components/PremiumGate';
+import TechnicalAnalysisSummary from '@/components/TechnicalAnalysisSummary';
 import { useWatchlist } from '@/lib/watchlistContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useLiveStock, formatLastUpdate } from '@/lib/useLiveStocks';
@@ -443,6 +463,30 @@ export default function StockDetailPage() {
       <div className="mb-6">
         <Suspense fallback={<ChartSkeleton />}>
           <TradingViewWidget symbol={stock.symbol} height={500} />
+        </Suspense>
+      </div>
+
+      {/* Technical Analysis Summary */}
+      <div className="mb-6">
+        <TechnicalAnalysisSummary
+          recommendation={extendedStock.recommendation}
+          rsi={extendedStock.rsi}
+          macd={extendedStock.macd}
+          macdSignal={extendedStock.macdSignal}
+          sma20={extendedStock.sma20}
+          sma50={extendedStock.sma50}
+          sma200={extendedStock.sma200}
+          ema20={extendedStock.ema20}
+          ema50={extendedStock.ema50}
+          ema200={extendedStock.ema200}
+          currentPrice={liveStock?.price || stock.price}
+        />
+      </div>
+
+      {/* TradingView Technical Analysis Widget */}
+      <div className="mb-6">
+        <Suspense fallback={<WidgetSkeleton title="Technical Analysis" height={450} />}>
+          <TradingViewTechnicalAnalysis symbol={stock.symbol} height={450} />
         </Suspense>
       </div>
 
@@ -1092,6 +1136,13 @@ export default function StockDetailPage() {
           <StatCard label="Cash/Share" value={yahooData?.financialRatios?.totalCashPerShare ? formatCurrency(yahooData.financialRatios.totalCashPerShare) : 'N/A'} />
         </div>
       </SectionCard>
+
+      {/* TradingView Financials Widget */}
+      <div className="mb-6">
+        <Suspense fallback={<WidgetSkeleton title="Financial Data" height={600} />}>
+          <TradingViewFinancials symbol={stock.symbol} height={600} />
+        </Suspense>
+      </div>
 
       {/* Balance Sheet */}
       <SectionCard title="Balance Sheet & Liquidity" icon={Building2} iconColor="text-teal-600">

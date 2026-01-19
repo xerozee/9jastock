@@ -66,6 +66,13 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
     - **Stripe Subscription System:** Integration for managing free and premium tiers, including Stripe Checkout and webhook handling.
     - **Premium Visual Theme:** Gold/amber neon theme for premium users with glow effects, shimmer animations, and distinctive branding. Uses PremiumThemeContext and PremiumWrapper components (`src/contexts/PremiumThemeContext.tsx`, `src/components/PremiumWrapper.tsx`, `src/styles/premium.css`).
     - **Referral System:** Database-backed referral tracking with Referral, ReferralReward, and ReferralStats schemas in MongoDB. Tracks referrer/referred relationships, conversion status, and prepares for future reward implementation (bronze/silver/gold/platinum tiers). API endpoints at `/api/referral/stats` and `/api/referral/apply`.
+    - **In-Depth Financial Analysis (Jan 2026):** Comprehensive stock analysis tools for institutional-grade investors:
+      - **TradingView Technical Analysis Widget:** Embedded widget showing oscillators, moving averages, and Buy/Sell/Neutral summary (`src/components/TradingViewTechnicalAnalysis.tsx`)
+      - **TradingView Financials Widget:** Embedded widget displaying revenue, earnings, balance sheet, and cash flow data (`src/components/TradingViewFinancials.tsx`)
+      - **Technical Analysis Summary:** Custom gauge component showing aggregated technical signals with oscillator and MA breakdown (`src/components/TechnicalAnalysisSummary.tsx`)
+      - **Company Profile Database:** MongoDB schema for curated company data including CEO, employees, headquarters, board of directors, subsidiaries, key products (`src/lib/mongodb.ts` - CompanyProfile schema)
+      - **Dividend History Tracking:** MongoDB schema for historical dividend data with fiscal year tracking, declaration dates, payment dates, and yield calculations (`src/lib/mongodb.ts` - DividendHistory schema)
+      - **API Endpoints:** `/api/company-profile` (GET/POST with admin auth), `/api/dividends` (GET/POST with admin auth) for managing company and dividend data
 
 ## External Dependencies
 - **Stock Data API:** Live stock data via backend services (presented as 9jaStocks.app data).

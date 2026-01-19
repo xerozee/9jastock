@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { connectToDatabase, User, Holding } from '@/lib/mongodb';
+import { getCachedQuote, getAllCachedQuotes, fetchNigerianStocksFromScanner, hasSession, getLastScanTime } from '@/lib/tradingviewClient';
+import { getStockBySymbol } from '@/lib/stockData';
 
 interface HoldingWithData {
   symbol: string;
@@ -13,25 +15,34 @@ interface HoldingWithData {
   gainPercent: number;
 }
 
+const CACHE_TTL = 5 * 60 * 1000;
+
 async function fetchStockPrice(symbol: string): Promise<number> {
   try {
-    const baseUrl = process.env.REPLIT_DEV_DOMAIN 
-      ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-      : 'http://localhost:5000';
+    const upperSymbol = symbol.toUpperCase();
     
-    const response = await fetch(`${baseUrl}/api/stocks/${symbol}`, {
-      cache: 'no-store',
-    });
+    const now = Date.now();
+    const lastScan = getLastScanTime();
+    const timeSinceLastScan = now - lastScan;
+    const cachedQuotes = getAllCachedQuotes();
     
-    if (response.ok) {
-      const result = await response.json();
-      if (result.success && result.data) {
-        return result.data.price || result.data.close || 0;
-      }
-      return result.price || result.close || 0;
+    if (hasSession() && (cachedQuotes.size === 0 || timeSinceLastScan > CACHE_TTL)) {
+      await fetchNigerianStocksFromScanner();
     }
+    
+    const cached = getCachedQuote(upperSymbol);
+    if (cached && cached.price > 0) {
+      return cached.price;
+    }
+    
+    const staticStock = getStockBySymbol(upperSymbol);
+    if (staticStock && staticStock.price > 0) {
+      return staticStock.price;
+    }
+    
     return 0;
-  } catch {
+  } catch (error) {
+    console.error(`Error fetching price for ${symbol}:`, error);
     return 0;
   }
 }

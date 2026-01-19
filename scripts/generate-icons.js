@@ -2,31 +2,10 @@ const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 
-const sizes = [72, 96, 128, 144, 152, 180, 192, 384, 512];
+const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+const maskableSizes = [192, 512];
 
-const generateSVG = (size) => {
-  const padding = size * 0.15;
-  const innerSize = size - (padding * 2);
-  const fontSize = size * 0.35;
-  const strokeWidth = Math.max(2, size * 0.03);
-  
-  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#0a0a0a"/>
-      <stop offset="100%" style="stop-color:#1a1a2e"/>
-    </linearGradient>
-    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#10b981"/>
-      <stop offset="100%" style="stop-color:#059669"/>
-    </linearGradient>
-  </defs>
-  <rect width="${size}" height="${size}" rx="${size * 0.2}" fill="url(#bg)"/>
-  <text x="${size/2}" y="${size/2 + fontSize * 0.35}" font-family="Arial, sans-serif" font-size="${fontSize}" font-weight="bold" fill="url(#accent)" text-anchor="middle">9ja</text>
-  <line x1="${padding}" y1="${size * 0.7}" x2="${size - padding}" y2="${size * 0.7}" stroke="#10b981" stroke-width="${strokeWidth}" stroke-linecap="round"/>
-  <polyline points="${padding + innerSize * 0.1},${size * 0.65} ${padding + innerSize * 0.3},${size * 0.55} ${padding + innerSize * 0.5},${size * 0.62} ${padding + innerSize * 0.7},${size * 0.48} ${padding + innerSize * 0.9},${size * 0.58}" fill="none" stroke="#10b981" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
-};
+const sourceIcon = path.join(__dirname, '../attached_assets/generated_images/9jastock_app_icon_design.png');
 
 async function generateIcons() {
   const iconsDir = path.join(__dirname, '..', 'public', 'icons');
@@ -36,11 +15,8 @@ async function generateIcons() {
   }
 
   for (const size of sizes) {
-    const svg = generateSVG(size);
-    const svgBuffer = Buffer.from(svg);
-    
     const pngFilename = `icon-${size}x${size}.png`;
-    await sharp(svgBuffer)
+    await sharp(sourceIcon)
       .resize(size, size)
       .png()
       .toFile(path.join(iconsDir, pngFilename));
@@ -48,7 +24,42 @@ async function generateIcons() {
     console.log(`Generated ${pngFilename}`);
   }
 
-  console.log('\\nAll PNG icons generated successfully!');
+  for (const size of maskableSizes) {
+    const pngFilename = `icon-maskable-${size}x${size}.png`;
+    const padding = Math.round(size * 0.1);
+    const innerSize = size - (padding * 2);
+    
+    const resizedIcon = await sharp(sourceIcon)
+      .resize(innerSize, innerSize)
+      .toBuffer();
+
+    await sharp({
+      create: {
+        width: size,
+        height: size,
+        channels: 4,
+        background: { r: 0, g: 135, b: 81, alpha: 1 }
+      }
+    })
+      .composite([{
+        input: resizedIcon,
+        top: padding,
+        left: padding
+      }])
+      .png()
+      .toFile(path.join(iconsDir, pngFilename));
+    
+    console.log(`Generated ${pngFilename}`);
+  }
+
+  const appleIconPath = path.join(__dirname, '..', 'public', 'apple-touch-icon.png');
+  await sharp(sourceIcon)
+    .resize(180, 180)
+    .png()
+    .toFile(appleIconPath);
+  console.log('Generated apple-touch-icon.png');
+
+  console.log('\nAll PNG icons generated successfully!');
 }
 
 generateIcons().catch(console.error);

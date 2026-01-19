@@ -1,0 +1,311 @@
+PREPARE 9JASTOCK FOR MOBILE APP STORES
+
+We're preparing the web app to be wrapped as a native Android app using PWABuilder. 
+This requires proper PWA configuration.
+
+TASKS:
+
+═══════════════════════════════════════════════════════════════════════════════
+1. CREATE APP ICONS
+═══════════════════════════════════════════════════════════════════════════════
+
+Create a folder: public/icons/ (if it doesn't exist)
+
+Generate these icon files with the 9jastock logo/branding:
+- icon-72x72.png
+- icon-96x96.png  
+- icon-128x128.png
+- icon-144x144.png
+- icon-152x152.png
+- icon-192x192.png (REQUIRED - must have)
+- icon-384x384.png
+- icon-512x512.png (REQUIRED - must have)
+
+The icons should:
+- Have the 9jastock logo centered
+- Use brand colors (green #10b981 or #008751)
+- Have a solid background (no transparency for app stores)
+- Be square with no rounded corners (system applies rounding)
+
+Also create:
+- icon-maskable-192x192.png (with extra padding for maskable icon)
+- icon-maskable-512x512.png (with extra padding for maskable icon)
+
+═══════════════════════════════════════════════════════════════════════════════
+2. UPDATE/CREATE MANIFEST.JSON
+═══════════════════════════════════════════════════════════════════════════════
+
+Create or update public/manifest.json with this EXACT content:
+
+{
+  "name": "9jastock - Nigerian Stock Investment Companion",
+  "short_name": "9jastock",
+  "description": "Track Nigerian stocks, get AI-powered analysis, and build your portfolio. The smartest way to invest in Nigeria.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#10b981",
+  "categories": ["finance", "business"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/home.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Home screen showing market overview"
+    },
+    {
+      "src": "/screenshots/portfolio.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Portfolio tracking dashboard"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "My Portfolio",
+      "short_name": "Portfolio",
+      "description": "View your investment portfolio",
+      "url": "/portfolio",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Market Overview",
+      "short_name": "Markets",
+      "description": "See today's market activity",
+      "url": "/stocks",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
+
+═══════════════════════════════════════════════════════════════════════════════
+3. UPDATE ROOT LAYOUT WITH MOBILE META TAGS
+═══════════════════════════════════════════════════════════════════════════════
+
+In src/app/layout.tsx, update the metadata and add mobile-specific tags:
+
+export const metadata: Metadata = {
+  title: '9jastock - Nigerian Stock Investment Companion',
+  description: 'Track Nigerian stocks, get AI-powered analysis, and build your portfolio. The smartest way to invest in Nigeria.',
+  manifest: '/manifest.json',
+  themeColor: '#10b981',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: '9jastock',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: 'cover',
+  },
+  icons: {
+    icon: [
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icons/icon-152x152.png', sizes: '152x152', type: 'image/png' },
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+    ],
+  },
+  openGraph: {
+    title: '9jastock - Nigerian Stock Investment Companion',
+    description: 'Track Nigerian stocks, get AI-powered analysis, and build your portfolio.',
+    url: 'https://9jastock.com',
+    siteName: '9jastock',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '9jastock',
+    description: 'The smartest way to invest in Nigeria',
+  },
+};
+
+Also add these meta tags in the <head> section if not using Next.js metadata:
+
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="9jastock" />
+<link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+<link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#10b981" />
+
+═══════════════════════════════════════════════════════════════════════════════
+4. CREATE/VERIFY SERVICE WORKER
+═══════════════════════════════════════════════════════════════════════════════
+
+Ensure there's a service worker for PWA functionality.
+
+If using next-pwa, verify it's configured in next.config.js.
+
+If not using next-pwa, create a basic service worker at public/sw.js:
+
+const CACHE_NAME = '9jastock-v1';
+const urlsToCache = [
+  '/',
+  '/manifest.json',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(urlsToCache))
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request)
+      .then((response) => response || fetch(event.request))
+  );
+});
+
+And register it in your app (in layout.tsx or a client component):
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js');
+  });
+}
+
+═══════════════════════════════════════════════════════════════════════════════
+5. FIX MOBILE UX ISSUES
+═══════════════════════════════════════════════════════════════════════════════
+
+Check and fix these common mobile issues:
+
+A) Prevent zoom on input focus - ensure all inputs have font-size >= 16px:
+
+input, select, textarea {
+  font-size: 16px; /* Prevents iOS zoom on focus */
+}
+
+B) Ensure no horizontal scroll:
+
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+C) Add safe area padding for notched phones:
+
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+D) Disable text selection on UI elements (optional):
+
+button, a, .no-select {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+═══════════════════════════════════════════════════════════════════════════════
+6. CREATE SCREENSHOTS FOLDER (OPTIONAL BUT RECOMMENDED)
+═══════════════════════════════════════════════════════════════════════════════
+
+Create public/screenshots/ folder with:
+- home.png (1080x1920) - Screenshot of home/market page
+- portfolio.png (1080x1920) - Screenshot of portfolio page
+- stocks.png (1080x1920) - Screenshot of stock detail page
+
+These are used in the PWA install prompt on some browsers.
+
+═══════════════════════════════════════════════════════════════════════════════
+7. VERIFY EVERYTHING WORKS
+═══════════════════════════════════════════════════════════════════════════════
+
+After making changes:
+
+1. Test that /manifest.json is accessible and returns valid JSON
+2. Test that all icon URLs in manifest return actual images
+3. Open Chrome DevTools → Application → Manifest to verify it's detected
+4. Run Lighthouse PWA audit (should pass most checks)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+When complete, the app will be ready for PWABuilder to generate an Android app.
+Let me know when these tasks are done so we can proceed to PWABuilder.

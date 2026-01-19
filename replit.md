@@ -19,7 +19,13 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
 - **Design:** Modern 3D UI, sci-fi aesthetic, glassmorphism, interactive elements, mobile-first responsive design.
 - **Homepage (Jan 2026 Simplification):** Streamlined landing page focused on value creation - "Invest in Nigeria with Confidence" tagline, 3 core features (real-time data, AI recommendations, portfolio tracking), minimal "What's Coming" teaser without dates, prominent pricing section.
 - **Theming:** Dark mode as default with persistence via localStorage. Inline script prevents flash of wrong theme on initial load. Theme toggle available in UI.
-- **PWA:** Progressive Web App support with `manifest.json`, service worker for offline capabilities, and device-specific installation prompts.
+- **PWA:** Progressive Web App support ready for mobile app store deployment:
+  - Full icon set in `public/icons/` (72-512px + maskable variants)
+  - Complete manifest.json with shortcuts, screenshots, categories
+  - Service worker with offline caching and push notification support
+  - Mobile UX CSS fixes (safe areas, input zoom prevention, touch handling)
+  - Device-specific installation prompts
+  - Ready for PWABuilder Android/iOS wrapping
 - **Market Hours:** Live indicator for NGX trading hours with countdowns.
 - **Launch Polish (Jan 2026):**
   - **Loading States:** Skeleton components (8 variants) for stocks, portfolio, news, watchlist with animated placeholders

@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.app_9jastocks.twa",
+    "sha256_cert_fingerprints": ["B7:7F:6E:DF:40:50:2F:77:F4:6E:0D:C9:78:72:EE:56:2E:E4:40:71:F1:5F:40:25:98:89:83:97:68:38:50:B9"]
+  }
+}]

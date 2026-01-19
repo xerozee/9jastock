@@ -4,7 +4,10 @@ const OFFLINE_URL = '/offline.html';
 const STATIC_ASSETS = [
   '/',
   '/offline.html',
-  '/manifest.json'
+  '/manifest.json',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
+  '/apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (event) => {

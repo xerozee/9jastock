@@ -1,4 +1,5 @@
 const CACHE_NAME = '9jastock-v1';
+const DATA_CACHE_NAME = '9jastock-data-v1';
 const OFFLINE_URL = '/offline.html';
 
 const STATIC_ASSETS = [
@@ -9,6 +10,14 @@ const STATIC_ASSETS = [
   '/icons/icon-512x512.png',
   '/apple-touch-icon.png'
 ];
+
+const SYNC_TAGS = {
+  STOCK_DATA: 'sync-stock-data',
+  PORTFOLIO: 'sync-portfolio',
+  NEWS: 'sync-news'
+};
+
+const PERIODIC_SYNC_TAG = 'periodic-stock-update';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -129,4 +138,103 @@ self.addEventListener('fetch', (event) => {
         });
     })
   );
+});
+
+// Background Sync - Triggered when connection is restored
+self.addEventListener('sync', (event) => {
+  console.log('[SW] Background sync triggered:', event.tag);
+  
+  if (event.tag === SYNC_TAGS.STOCK_DATA) {
+    event.waitUntil(syncStockData());
+  } else if (event.tag === SYNC_TAGS.PORTFOLIO) {
+    event.waitUntil(syncPortfolio());
+  } else if (event.tag === SYNC_TAGS.NEWS) {
+    event.waitUntil(syncNews());
+  }
+});
+
+// Periodic Background Sync - Fetches data at regular intervals
+self.addEventListener('periodicsync', (event) => {
+  console.log('[SW] Periodic sync triggered:', event.tag);
+  
+  if (event.tag === PERIODIC_SYNC_TAG) {
+    event.waitUntil(fetchAndCacheStockData());
+  }
+});
+
+// Fetch and cache stock data
+async function fetchAndCacheStockData() {
+  try {
+    const response = await fetch('/api/stocks');
+    if (response.ok) {
+      const cache = await caches.open(DATA_CACHE_NAME);
+      await cache.put('/api/stocks', response.clone());
+      
+      // Notify clients about the update
+      const clients = await self.clients.matchAll();
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'STOCK_DATA_UPDATED',
+          timestamp: Date.now()
+        });
+      });
+      
+      console.log('[SW] Stock data cached successfully');
+      return response.json();
+    }
+  } catch (error) {
+    console.error('[SW] Failed to fetch stock data:', error);
+  }
+}
+
+// Sync stock data when back online
+async function syncStockData() {
+  try {
+    const data = await fetchAndCacheStockData();
+    console.log('[SW] Stock data synced:', data?.length || 0, 'stocks');
+  } catch (error) {
+    console.error('[SW] Stock sync failed:', error);
+  }
+}
+
+// Sync portfolio data
+async function syncPortfolio() {
+  try {
+    const response = await fetch('/api/portfolio');
+    if (response.ok) {
+      const cache = await caches.open(DATA_CACHE_NAME);
+      await cache.put('/api/portfolio', response.clone());
+      console.log('[SW] Portfolio synced');
+    }
+  } catch (error) {
+    console.error('[SW] Portfolio sync failed:', error);
+  }
+}
+
+// Sync news data
+async function syncNews() {
+  try {
+    const response = await fetch('/api/news');
+    if (response.ok) {
+      const cache = await caches.open(DATA_CACHE_NAME);
+      await cache.put('/api/news', response.clone());
+      console.log('[SW] News synced');
+    }
+  } catch (error) {
+    console.error('[SW] News sync failed:', error);
+  }
+}
+
+// Message handler for client communication
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+  
+  if (event.data && event.data.type === 'REQUEST_SYNC') {
+    const tag = event.data.tag || SYNC_TAGS.STOCK_DATA;
+    self.registration.sync.register(tag).catch(err => {
+      console.error('[SW] Sync registration failed:', err);
+    });
+  }
 });

@@ -470,7 +470,7 @@ export default function StockDetailPage() {
       {/* Technical Analysis Summary */}
       <div className="mb-6">
         <TechnicalAnalysisSummary
-          recommendation={extendedStock.recommendation}
+          recommendation={extendedStock.recommendAll}
           rsi={extendedStock.rsi}
           macd={extendedStock.macd}
           macdSignal={extendedStock.macdSignal}

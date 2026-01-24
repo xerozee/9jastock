@@ -177,17 +177,11 @@ export default function AfricanFinancialsData({ symbol, companyName }: AfricanFi
     );
   }
 
-  const notFoundMessage = (
-    <div className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
-      <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-      <div>
-        <p className="text-amber-800 dark:text-amber-300 font-medium">Not Found</p>
-        <p className="text-amber-600 dark:text-amber-400 text-sm">
-          Financial data for {symbol} is not currently available.
-        </p>
-      </div>
-    </div>
-  );
+  // Hide the component entirely if no data is found (no dividends and no documents)
+  const hasData = data?.found && (data.dividends.length > 0 || data.documents.length > 0 || data.profile?.description);
+  if (!hasData) {
+    return null;
+  }
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg dark:shadow-slate-900/50 border border-gray-100 dark:border-slate-700 overflow-hidden">
@@ -227,90 +221,75 @@ export default function AfricanFinancialsData({ symbol, companyName }: AfricanFi
           </div>
         )}
 
-        {!data?.found ? (
-          notFoundMessage
-        ) : (
-          <>
-            {data.profile?.description && (
-              <div className="pb-4 border-b border-gray-100 dark:border-slate-700">
-                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {data.profile.description}
-                </p>
-              </div>
-            )}
+        {data?.profile?.description && (
+          <div className="pb-4 border-b border-gray-100 dark:border-slate-700">
+            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              {data.profile.description}
+            </p>
+          </div>
+        )}
 
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <DollarSign className="w-5 h-5 text-green-600 dark:text-green-400" />
-                <h4 className="font-semibold text-slate-900 dark:text-white">Dividend History</h4>
-              </div>
-              
-              {data.dividends.length === 0 ? (
-                <div className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg text-slate-500 dark:text-slate-400 text-sm">
-                  <AlertCircle className="w-4 h-4" />
-                  <span>No dividend data available</span>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-gray-200 dark:border-slate-700">
-                        <th className="text-left py-2 px-2 text-slate-600 dark:text-slate-400 font-medium">Year</th>
-                        <th className="text-left py-2 px-2 text-slate-600 dark:text-slate-400 font-medium">Type</th>
-                        <th className="text-right py-2 px-2 text-slate-600 dark:text-slate-400 font-medium">Amount</th>
-                        <th className="text-left py-2 px-2 text-slate-600 dark:text-slate-400 font-medium">Payment Date</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {data.dividends.slice(0, 5).map((div, idx) => (
-                        <tr key={idx} className="border-b border-gray-100 dark:border-slate-700/50 last:border-0">
-                          <td className="py-2 px-2 text-slate-900 dark:text-white">{div.fiscalYear}</td>
-                          <td className="py-2 px-2">
-                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                              div.dividendType === 'Interim' 
-                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                                : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                            }`}>
-                              {div.dividendType}
-                            </span>
-                          </td>
-                          <td className="py-2 px-2 text-right font-medium text-slate-900 dark:text-white">
-                            {div.currency} {div.amount.toFixed(2)}
-                          </td>
-                          <td className="py-2 px-2 text-slate-600 dark:text-slate-400">{div.paymentDate || '-'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+        {data && data.dividends.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <DollarSign className="w-5 h-5 text-green-600 dark:text-green-400" />
+              <h4 className="font-semibold text-slate-900 dark:text-white">Dividend History</h4>
             </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-slate-700">
+                    <th className="text-left py-2 px-2 text-slate-600 dark:text-slate-400 font-medium">Year</th>
+                    <th className="text-left py-2 px-2 text-slate-600 dark:text-slate-400 font-medium">Type</th>
+                    <th className="text-right py-2 px-2 text-slate-600 dark:text-slate-400 font-medium">Amount</th>
+                    <th className="text-left py-2 px-2 text-slate-600 dark:text-slate-400 font-medium">Payment Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.dividends.slice(0, 5).map((div, idx) => (
+                    <tr key={idx} className="border-b border-gray-100 dark:border-slate-700/50 last:border-0">
+                      <td className="py-2 px-2 text-slate-900 dark:text-white">{div.fiscalYear}</td>
+                      <td className="py-2 px-2">
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                          div.dividendType === 'Interim' 
+                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                            : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                        }`}>
+                          {div.dividendType}
+                        </span>
+                      </td>
+                      <td className="py-2 px-2 text-right font-medium text-slate-900 dark:text-white">
+                        {div.currency} {div.amount.toFixed(2)}
+                      </td>
+                      <td className="py-2 px-2 text-slate-600 dark:text-slate-400">{div.paymentDate || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                <h4 className="font-semibold text-slate-900 dark:text-white">Financial Documents</h4>
-              </div>
-              
-              {(() => {
-                const uniqueDocs = data.documents.reduce((acc, doc) => {
-                  if (!acc.find(d => d.url === doc.url)) {
-                    const relevantTypes = ['Annual Report', 'Interim Report', 'Quarterly Report'];
-                    if (relevantTypes.includes(doc.type)) {
-                      acc.push(doc);
-                    }
+        {data && data.documents.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <h4 className="font-semibold text-slate-900 dark:text-white">Financial Documents</h4>
+            </div>
+            {(() => {
+              const uniqueDocs = data.documents.reduce((acc, doc) => {
+                if (!acc.find(d => d.url === doc.url)) {
+                  const relevantTypes = ['Annual Report', 'Interim Report', 'Quarterly Report'];
+                  if (relevantTypes.includes(doc.type)) {
+                    acc.push(doc);
                   }
-                  return acc;
-                }, [] as Document[]).sort((a, b) => (b.year || 0) - (a.year || 0));
-                
-                return uniqueDocs.length === 0 ? (
-                  <div className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg text-slate-500 dark:text-slate-400 text-sm">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>No financial documents available</span>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {uniqueDocs.slice(0, 10).map((doc, idx) => (
+                }
+                return acc;
+              }, [] as Document[]).sort((a, b) => (b.year || 0) - (a.year || 0));
+              
+              return uniqueDocs.length > 0 ? (
+                <div className="space-y-2">
+                  {uniqueDocs.slice(0, 10).map((doc, idx) => (
                     <a
                       key={idx}
                       href={doc.url}
@@ -337,10 +316,9 @@ export default function AfricanFinancialsData({ symbol, companyName }: AfricanFi
                     </a>
                   ))}
                 </div>
-                );
-              })()}
-            </div>
-          </>
+              ) : null;
+            })()}
+          </div>
         )}
       </div>
     </div>

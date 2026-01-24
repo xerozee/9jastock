@@ -82,6 +82,8 @@ function FinancialsContent() {
   const [yearFilter, setYearFilter] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reportsPerPage, setReportsPerPage] = useState(25);
+  const [currentPage, setCurrentPage] = useState(1);
   
   const [stats, setStats] = useState<Stats | null>(null);
   const [companies, setCompanies] = useState<CompanyStats[]>([]);
@@ -162,6 +164,17 @@ function FinancialsContent() {
       d.companySymbol.toLowerCase().includes(query)
     );
   }, [dividends, searchQuery]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, reportFilter, yearFilter]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredDocuments.length / reportsPerPage);
+  const startIndex = (currentPage - 1) * reportsPerPage;
+  const endIndex = startIndex + reportsPerPage;
+  const paginatedDocuments = filteredDocuments.slice(startIndex, endIndex);
 
   const tabs = [
     { id: 'overview' as TabType, label: 'Overview', icon: PieChart },
@@ -383,6 +396,32 @@ function FinancialsContent() {
 
         {activeTab === 'reports' && (
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+            {/* Results count and per-page selector */}
+            <div className="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-700/30 border-b border-slate-200 dark:border-slate-700">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                <span className="font-semibold text-slate-900 dark:text-white">{filteredDocuments.length}</span> reports found
+                {searchQuery && <span> for "{searchQuery}"</span>}
+              </p>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-slate-500 dark:text-slate-400">Show:</span>
+                <select
+                  value={reportsPerPage}
+                  onChange={(e) => {
+                    setReportsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                >
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                  {filteredDocuments.length > 0 && (
+                    <option value={filteredDocuments.length}>All ({filteredDocuments.length})</option>
+                  )}
+                </select>
+              </div>
+            </div>
+
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-slate-50 dark:bg-slate-700/50">
@@ -395,7 +434,7 @@ function FinancialsContent() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                  {filteredDocuments.slice(0, 50).map((doc, i) => (
+                  {paginatedDocuments.map((doc, i) => (
                     <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
                       <td className="px-4 py-3">
                         <Link href={`/stocks/${doc.companySymbol}`} className="font-medium text-emerald-600 dark:text-emerald-400 hover:underline">
@@ -433,15 +472,53 @@ function FinancialsContent() {
                 </tbody>
               </table>
             </div>
+
             {filteredDocuments.length === 0 && (
               <div className="text-center py-12">
                 <AlertCircle className="w-12 h-12 mx-auto text-slate-400 mb-3" />
                 <p className="text-slate-600 dark:text-slate-400">No reports found matching your criteria</p>
               </div>
             )}
-            {filteredDocuments.length > 50 && (
-              <div className="px-4 py-3 bg-slate-50 dark:bg-slate-700/30 text-center text-sm text-slate-600 dark:text-slate-400">
-                Showing 50 of {filteredDocuments.length} reports
+
+            {/* Pagination controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-700/30 border-t border-slate-200 dark:border-slate-700">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  Showing {startIndex + 1} - {Math.min(endIndex, filteredDocuments.length)} of {filteredDocuments.length}
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(1)}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    First
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  <span className="px-3 py-1.5 text-sm font-medium text-slate-900 dark:text-white">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(totalPages)}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Last
+                  </button>
+                </div>
               </div>
             )}
           </div>

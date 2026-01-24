@@ -4,7 +4,7 @@ import { fetchCompanyDocuments, fetchLatestDocuments, FinancialDocumentData } fr
 
 export const dynamic = 'force-dynamic';
 
-const CACHE_TTL = 6 * 60 * 60 * 1000;
+const CACHE_TTL = 10 * 60 * 1000;
 
 async function upsertDocuments(documents: FinancialDocumentData[]) {
   for (const doc of documents) {

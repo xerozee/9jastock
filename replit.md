@@ -73,11 +73,12 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
       - **Company Profile Database:** MongoDB schema for curated company data including CEO, employees, headquarters, board of directors, subsidiaries, key products (`src/lib/mongodb.ts` - CompanyProfile schema)
       - **Dividend History Tracking:** MongoDB schema for historical dividend data with fiscal year tracking, declaration dates, payment dates, and yield calculations (`src/lib/mongodb.ts` - DividendHistory schema)
       - **API Endpoints:** `/api/company-profile` (GET/POST with admin auth), `/api/dividends` (GET/POST with admin auth) for managing company and dividend data
-    - **African Financials Integration (Jan 2026):** Scrapes financial documents (annual reports, interim reports, presentations) from africanfinancials.com:
-      - **Scraper Service:** `src/lib/africanFinancialsScraper.ts` - Fetches and parses documents, extracts key metrics (revenue, PAT, EPS) from summaries
-      - **MongoDB Schema:** FinancialDocument in `src/lib/mongodb.ts` for storing scraped documents with 6-hour cache TTL
-      - **API Endpoint:** `/api/financial-documents` (GET with symbol, type, year filters)
+    - **African Financials Integration (Jan 2026):** Financial document system with scraping infrastructure:
+      - **Scraper Service:** `src/lib/africanFinancialsScraper.ts` - Designed to fetch and parse documents, extracts key metrics (revenue, PAT, EPS) from summaries
+      - **MongoDB Schema:** FinancialDocument and FinancialDocSync in `src/lib/mongodb.ts` for storing documents with sync progress tracking
+      - **API Endpoints:** `/api/financial-documents` (GET with symbol, type, year filters), `/api/financial-documents/sync` (GET status, POST trigger), `/api/financial-documents/sync/runner` (incremental sync)
       - **UI Component:** `src/components/FinancialDocuments.tsx` - Displays documents with filtering, metrics badges, and links to full reports
+      - **LIMITATION:** African Financials website uses Cloudflare protection that blocks automated scraping. Manual data entry or alternative data sources may be required. TradingView widgets provide real-time fundamental data as an alternative.
 
 ## External Dependencies
 - **Stock Data API:** Live stock data via backend services (presented as 9jaStocks.app data).

@@ -642,6 +642,28 @@ financialDocumentSchema.index({ publishedDate: -1 });
 
 export const FinancialDocument = mongoose.models.FinancialDocument || mongoose.model('FinancialDocument', financialDocumentSchema);
 
+const financialDocSyncSchema = new mongoose.Schema({
+  syncId: { type: String, default: 'main', unique: true },
+  status: { 
+    type: String, 
+    enum: ['idle', 'running', 'completed', 'error'],
+    default: 'idle'
+  },
+  totalStocks: { type: Number, default: 0 },
+  processedStocks: { type: Number, default: 0 },
+  successfulStocks: { type: Number, default: 0 },
+  failedStocks: { type: Number, default: 0 },
+  totalDocuments: { type: Number, default: 0 },
+  currentSymbol: { type: String, default: '' },
+  startedAt: { type: Date },
+  completedAt: { type: Date },
+  lastUpdated: { type: Date, default: Date.now },
+  syncErrors: [{ type: String }],
+  stocksWithDocs: [{ type: String }],
+});
+
+export const FinancialDocSync = mongoose.models.FinancialDocSync || mongoose.model('FinancialDocSync', financialDocSyncSchema);
+
 export type IFinancialDocument = {
   _id: mongoose.Types.ObjectId;
   symbol: string;

@@ -7,42 +7,23 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
 
 const AFCompanyDataSchema = new mongoose.Schema({
-  symbol: { type: String, required: true, unique: true },
+  symbol: { type: String, required: true },
   name: String,
   url: String,
   found: { type: Boolean, default: false },
   sector: String,
-  dividends: [{
-    fiscalYear: String,
-    dividendType: String,
-    amount: Number,
-    currency: String,
-    paymentDate: String,
-    declarationDate: String,
-    exDate: String,
-  }],
-  documents: [{
-    title: String,
-    type: String,
-    year: Number,
-    url: String,
-    publishedDate: String,
-    metrics: {
-      revenue: String,
-      profit: String,
-      eps: String,
-    },
-  }],
-  profile: {
-    description: String,
-    ceo: String,
-    headquarters: String,
-    employees: String,
-    founded: String,
-    industry: String,
-  },
+  dividends: { type: mongoose.Schema.Types.Mixed, default: [] },
+  documents: { type: mongoose.Schema.Types.Mixed, default: [] },
+  profile: { type: mongoose.Schema.Types.Mixed, default: {} },
   updatedAt: { type: Date, default: Date.now },
-});
+}, { strict: false });
+
+function getAFCompanyDataModel() {
+  if (mongoose.models.AFCompanyData2) {
+    return mongoose.models.AFCompanyData2;
+  }
+  return mongoose.model('AFCompanyData2', AFCompanyDataSchema);
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -59,7 +40,7 @@ export async function GET(request: Request) {
   try {
     await connectToDatabase();
     
-    const AFCompanyDataModel = mongoose.models.AFCompanyData || mongoose.model('AFCompanyData', AFCompanyDataSchema);
+    const AFCompanyDataModel = getAFCompanyDataModel();
     
     const existingData = await AFCompanyDataModel.findOne({ symbol: symbol.toUpperCase() }).lean();
     

@@ -221,13 +221,22 @@ export async function scrapeCompanyData(symbol: string): Promise<AFCompanyData> 
       return result;
     }
     
+    const pageTitle = await page.title();
     const pageContent = await page.content();
-    if (pageContent.includes('Page not found') || pageContent.includes('404') || pageContent.includes('Not Found')) {
-      console.log(`[Browser] ${symbol}: Page not found`);
+    
+    const is404 = pageTitle.toLowerCase().includes('not found') ||
+                  pageTitle.includes('404') ||
+                  pageContent.includes('Error 404') ||
+                  pageContent.includes('page you are looking for') ||
+                  (pageContent.includes('<h1>') && pageContent.includes('Page not found</h1>'));
+    
+    if (is404) {
+      console.log(`[Browser] ${symbol}: Page not found (title: ${pageTitle})`);
       return result;
     }
     
     result.found = true;
+    console.log(`[Browser] ${symbol}: Page loaded (title: ${pageTitle})`);
     
     const data = await page.evaluate((sym: string) => {
       const companyName = document.querySelector('h1, .company-name, .entry-title')?.textContent?.trim() || '';

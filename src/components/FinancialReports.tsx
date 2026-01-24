@@ -9,17 +9,20 @@ import {
 interface ReportHighlights {
   revenue?: number;
   profit?: number;
+  profitBeforeTax?: number;
   totalAssets?: number;
   eps?: number;
   dividend?: number;
   dividendPerShare?: number;
+  grossEarnings?: number;
+  operatingProfit?: number;
 }
 
 interface FinancialReport {
   _id: string;
   symbol: string;
   companyName: string;
-  reportType: 'annual' | 'interim' | 'quarterly';
+  reportType: 'annual' | 'interim' | 'quarterly' | 'abridged';
   reportTitle: string;
   reportUrl: string;
   documentUrl?: string;
@@ -71,6 +74,7 @@ function ReportTypeBadge({ type }: { type: string }) {
     annual: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
     interim: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
     quarterly: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+    abridged: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
   };
 
   return (
@@ -136,6 +140,14 @@ function ReportCard({ report, isExpanded, onToggle }: {
             Key Highlights
           </h5>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {report.highlights.grossEarnings !== undefined && (
+              <div className="p-2 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Gross Earnings</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                  {formatCurrency(report.highlights.grossEarnings)}
+                </p>
+              </div>
+            )}
             {report.highlights.revenue !== undefined && (
               <div className="p-2 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
                 <p className="text-xs text-gray-500 dark:text-gray-400">Revenue</p>
@@ -146,9 +158,25 @@ function ReportCard({ report, isExpanded, onToggle }: {
             )}
             {report.highlights.profit !== undefined && (
               <div className="p-2 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Profit</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Profit After Tax</p>
                 <p className="text-sm font-semibold text-green-600">
                   {formatCurrency(report.highlights.profit)}
+                </p>
+              </div>
+            )}
+            {report.highlights.profitBeforeTax !== undefined && (
+              <div className="p-2 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Profit Before Tax</p>
+                <p className="text-sm font-semibold text-green-600">
+                  {formatCurrency(report.highlights.profitBeforeTax)}
+                </p>
+              </div>
+            )}
+            {report.highlights.operatingProfit !== undefined && (
+              <div className="p-2 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Operating Profit</p>
+                <p className="text-sm font-semibold text-blue-600">
+                  {formatCurrency(report.highlights.operatingProfit)}
                 </p>
               </div>
             )}
@@ -191,7 +219,7 @@ export default function FinancialReports({ symbol }: FinancialReportsProps) {
   const [expandedReport, setExpandedReport] = useState<string | null>(null);
   const [africanFinancialsUrl, setAfricanFinancialsUrl] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
-  const [filterType, setFilterType] = useState<'all' | 'annual' | 'interim' | 'quarterly'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'annual' | 'interim' | 'quarterly' | 'abridged'>('all');
 
   const fetchReports = async (refresh = false) => {
     setIsLoading(true);
@@ -324,6 +352,7 @@ export default function FinancialReports({ symbol }: FinancialReportsProps) {
           >
             <option value="all">All Reports</option>
             <option value="annual">Annual</option>
+            <option value="abridged">Abridged</option>
             <option value="interim">Interim</option>
             <option value="quarterly">Quarterly</option>
           </select>

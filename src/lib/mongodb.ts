@@ -606,7 +606,7 @@ export type IDividendHistory = {
 const financialReportSchema = new mongoose.Schema({
   symbol: { type: String, required: true },
   companyName: { type: String, required: true },
-  reportType: { type: String, enum: ['annual', 'interim', 'quarterly'], required: true },
+  reportType: { type: String, enum: ['annual', 'interim', 'quarterly', 'abridged'], required: true },
   reportTitle: { type: String, required: true },
   reportUrl: { type: String, required: true },
   documentUrl: { type: String },
@@ -616,10 +616,13 @@ const financialReportSchema = new mongoose.Schema({
   highlights: {
     revenue: { type: Number },
     profit: { type: Number },
+    profitBeforeTax: { type: Number },
     totalAssets: { type: Number },
     eps: { type: Number },
     dividend: { type: Number },
     dividendPerShare: { type: Number },
+    grossEarnings: { type: Number },
+    operatingProfit: { type: Number },
   },
   source: { type: String, default: 'africanfinancials.com' },
   scrapedAt: { type: Date, default: Date.now },
@@ -656,7 +659,7 @@ export type IFinancialReport = {
   _id: mongoose.Types.ObjectId;
   symbol: string;
   companyName: string;
-  reportType: 'annual' | 'interim' | 'quarterly';
+  reportType: 'annual' | 'interim' | 'quarterly' | 'abridged';
   reportTitle: string;
   reportUrl: string;
   documentUrl?: string;
@@ -666,10 +669,13 @@ export type IFinancialReport = {
   highlights?: {
     revenue?: number;
     profit?: number;
+    profitBeforeTax?: number;
     totalAssets?: number;
     eps?: number;
     dividend?: number;
     dividendPerShare?: number;
+    grossEarnings?: number;
+    operatingProfit?: number;
   };
   source: string;
   scrapedAt: Date;

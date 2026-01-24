@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase, User } from '@/lib/mongodb';
+import { connectToDatabase, User, AFCompanyData2 } from '@/lib/mongodb';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { getAIStockRecommendations, StockData, UserProfile } from '@/lib/openai';
@@ -102,9 +102,44 @@ export async function GET() {
       interestedSectors: user.interestedSectors,
     };
 
+    const stockSymbols = stocks.slice(0, 30).map(s => s.symbol.replace('NGX:', ''));
+    const afDataList = await AFCompanyData2.find({ 
+      symbol: { $in: stockSymbols.map(s => s.toUpperCase()) } 
+    }).lean();
+    
+    const afDataMap = new Map();
+    afDataList.forEach((af: any) => {
+      afDataMap.set(af.symbol?.toUpperCase(), af);
+      if (af.originalSymbol) {
+        afDataMap.set(af.originalSymbol?.toUpperCase(), af);
+      }
+    });
+
+    const enrichedStocks = stocks.map(stock => {
+      const symbol = stock.symbol.replace('NGX:', '').toUpperCase();
+      const afData = afDataMap.get(symbol);
+      
+      if (afData && afData.found) {
+        const latestDividend = afData.dividends?.[0];
+        const docCount = afData.documents?.length || 0;
+        
+        return {
+          ...stock,
+          afDividendHistory: latestDividend ? {
+            lastDividend: latestDividend.amount,
+            dividendType: latestDividend.dividendType,
+            paymentDate: latestDividend.paymentDate,
+          } : undefined,
+          afDocumentsCount: docCount,
+          afDataAvailable: true,
+        };
+      }
+      return stock;
+    });
+
     try {
       const aiRecommendations = await getAIStockRecommendations(
-        stocks as StockData[],
+        enrichedStocks as StockData[],
         userProfile
       );
 

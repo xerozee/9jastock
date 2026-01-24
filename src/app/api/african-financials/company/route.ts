@@ -1,29 +1,9 @@
 import { NextResponse } from 'next/server';
 import { scrapeCompanyData, generateCompanyUrl, AFCompanyData } from '@/lib/africanFinancialsBrowser';
-import { connectToDatabase } from '@/lib/mongodb';
-import mongoose from 'mongoose';
+import { connectToDatabase, AFCompanyData2 } from '@/lib/mongodb';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
-
-const AFCompanyDataSchema = new mongoose.Schema({
-  symbol: { type: String, required: true },
-  name: String,
-  url: String,
-  found: { type: Boolean, default: false },
-  sector: String,
-  dividends: { type: mongoose.Schema.Types.Mixed, default: [] },
-  documents: { type: mongoose.Schema.Types.Mixed, default: [] },
-  profile: { type: mongoose.Schema.Types.Mixed, default: {} },
-  updatedAt: { type: Date, default: Date.now },
-}, { strict: false });
-
-function getAFCompanyDataModel() {
-  if (mongoose.models.AFCompanyData2) {
-    return mongoose.models.AFCompanyData2;
-  }
-  return mongoose.model('AFCompanyData2', AFCompanyDataSchema);
-}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -40,13 +20,11 @@ export async function GET(request: Request) {
   try {
     await connectToDatabase();
     
-    const AFCompanyDataModel = getAFCompanyDataModel();
-    
-    const existingData = await AFCompanyDataModel.findOne({ symbol: symbol.toUpperCase() }).lean();
+    const existingData = await AFCompanyData2.findOne({ symbol: symbol.toUpperCase() }).lean();
     
     const needsRefresh = !existingData || 
       refresh || 
-      (existingData.updatedAt && (Date.now() - new Date(existingData.updatedAt as Date).getTime()) > 7 * 24 * 60 * 60 * 1000);
+      (existingData.scrapedAt && (Date.now() - new Date(existingData.scrapedAt as Date).getTime()) > 7 * 24 * 60 * 60 * 1000);
     
     if (existingData && !needsRefresh) {
       return NextResponse.json({
@@ -60,12 +38,13 @@ export async function GET(request: Request) {
     const freshData = await scrapeCompanyData(symbol.toUpperCase());
     
     if (freshData.found || !existingData) {
-      await AFCompanyDataModel.findOneAndUpdate(
+      await AFCompanyData2.findOneAndUpdate(
         { symbol: symbol.toUpperCase() },
         {
           ...freshData,
           symbol: symbol.toUpperCase(),
-          updatedAt: new Date(),
+          scrapedAt: new Date(),
+          lastUpdated: new Date(),
         },
         { upsert: true }
       );

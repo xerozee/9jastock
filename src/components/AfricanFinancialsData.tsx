@@ -49,7 +49,71 @@ interface AfricanFinancialsDataProps {
   companyName?: string;
 }
 
+const SYMBOL_MAPPING: Record<string, string> = {
+  'ACCESSCORP': 'ACCESS',
+  'GTCO': 'GUARANTY',
+  'ZENITHBANK': 'ZENITH',
+  'FBNH': 'FIRSTBANK',
+  'UBA': 'UBA',
+  'DANGCEM': 'DANGCEM',
+  'MTNN': 'MTNN',
+  'BUACEMENT': 'BUACEMENT',
+  'WAPCO': 'LAFARGE',
+  'NESTLE': 'NESTLE',
+  'NB': 'NB',
+  'GUINNESS': 'GUINNESS',
+  'FLOURMILL': 'FLOURMILL',
+  'OKOMUOIL': 'OKOMU',
+  'PRESCO': 'PRESCO',
+  'SEPLAT': 'SEPLAT',
+  'OANDO': 'OANDO',
+  'FIDELITYBK': 'FIDELITY',
+  'STANBIC': 'STANBIC',
+  'ETI': 'ETI',
+  'FCMB': 'FCMB',
+  'WEMABANK': 'WEMA',
+  'STERLINGNG': 'STERLING',
+  'UNIONBNK': 'UNION',
+  'UNITYBNK': 'UNITY',
+  'JBERGER': 'JULIUS',
+  'CADBURY': 'CADBURY',
+  'UNILEVER': 'UNILEVER',
+  'PZ': 'PZ',
+  'TRANSCORP': 'TRANSCORP',
+  'TOTAL': 'TOTAL',
+  'CONOIL': 'CONOIL',
+  'ETERNA': 'ETERNA',
+  'MOBIL': 'MOBIL',
+  'BERGER': 'BERGER',
+  'CUSTODIAN': 'CUSTODIAN',
+  'AIICO': 'AIICO',
+  'MANSARD': 'MANSARD',
+  'NEM': 'NEM',
+  'LASACO': 'LASACO',
+  'ROYALEX': 'ROYALEX',
+  'CORNERST': 'CORNERST',
+  'MAYBAKER': 'MAYBAKER',
+  'GLAXOSMITH': 'GLAXO',
+  'PHARMDEKO': 'PHARMDEKO',
+  'FIDSON': 'FIDSON',
+  'NEIMETH': 'NEIMETH',
+  'SKYAVN': 'SKYAVN',
+  'INTBREW': 'INTBREW',
+  'HONYFLOUR': 'HONYFLOUR',
+  'DANGSUGAR': 'DANGSUGAR',
+  'VITAFOAM': 'VITAFOAM',
+  'AIRTELAFRI': 'AIRTEL',
+  'ARADEL': 'ARADEL',
+  'GEREGU': 'GEREGU',
+  'BUAFOODS': 'BUAFOODS',
+};
+
+function getAfricanFinancialsSymbol(tvSymbol: string): string {
+  return SYMBOL_MAPPING[tvSymbol.toUpperCase()] || tvSymbol.replace(/CORP$|BANK$|BK$|NG$/, '').toUpperCase();
+}
+
 export default function AfricanFinancialsData({ symbol, companyName }: AfricanFinancialsDataProps) {
+  const afSymbol = getAfricanFinancialsSymbol(symbol);
   const [data, setData] = useState<CompanyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -61,16 +125,16 @@ export default function AfricanFinancialsData({ symbol, companyName }: AfricanFi
       else setLoading(true);
       setError(null);
       
-      const response = await fetch(`/api/african-financials/company?symbol=${symbol}${refresh ? '&refresh=true' : ''}`);
+      const response = await fetch(`/api/african-financials/company?symbol=${afSymbol}${refresh ? '&refresh=true' : ''}`);
       const result = await response.json();
       
       if (result.success && result.data) {
         setData(result.data);
       } else {
         setData({
-          symbol,
+          symbol: afSymbol,
           name: companyName || '',
-          url: `https://africanfinancials.com/company/ng-${symbol.toLowerCase()}/`,
+          url: `https://africanfinancials.com/company/ng-${afSymbol.toLowerCase()}/`,
           found: false,
           dividends: [],
           documents: [],
@@ -80,9 +144,9 @@ export default function AfricanFinancialsData({ symbol, companyName }: AfricanFi
       console.error('Error fetching African Financials data:', err);
       setError('Failed to load data');
       setData({
-        symbol,
+        symbol: afSymbol,
         name: companyName || '',
-        url: `https://africanfinancials.com/company/ng-${symbol.toLowerCase()}/`,
+        url: `https://africanfinancials.com/company/ng-${afSymbol.toLowerCase()}/`,
         found: false,
         dividends: [],
         documents: [],
@@ -95,7 +159,7 @@ export default function AfricanFinancialsData({ symbol, companyName }: AfricanFi
 
   useEffect(() => {
     fetchData();
-  }, [symbol]);
+  }, [afSymbol]);
 
   if (loading) {
     return (
@@ -228,14 +292,25 @@ export default function AfricanFinancialsData({ symbol, companyName }: AfricanFi
                 <h4 className="font-semibold text-slate-900 dark:text-white">Financial Documents</h4>
               </div>
               
-              {data.documents.length === 0 ? (
-                <div className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg text-slate-500 dark:text-slate-400 text-sm">
-                  <AlertCircle className="w-4 h-4" />
-                  <span>No financial documents available</span>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {data.documents.slice(0, 5).map((doc, idx) => (
+              {(() => {
+                const uniqueDocs = data.documents.reduce((acc, doc) => {
+                  if (!acc.find(d => d.url === doc.url)) {
+                    const relevantTypes = ['Annual Report', 'Interim Report', 'Quarterly Report'];
+                    if (relevantTypes.includes(doc.type)) {
+                      acc.push(doc);
+                    }
+                  }
+                  return acc;
+                }, [] as Document[]).sort((a, b) => (b.year || 0) - (a.year || 0));
+                
+                return uniqueDocs.length === 0 ? (
+                  <div className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg text-slate-500 dark:text-slate-400 text-sm">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>No financial documents available</span>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {uniqueDocs.slice(0, 10).map((doc, idx) => (
                     <a
                       key={idx}
                       href={doc.url}
@@ -262,7 +337,8 @@ export default function AfricanFinancialsData({ symbol, companyName }: AfricanFi
                     </a>
                   ))}
                 </div>
-              )}
+                );
+              })()}
             </div>
           </>
         )}

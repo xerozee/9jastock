@@ -20,7 +20,14 @@ export async function GET(request: Request) {
   try {
     await connectToDatabase();
     
-    const existingData = await AFCompanyData2.findOne({ symbol: symbol.toUpperCase() }).lean();
+    // Search by both symbol (AF format) and originalSymbol (TradingView format)
+    const upperSymbol = symbol.toUpperCase();
+    const existingData = await AFCompanyData2.findOne({
+      $or: [
+        { symbol: upperSymbol },
+        { originalSymbol: upperSymbol }
+      ]
+    }).lean();
     
     const needsRefresh = !existingData || 
       refresh || 

@@ -73,6 +73,14 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
       - **Company Profile Database:** MongoDB schema for curated company data including CEO, employees, headquarters, board of directors, subsidiaries, key products (`src/lib/mongodb.ts` - CompanyProfile schema)
       - **Dividend History Tracking:** MongoDB schema for historical dividend data with fiscal year tracking, declaration dates, payment dates, and yield calculations (`src/lib/mongodb.ts` - DividendHistory schema)
       - **API Endpoints:** `/api/company-profile` (GET/POST with admin auth), `/api/dividends` (GET/POST with admin auth) for managing company and dividend data
+    - **Financials Hub Page (Jan 2026):** Dedicated `/financials` route with premium-gated access:
+      - **Overview Tab:** Stats cards showing total companies, documents, and data coverage
+      - **Reports Tab:** Filterable table of all financial documents (annual, interim, quarterly reports) with direct download links to African Financials
+      - **Dividends Tab:** Historical dividend data with fiscal year and date columns (currently populating as AF adds data)
+      - **Companies Tab:** Grid view of all 49+ companies with synced financial data, showing document counts and sector badges
+      - **API Endpoint:** `/api/financials/companies` aggregates data from AFCompanyData2 collection with stats, companies list, and documents
+      - **Navigation:** "Financials" link added to Header.tsx with FileText icon
+      - **Premium Gating:** Uses AuthGuard + useSubscription hook to gate access for premium users only
     - **African Financials Integration (Jan 2026):** Comprehensive financial document and dividend data system:
       - **Browser Scraper:** `src/lib/africanFinancialsBrowser.ts` - Puppeteer-based scraper that bypasses Cloudflare protection using stealth techniques (realistic user agent, random delays, browser launch options)
       - **MongoDB Schema:** AFCompanyData2 in `src/lib/mongodb.ts` with flexible Mixed types for storing company profiles, dividends, and documents with 7-day caching

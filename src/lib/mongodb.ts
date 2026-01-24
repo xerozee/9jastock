@@ -601,3 +601,73 @@ export type IDividendHistory = {
   sourceUrl?: string;
   scrapedAt: Date;
 };
+
+const financialDocumentSchema = new mongoose.Schema({
+  symbol: { type: String, required: true, index: true },
+  companyName: { type: String, required: true },
+  documentType: { 
+    type: String, 
+    required: true,
+    enum: ['annual_report', 'interim_report', 'abridged_report', 'presentation', 'circular', 'prospectus']
+  },
+  year: { type: Number, required: true, index: true },
+  period: { type: String, enum: ['FY', 'HY', 'Q1', 'Q2', 'Q3', 'Q4'] },
+  title: { type: String, required: true },
+  summary: { type: String },
+  documentUrl: { type: String, required: true, unique: true },
+  sourceUrl: { type: String },
+  publishedDate: { type: Date, required: true, index: true },
+  
+  extractedMetrics: {
+    revenue: { type: Number },
+    revenueChange: { type: Number },
+    operatingProfit: { type: Number },
+    operatingProfitChange: { type: Number },
+    profitAfterTax: { type: Number },
+    profitAfterTaxChange: { type: Number },
+    earningsPerShare: { type: Number },
+    earningsPerSharePrior: { type: Number },
+    totalAssets: { type: Number },
+    totalEquity: { type: Number },
+    dividendPerShare: { type: Number },
+    returnOnEquity: { type: Number },
+  },
+  
+  scrapedAt: { type: Date, default: Date.now },
+  lastUpdated: { type: Date, default: Date.now },
+});
+
+financialDocumentSchema.index({ symbol: 1, year: -1, documentType: 1 });
+financialDocumentSchema.index({ publishedDate: -1 });
+
+export const FinancialDocument = mongoose.models.FinancialDocument || mongoose.model('FinancialDocument', financialDocumentSchema);
+
+export type IFinancialDocument = {
+  _id: mongoose.Types.ObjectId;
+  symbol: string;
+  companyName: string;
+  documentType: 'annual_report' | 'interim_report' | 'abridged_report' | 'presentation' | 'circular' | 'prospectus';
+  year: number;
+  period?: 'FY' | 'HY' | 'Q1' | 'Q2' | 'Q3' | 'Q4';
+  title: string;
+  summary?: string;
+  documentUrl: string;
+  sourceUrl?: string;
+  publishedDate: Date;
+  extractedMetrics?: {
+    revenue?: number;
+    revenueChange?: number;
+    operatingProfit?: number;
+    operatingProfitChange?: number;
+    profitAfterTax?: number;
+    profitAfterTaxChange?: number;
+    earningsPerShare?: number;
+    earningsPerSharePrior?: number;
+    totalAssets?: number;
+    totalEquity?: number;
+    dividendPerShare?: number;
+    returnOnEquity?: number;
+  };
+  scrapedAt: Date;
+  lastUpdated: Date;
+};

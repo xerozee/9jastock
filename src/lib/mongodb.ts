@@ -676,8 +676,8 @@ const afCompanyData2Schema = new mongoose.Schema({
   lastUpdated: { type: Date, default: Date.now },
 }, { strict: false, timestamps: true });
 
-afCompanyData2Schema.index({ symbol: 1 });
 afCompanyData2Schema.index({ scrapedAt: -1 });
+afCompanyData2Schema.index({ originalSymbol: 1 });
 
 export const AFCompanyData2 = mongoose.models.AFCompanyData2 || mongoose.model('AFCompanyData2', afCompanyData2Schema);
 

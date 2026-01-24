@@ -102,17 +102,18 @@ export async function GET() {
       interestedSectors: user.interestedSectors,
     };
 
-    const stockSymbols = stocks.slice(0, 30).map(s => s.symbol.replace('NGX:', ''));
+    const stockSymbols = stocks.slice(0, 30).map(s => s.symbol.replace('NGX:', '').toUpperCase());
     const afDataList = await AFCompanyData2.find({ 
-      symbol: { $in: stockSymbols.map(s => s.toUpperCase()) } 
+      $or: [
+        { symbol: { $in: stockSymbols } },
+        { originalSymbol: { $in: stockSymbols } }
+      ]
     }).lean();
     
     const afDataMap = new Map();
     afDataList.forEach((af: any) => {
-      afDataMap.set(af.symbol?.toUpperCase(), af);
-      if (af.originalSymbol) {
-        afDataMap.set(af.originalSymbol?.toUpperCase(), af);
-      }
+      if (af.symbol) afDataMap.set(af.symbol.toUpperCase(), af);
+      if (af.originalSymbol) afDataMap.set(af.originalSymbol.toUpperCase(), af);
     });
 
     const enrichedStocks = stocks.map(stock => {

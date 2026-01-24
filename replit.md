@@ -80,6 +80,14 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
       - **UI Component:** `src/components/AfricanFinancialsData.tsx` - Displays dividend history, financial documents, and company profiles with symbol mapping (TradingView to AF format), document deduplication, and "Not Found" fallbacks
       - **Symbol Mapping:** Handles differences between TradingView symbols (ACCESSCORP, GTCO) and African Financials symbols (ACCESS, GUARANTY) via mapping table and normalization fallbacks
       - **Supported Data:** Dividend history (year, type, amount, payment dates), financial documents (annual reports, interim reports, quarterly reports), company descriptions
+      - **Automated Data Sync Agent (Jan 2026):** Continuous background sync workflow:
+        - **Sync Agent:** `src/lib/afDataSyncAgent.ts` - Batch processing engine that syncs all 129+ stocks in batches of 15 with 2-5 second delays between requests
+        - **Scheduler:** `scripts/af-sync-scheduler.ts` - Runs every 3 hours via workflow, processes all stocks and updates MongoDB cache
+        - **Status Tracking:** AFSyncStatus schema in MongoDB tracks progress, success/failure counts, current batch, errors, and duration metrics
+        - **API Endpoints:** `/api/af-sync/status` (GET), `/api/af-sync/trigger` (POST), `/api/af-sync/runner` (POST) for monitoring and control
+        - **Status Dashboard:** `src/components/AFSyncStatusCard.tsx` - Real-time monitoring with progress bar, batch info, error list, and manual trigger button
+        - **AI Integration:** Stock recommendations engine enriched with latest dividend history and document counts from synced data
+        - **Workflow:** "AF Data Sync Agent" workflow configured to run continuously with 3-hour intervals
 
 ## External Dependencies
 - **Stock Data API:** Live stock data via backend services (presented as 9jaStocks.app data).

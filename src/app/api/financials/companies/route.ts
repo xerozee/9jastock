@@ -12,17 +12,55 @@ export async function GET() {
       .sort({ 'documents.0.year': -1 })
       .lean();
 
+    const isDateString = (str: string) => /^\d{4}-\d{2}-\d{2}$/.test(str);
+    const isYearOnly = (str: string) => /^20\d{2}$/.test(str);
+    const isReportType = (str: string) => {
+      const lower = str.toLowerCase();
+      return lower.includes('report') || lower.includes('presentation') || 
+             lower === 'agm' || lower.includes('meeting') || lower.includes('abridged');
+    };
+
+    const mergeCompanyDocs = (docs: any[]) => {
+      const docsByUrl = new Map<string, any>();
+      
+      docs.forEach((doc: any) => {
+        const url = doc.url;
+        if (!url) return;
+        
+        if (!docsByUrl.has(url)) {
+          docsByUrl.set(url, { url, type: null, title: null, year: null, publishedDate: null });
+        }
+        
+        const merged = docsByUrl.get(url);
+        const title = doc.title?.trim() || '';
+        
+        if (isDateString(title)) {
+          merged.publishedDate = title;
+        } else if (isYearOnly(title)) {
+          if (!merged.year || parseInt(title) < merged.year) {
+            merged.year = parseInt(title);
+          }
+        } else if (isReportType(title)) {
+          merged.type = doc.type || title;
+          merged.title = title;
+        }
+      });
+      
+      return Array.from(docsByUrl.values()).filter(d => d.type && d.title);
+    };
+
     const companiesWithStats = companies.map((company: any) => {
       const docs = company.documents || [];
       const dividends = company.dividends || [];
       
-      const annualReports = docs.filter((d: any) => d.type === 'Annual Report').length;
-      const interimReports = docs.filter((d: any) => d.type === 'Interim Report').length;
-      const quarterlyReports = docs.filter((d: any) => d.type === 'Quarterly Report').length;
-      const presentations = docs.filter((d: any) => d.type === 'Presentation').length;
-      const otherDocs = docs.filter((d: any) => !['Annual Report', 'Interim Report', 'Quarterly Report', 'Presentation'].includes(d.type)).length;
+      const mergedDocs = mergeCompanyDocs(docs);
+      const annualReports = mergedDocs.filter((d: any) => d.type === 'Annual Report').length;
+      const interimReports = mergedDocs.filter((d: any) => d.type === 'Interim Report').length;
+      const quarterlyReports = mergedDocs.filter((d: any) => d.type === 'Quarterly Report').length;
+      const presentations = mergedDocs.filter((d: any) => d.type === 'Presentation').length;
+      const otherDocs = mergedDocs.filter((d: any) => !['Annual Report', 'Interim Report', 'Quarterly Report', 'Presentation'].includes(d.type)).length;
       
-      const latestDoc = docs[0];
+      const latestDoc = mergedDocs.sort((a, b) => (b.year || 0) - (a.year || 0))[0];
       const latestYear = latestDoc?.year || 0;
       
       return {
@@ -30,7 +68,7 @@ export async function GET() {
         afSymbol: company.symbol,
         name: company.name?.replace(/\s*\([^)]*\)$/, '') || company.symbol,
         url: company.url,
-        totalDocuments: docs.length,
+        totalDocuments: mergedDocs.length,
         annualReports,
         interimReports,
         quarterlyReports,
@@ -50,13 +88,53 @@ export async function GET() {
       const companyName = company.name?.replace(/\s*\([^)]*\)$/, '') || company.symbol;
       const symbol = company.originalSymbol || company.symbol;
       
+      const docsByUrl = new Map<string, any>();
+      
       (company.documents || []).forEach((doc: any) => {
-        if (!allDocuments.some(d => d.url === doc.url)) {
-          allDocuments.push({
-            ...doc,
+        const url = doc.url;
+        if (!url) return;
+        
+        if (!docsByUrl.has(url)) {
+          docsByUrl.set(url, {
+            url,
             companySymbol: symbol,
             companyName,
+            type: null,
+            title: null,
+            year: null,
+            publishedDate: null,
           });
+        }
+        
+        const merged = docsByUrl.get(url);
+        const title = doc.title?.trim() || '';
+        
+        if (isDateString(title)) {
+          merged.publishedDate = title;
+        } else if (isYearOnly(title)) {
+          if (!merged.year || parseInt(title) < merged.year) {
+            merged.year = parseInt(title);
+          }
+        } else if (isReportType(title)) {
+          merged.type = doc.type || title;
+          merged.title = title;
+        } else if (title === 'HY' || title === 'Q1' || title === 'Q2' || title === 'Q3' || title === 'Q4') {
+          if (!merged.title || !merged.title.includes(title)) {
+            merged.period = title;
+          }
+        }
+      });
+      
+      docsByUrl.forEach((doc) => {
+        if (doc.type && doc.title) {
+          const existingDoc = allDocuments.find(d => d.url === doc.url);
+          if (!existingDoc) {
+            if (doc.period && doc.title && !doc.title.includes(doc.period)) {
+              doc.title = `${doc.title} (${doc.period})`;
+            }
+            delete doc.period;
+            allDocuments.push(doc);
+          }
         }
       });
       

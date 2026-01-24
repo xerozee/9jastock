@@ -51,6 +51,7 @@ interface Document {
   url: string;
   companySymbol: string;
   companyName: string;
+  publishedDate?: string;
 }
 
 interface Dividend {

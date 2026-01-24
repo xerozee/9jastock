@@ -13,6 +13,7 @@ import {
 const TradingViewWidget = lazy(() => import('@/components/TradingViewWidget'));
 const TradingViewTechnicalAnalysis = lazy(() => import('@/components/TradingViewTechnicalAnalysis'));
 const TradingViewFinancials = lazy(() => import('@/components/TradingViewFinancials'));
+const FinancialReports = lazy(() => import('@/components/FinancialReports'));
 
 function ChartSkeleton() {
   return (
@@ -1141,6 +1142,13 @@ export default function StockDetailPage() {
       <div className="mb-6">
         <Suspense fallback={<WidgetSkeleton title="Financial Data" height={600} />}>
           <TradingViewFinancials symbol={stock.symbol} height={600} />
+        </Suspense>
+      </div>
+
+      {/* African Financials Reports */}
+      <div className="mb-6">
+        <Suspense fallback={<WidgetSkeleton title="Financial Reports" height={300} />}>
+          <FinancialReports symbol={stock.symbol} />
         </Suspense>
       </div>
 

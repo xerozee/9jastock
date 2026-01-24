@@ -601,3 +601,92 @@ export type IDividendHistory = {
   sourceUrl?: string;
   scrapedAt: Date;
 };
+
+// African Financials Report Schema - stores annual/interim reports
+const financialReportSchema = new mongoose.Schema({
+  symbol: { type: String, required: true },
+  companyName: { type: String, required: true },
+  reportType: { type: String, enum: ['annual', 'interim', 'quarterly'], required: true },
+  reportTitle: { type: String, required: true },
+  reportUrl: { type: String, required: true },
+  documentUrl: { type: String },
+  year: { type: Number, required: true },
+  period: { type: String }, // Q1, Q2, Q3, Q4, HY, FY
+  publishedAt: { type: Date },
+  highlights: {
+    revenue: { type: Number },
+    profit: { type: Number },
+    totalAssets: { type: Number },
+    eps: { type: Number },
+    dividend: { type: Number },
+    dividendPerShare: { type: Number },
+  },
+  source: { type: String, default: 'africanfinancials.com' },
+  scrapedAt: { type: Date, default: Date.now },
+});
+
+financialReportSchema.index({ symbol: 1, year: -1 });
+financialReportSchema.index({ reportType: 1 });
+financialReportSchema.index({ year: -1 });
+financialReportSchema.index({ symbol: 1, reportUrl: 1 }, { unique: true });
+
+// Company Financial Data Cache - stores aggregated data per company
+const companyFinancialDataSchema = new mongoose.Schema({
+  symbol: { type: String, required: true, unique: true },
+  companyName: { type: String },
+  africanFinancialsUrl: { type: String },
+  reportsCount: { type: Number, default: 0 },
+  latestReportYear: { type: Number },
+  latestReportType: { type: String },
+  dividendsCount: { type: Number, default: 0 },
+  latestDividendYear: { type: Number },
+  lastUpdated: { type: Date, default: Date.now },
+  lastScrapedAt: { type: Date },
+  scrapeStatus: { type: String, enum: ['success', 'failed', 'pending', 'not_found'], default: 'pending' },
+  scrapeError: { type: String },
+});
+
+companyFinancialDataSchema.index({ lastUpdated: -1 });
+companyFinancialDataSchema.index({ scrapeStatus: 1 });
+
+export const FinancialReport = mongoose.models.FinancialReport || mongoose.model('FinancialReport', financialReportSchema);
+export const CompanyFinancialData = mongoose.models.CompanyFinancialData || mongoose.model('CompanyFinancialData', companyFinancialDataSchema);
+
+export type IFinancialReport = {
+  _id: mongoose.Types.ObjectId;
+  symbol: string;
+  companyName: string;
+  reportType: 'annual' | 'interim' | 'quarterly';
+  reportTitle: string;
+  reportUrl: string;
+  documentUrl?: string;
+  year: number;
+  period?: string;
+  publishedAt?: Date;
+  highlights?: {
+    revenue?: number;
+    profit?: number;
+    totalAssets?: number;
+    eps?: number;
+    dividend?: number;
+    dividendPerShare?: number;
+  };
+  source: string;
+  scrapedAt: Date;
+};
+
+export type ICompanyFinancialData = {
+  _id: mongoose.Types.ObjectId;
+  symbol: string;
+  companyName?: string;
+  africanFinancialsUrl?: string;
+  reportsCount: number;
+  latestReportYear?: number;
+  latestReportType?: string;
+  dividendsCount: number;
+  latestDividendYear?: number;
+  lastUpdated: Date;
+  lastScrapedAt?: Date;
+  scrapeStatus: 'success' | 'failed' | 'pending' | 'not_found';
+  scrapeError?: string;
+};

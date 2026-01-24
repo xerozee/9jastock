@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useWatchlist } from '@/lib/watchlistContext';
 import Avatar from '@/components/Avatar';
 import ProfileXPosts from '@/components/ProfileXPosts';
 import NotificationSettings from '@/components/NotificationSettings';
@@ -107,6 +108,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const { user: authUser, isLoading: authLoading } = useAuth();
   const { isPremium } = useSubscription();
+  const { watchlist } = useWatchlist();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [stocks, setStocks] = useState<StockData[]>([]);
   const [stocksError, setStocksError] = useState(false);
@@ -117,6 +119,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [referralCopied, setReferralCopied] = useState(false);
+  const [isPortfolioAware, setIsPortfolioAware] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !authUser) {
@@ -172,7 +175,9 @@ export default function ProfilePage() {
 
   const fetchRecommendations = async () => {
     try {
-      const response = await fetch('/api/recommendations');
+      // Pass watchlist to get personalized recommendations
+      const watchlistParam = watchlist.length > 0 ? `?watchlist=${watchlist.join(',')}` : '';
+      const response = await fetch(`/api/recommendations${watchlistParam}`);
       const data = await response.json();
       
       if (response.status === 403 && data.premiumRequired) {
@@ -180,6 +185,7 @@ export default function ProfilePage() {
         setRecommendations([]);
         setHasProfile(true);
         setRecommendationsError(false);
+        setIsPortfolioAware(false);
         return;
       }
       
@@ -188,6 +194,7 @@ export default function ProfilePage() {
         setHasProfile(data.hasProfile !== false);
         setRecommendationsError(data.error === true);
         setPremiumRequired(false);
+        setIsPortfolioAware(data.portfolioAware === true);
       } else {
         console.error('Failed to fetch recommendations:', response.status);
         setRecommendationsError(true);
@@ -468,10 +475,18 @@ export default function ProfilePage() {
 
             <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-[#FCD116]" />
-                  Stock Recommendations
-                </h2>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-[#FCD116]" />
+                    AI Stock Recommendations
+                  </h2>
+                  {isPortfolioAware && (
+                    <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
+                      <Target className="w-3.5 h-3.5" />
+                      Personalized based on your portfolio & watchlist
+                    </p>
+                  )}
+                </div>
                 <Link
                   href="/stocks"
                   className="text-sm text-green-600 dark:text-green-400 hover:underline flex items-center gap-1"

@@ -35,6 +35,21 @@ export interface UserProfile {
   interestedSectors?: string[];
 }
 
+export interface PortfolioHolding {
+  symbol: string;
+  shares: number;
+  purchasePrice: number;
+  currentPrice?: number;
+  gainLossPercent?: number;
+}
+
+export interface PortfolioData {
+  holdings: PortfolioHolding[];
+  watchlist: string[];
+  totalValue?: number;
+  totalCost?: number;
+}
+
 export interface AIRecommendation {
   symbol: string;
   name: string;
@@ -63,7 +78,8 @@ export interface StockAnalysis {
 
 export async function getAIStockRecommendations(
   stocks: StockData[],
-  userProfile: UserProfile
+  userProfile: UserProfile,
+  portfolioData?: PortfolioData
 ): Promise<AIRecommendation[]> {
   const openai = getOpenAIClient();
   
@@ -84,6 +100,33 @@ export async function getAIStockRecommendations(
     rsi: s.rsi?.toFixed(0) || 'N/A',
   }));
 
+  // Build portfolio context for personalized recommendations
+  let portfolioContext = '';
+  if (portfolioData) {
+    if (portfolioData.holdings.length > 0) {
+      const holdingsSummary = portfolioData.holdings.map(h => ({
+        symbol: h.symbol,
+        shares: h.shares,
+        avgCost: h.purchasePrice.toFixed(2),
+        currentValue: h.currentPrice ? (h.shares * h.currentPrice).toFixed(2) : 'N/A',
+        gainLoss: h.gainLossPercent ? `${h.gainLossPercent >= 0 ? '+' : ''}${h.gainLossPercent.toFixed(1)}%` : 'N/A',
+      }));
+      portfolioContext += `
+CURRENT PORTFOLIO (${portfolioData.holdings.length} holdings):
+${JSON.stringify(holdingsSummary, null, 2)}
+${portfolioData.totalValue ? `Total Portfolio Value: ₦${portfolioData.totalValue.toLocaleString()}` : ''}
+${portfolioData.totalCost ? `Total Cost Basis: ₦${portfolioData.totalCost.toLocaleString()}` : ''}
+`;
+    }
+    
+    if (portfolioData.watchlist.length > 0) {
+      portfolioContext += `
+WATCHLIST (stocks the investor is interested in):
+${portfolioData.watchlist.join(', ')}
+`;
+    }
+  }
+
   const prompt = `You are an expert Nigerian Stock Exchange (NGX) analyst with deep knowledge of the Nigerian economy, sectors, and market dynamics. Analyze the following NGX stocks and provide personalized recommendations for this investor.
 
 NIGERIAN MARKET CONTEXT:
@@ -99,6 +142,15 @@ INVESTOR PROFILE:
 - Risk Tolerance: ${userProfile.riskTolerance || 'Not specified'}
 - Investment Horizon: ${userProfile.investmentHorizon || 'Not specified'}
 - Interested Sectors: ${userProfile.interestedSectors?.join(', ') || 'Not specified'}
+${portfolioContext}
+PERSONALIZATION GUIDELINES:
+${portfolioData?.holdings.length ? `- Consider the investor's existing holdings when making recommendations
+- Suggest diversification if portfolio is concentrated in certain sectors
+- For stocks they already own with gains, consider HOLD or partial profit-taking
+- For stocks they own with losses, analyze if they should hold for recovery or cut losses
+- Prioritize stocks that complement their existing portfolio` : '- New investor with no current holdings'}
+${portfolioData?.watchlist.length ? `- Pay special attention to watchlist stocks as they show investor interest
+- If a watchlist stock is a good buy, prioritize it in recommendations` : ''}
 
 AVAILABLE STOCKS:
 ${JSON.stringify(stocksSummary, null, 2)}
@@ -109,6 +161,7 @@ Provide exactly 5 stock recommendations with specific BUY, HOLD, or SELL actions
 3. Consider Nigerian market-specific factors
 4. Analyze fundamentals (P/E ratio, dividend yield, market cap)
 5. Factor in recent performance, RSI, and momentum
+6. Consider their existing portfolio and watchlist for personalization
 
 RESPONSE FORMAT (JSON):
 {

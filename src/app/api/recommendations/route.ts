@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
-import { connectToDatabase, User, AFCompanyData2 } from '@/lib/mongodb';
+import { NextRequest, NextResponse } from 'next/server';
+import { connectToDatabase, User, AFCompanyData2, Holding, PortfolioItem } from '@/lib/mongodb';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
-import { getAIStockRecommendations, StockData, UserProfile } from '@/lib/openai';
+import { getAIStockRecommendations, StockData, UserProfile, PortfolioData, PortfolioHolding } from '@/lib/openai';
 import { getUserTier, canAccessFeature } from '@/lib/subscription';
 
 interface Stock {
@@ -20,7 +20,9 @@ interface Stock {
   low52Week?: number;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const watchlistParam = searchParams.get('watchlist');
   try {
     const session = await getServerSession(authOptions);
     
@@ -102,6 +104,41 @@ export async function GET() {
       interestedSectors: user.interestedSectors,
     };
 
+    // Fetch user's portfolio holdings
+    const userHoldings = await Holding.find({ userId: user._id }).lean();
+    
+    // Parse watchlist from query params (sent from client localStorage)
+    const watchlist: string[] = watchlistParam ? watchlistParam.split(',').filter(Boolean) : [];
+    
+    // Build portfolio data with current prices
+    const stockPriceMap = new Map(stocks.map(s => [s.symbol.replace('NGX:', '').toUpperCase(), s.price]));
+    
+    const portfolioHoldings = userHoldings.map((h: any) => {
+      const symbol = h.symbol.toUpperCase();
+      const currentPrice = stockPriceMap.get(symbol) || 0;
+      const totalCost = h.shares * h.purchasePrice;
+      const currentValue = h.shares * currentPrice;
+      const gainLossPercent = totalCost > 0 ? ((currentValue - totalCost) / totalCost) * 100 : 0;
+      
+      return {
+        symbol: h.symbol,
+        shares: h.shares,
+        purchasePrice: h.purchasePrice,
+        currentPrice,
+        gainLossPercent,
+      };
+    });
+    
+    const totalValue = portfolioHoldings.reduce((sum, h) => sum + (h.shares * (h.currentPrice || 0)), 0);
+    const totalCost = portfolioHoldings.reduce((sum, h) => sum + (h.shares * h.purchasePrice), 0);
+    
+    const portfolioData: PortfolioData = {
+      holdings: portfolioHoldings,
+      watchlist,
+      totalValue,
+      totalCost,
+    };
+
     const stockSymbols = stocks.slice(0, 30).map(s => s.symbol.replace('NGX:', '').toUpperCase());
     const afDataList = await AFCompanyData2.find({ 
       $or: [
@@ -141,22 +178,25 @@ export async function GET() {
     try {
       const aiRecommendations = await getAIStockRecommendations(
         enrichedStocks as StockData[],
-        userProfile
+        userProfile,
+        portfolioData
       );
 
       return NextResponse.json({
         recommendations: aiRecommendations,
         hasProfile: true,
         aiPowered: true,
+        portfolioAware: portfolioData.holdings.length > 0 || portfolioData.watchlist.length > 0,
       });
     } catch (aiError) {
       console.error('AI recommendations failed, falling back to rule-based:', aiError);
       
-      const fallbackRecs = getFallbackRecommendations(stocks, userProfile);
+      const fallbackRecs = getFallbackRecommendations(stocks, userProfile, portfolioData);
       return NextResponse.json({
         recommendations: fallbackRecs,
         hasProfile: true,
         aiPowered: false,
+        portfolioAware: portfolioData.holdings.length > 0 || portfolioData.watchlist.length > 0,
       });
     }
   } catch (error) {
@@ -165,7 +205,7 @@ export async function GET() {
   }
 }
 
-function getFallbackRecommendations(stocks: Stock[], profile: UserProfile) {
+function getFallbackRecommendations(stocks: Stock[], profile: UserProfile, portfolioData?: PortfolioData) {
   const { riskTolerance, investmentGoal } = profile;
   let filtered = stocks.filter(s => s.marketCap && s.volume);
 
@@ -179,20 +219,43 @@ function getFallbackRecommendations(stocks: Stock[], profile: UserProfile) {
     filtered = filtered.filter(s => (s.dividendYield || 0) > 2);
   }
 
+  // Prioritize watchlist stocks
+  const watchlistSymbols = new Set(portfolioData?.watchlist.map(s => s.toUpperCase()) || []);
+  const holdingSymbols = new Set(portfolioData?.holdings.map(h => h.symbol.toUpperCase()) || []);
+  
+  // Sort to prioritize watchlist stocks, then by volume
+  filtered.sort((a, b) => {
+    const aSymbol = a.symbol.replace('NGX:', '').toUpperCase();
+    const bSymbol = b.symbol.replace('NGX:', '').toUpperCase();
+    const aInWatchlist = watchlistSymbols.has(aSymbol) ? 1 : 0;
+    const bInWatchlist = watchlistSymbols.has(bSymbol) ? 1 : 0;
+    if (aInWatchlist !== bInWatchlist) return bInWatchlist - aInWatchlist;
+    return (b.volume || 0) - (a.volume || 0);
+  });
+
   return filtered
-    .sort((a, b) => (b.volume || 0) - (a.volume || 0))
     .slice(0, 5)
-    .map(s => ({
-      symbol: s.symbol.replace('NGX:', ''),
-      name: s.name,
-      price: s.price,
-      changePercent: s.changePercent,
-      sector: s.sector,
-      reason: 'Top traded stock matching your investment profile',
-      analysis: `Based on your ${riskTolerance || 'moderate'} risk tolerance and ${investmentGoal || 'general'} investment goals, this stock shows strong trading volume and market stability on the NGX.`,
-      confidenceScore: 70,
-      riskLevel: 'medium' as const,
-      action: 'hold' as const,
-      timeframe: 'medium-term',
-    }));
+    .map(s => {
+      const symbol = s.symbol.replace('NGX:', '');
+      const isInWatchlist = watchlistSymbols.has(symbol.toUpperCase());
+      const isOwned = holdingSymbols.has(symbol.toUpperCase());
+      
+      let reason = 'Top traded stock matching your investment profile';
+      if (isInWatchlist) reason = 'This stock is on your watchlist and matches your profile';
+      if (isOwned) reason = 'You already own this stock - consider your position';
+      
+      return {
+        symbol,
+        name: s.name,
+        price: s.price,
+        changePercent: s.changePercent,
+        sector: s.sector,
+        reason,
+        analysis: `Based on your ${riskTolerance || 'moderate'} risk tolerance and ${investmentGoal || 'general'} investment goals, this stock shows strong trading volume and market stability on the NGX.`,
+        confidenceScore: 70,
+        riskLevel: 'medium' as const,
+        action: isOwned ? 'hold' as const : 'buy' as const,
+        timeframe: 'medium-term',
+      };
+    });
 }

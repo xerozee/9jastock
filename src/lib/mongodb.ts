@@ -664,6 +664,23 @@ const financialDocSyncSchema = new mongoose.Schema({
 
 export const FinancialDocSync = mongoose.models.FinancialDocSync || mongoose.model('FinancialDocSync', financialDocSyncSchema);
 
+const afCompanyData2Schema = new mongoose.Schema({
+  symbol: { type: String, required: true, unique: true, index: true },
+  originalSymbol: { type: String },
+  url: { type: String },
+  profile: { type: mongoose.Schema.Types.Mixed },
+  dividends: { type: mongoose.Schema.Types.Mixed },
+  documents: { type: mongoose.Schema.Types.Mixed },
+  found: { type: Boolean, default: true },
+  scrapedAt: { type: Date, default: Date.now },
+  lastUpdated: { type: Date, default: Date.now },
+}, { strict: false, timestamps: true });
+
+afCompanyData2Schema.index({ symbol: 1 });
+afCompanyData2Schema.index({ scrapedAt: -1 });
+
+export const AFCompanyData2 = mongoose.models.AFCompanyData2 || mongoose.model('AFCompanyData2', afCompanyData2Schema);
+
 export type IFinancialDocument = {
   _id: mongoose.Types.ObjectId;
   symbol: string;

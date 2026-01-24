@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { connectToDatabase, FinancialReport, CompanyFinancialData } from './mongodb';
 
 let openaiClient: OpenAI | null = null;
 
@@ -10,6 +11,48 @@ export function getOpenAIClient(): OpenAI {
     });
   }
   return openaiClient;
+}
+
+// Fetch financial report data for enhanced recommendations
+async function getFinancialDataForSymbols(symbols: string[]): Promise<Map<string, any>> {
+  try {
+    await connectToDatabase();
+
+    const reports = await FinancialReport.find({
+      symbol: { $in: symbols.map(s => s.replace('NGX:', '').toUpperCase()) },
+    })
+      .sort({ year: -1 })
+      .lean();
+
+    const companyData = await CompanyFinancialData.find({
+      symbol: { $in: symbols.map(s => s.replace('NGX:', '').toUpperCase()) },
+    }).lean();
+
+    const dataMap = new Map<string, any>();
+
+    // Group reports by symbol
+    for (const report of reports) {
+      const symbol = report.symbol;
+      if (!dataMap.has(symbol)) {
+        dataMap.set(symbol, { reports: [], companyInfo: null });
+      }
+      dataMap.get(symbol).reports.push(report);
+    }
+
+    // Add company info
+    for (const company of companyData) {
+      if (dataMap.has(company.symbol)) {
+        dataMap.get(company.symbol).companyInfo = company;
+      } else {
+        dataMap.set(company.symbol, { reports: [], companyInfo: company });
+      }
+    }
+
+    return dataMap;
+  } catch (error) {
+    console.error('Error fetching financial data:', error);
+    return new Map();
+  }
 }
 
 export interface StockData {
@@ -66,23 +109,50 @@ export async function getAIStockRecommendations(
   userProfile: UserProfile
 ): Promise<AIRecommendation[]> {
   const openai = getOpenAIClient();
-  
+
   const topStocks = stocks
     .filter(s => s.marketCap && s.volume)
     .sort((a, b) => (b.volume || 0) - (a.volume || 0))
     .slice(0, 30);
 
-  const stocksSummary = topStocks.map(s => ({
-    symbol: s.symbol,
-    name: s.name,
-    price: s.price,
-    change: s.changePercent?.toFixed(2) + '%',
-    sector: s.sector || 'Unknown',
-    pe: s.peRatio?.toFixed(2) || 'N/A',
-    dividend: s.dividendYield?.toFixed(2) + '%' || 'N/A',
-    marketCap: s.marketCap ? (s.marketCap / 1e9).toFixed(2) + 'B' : 'N/A',
-    rsi: s.rsi?.toFixed(0) || 'N/A',
-  }));
+  // Fetch financial report data for enhanced recommendations
+  const symbols = topStocks.map(s => s.symbol);
+  const financialData = await getFinancialDataForSymbols(symbols);
+
+  const stocksSummary = topStocks.map(s => {
+    const cleanSymbol = s.symbol.replace('NGX:', '').toUpperCase();
+    const finData = financialData.get(cleanSymbol);
+    const latestReport = finData?.reports?.[0];
+    const highlights = latestReport?.highlights;
+
+    return {
+      symbol: s.symbol,
+      name: s.name,
+      price: s.price,
+      change: s.changePercent?.toFixed(2) + '%',
+      sector: s.sector || 'Unknown',
+      pe: s.peRatio?.toFixed(2) || 'N/A',
+      dividend: s.dividendYield?.toFixed(2) + '%' || 'N/A',
+      marketCap: s.marketCap ? (s.marketCap / 1e9).toFixed(2) + 'B' : 'N/A',
+      rsi: s.rsi?.toFixed(0) || 'N/A',
+      // Enhanced with African Financials data
+      ...(highlights && {
+        latestFinancials: {
+          year: latestReport?.year,
+          reportType: latestReport?.reportType,
+          revenue: highlights.revenue ? (highlights.revenue / 1e9).toFixed(2) + 'B' : undefined,
+          profit: highlights.profit ? (highlights.profit / 1e9).toFixed(2) + 'B' : undefined,
+          grossEarnings: highlights.grossEarnings ? (highlights.grossEarnings / 1e9).toFixed(2) + 'B' : undefined,
+          eps: highlights.eps,
+          dividendPerShare: highlights.dividendPerShare,
+          totalAssets: highlights.totalAssets ? (highlights.totalAssets / 1e12).toFixed(2) + 'T' : undefined,
+        },
+      }),
+      reportsAvailable: finData?.reports?.length || 0,
+    };
+  });
+
+  const hasFinancialData = stocksSummary.some(s => s.reportsAvailable > 0);
 
   const prompt = `You are an expert Nigerian Stock Exchange (NGX) analyst with deep knowledge of the Nigerian economy, sectors, and market dynamics. Analyze the following NGX stocks and provide personalized recommendations for this investor.
 
@@ -95,19 +165,28 @@ NIGERIAN MARKET CONTEXT:
 
 INVESTOR PROFILE:
 - Investment Goal: ${userProfile.investmentGoal || 'Not specified'}
-- Experience Level: ${userProfile.experienceLevel || 'Not specified'}  
+- Experience Level: ${userProfile.experienceLevel || 'Not specified'}
 - Risk Tolerance: ${userProfile.riskTolerance || 'Not specified'}
 - Investment Horizon: ${userProfile.investmentHorizon || 'Not specified'}
 - Interested Sectors: ${userProfile.interestedSectors?.join(', ') || 'Not specified'}
 
-AVAILABLE STOCKS:
+AVAILABLE STOCKS (includes latest financial report data from African Financials where available):
 ${JSON.stringify(stocksSummary, null, 2)}
+
+${hasFinancialData ? `
+FINANCIAL DATA CONTEXT:
+- Some stocks include "latestFinancials" with actual company earnings data from annual/interim reports
+- Use revenue, profit, gross earnings, EPS, and dividend data to inform fundamental analysis
+- Prioritize stocks with strong recent financial performance when suitable for the investor profile
+- Companies with growing revenue/profit trends are generally more attractive for growth-oriented investors
+- High dividend per share makes stocks attractive for passive-income focused investors
+` : ''}
 
 Provide exactly 5 stock recommendations with specific BUY, HOLD, or SELL actions. For each stock:
 1. Match to investor's risk tolerance and experience level
 2. Align with their investment goals and time horizon
 3. Consider Nigerian market-specific factors
-4. Analyze fundamentals (P/E ratio, dividend yield, market cap)
+4. Analyze fundamentals (P/E ratio, dividend yield, market cap, AND latest financial report data if available)
 5. Factor in recent performance, RSI, and momentum
 
 RESPONSE FORMAT (JSON):
@@ -117,7 +196,7 @@ RESPONSE FORMAT (JSON):
       "symbol": "SYMBOL (without NGX: prefix)",
       "action": "buy|hold|sell",
       "reason": "2-3 sentence explanation why this action suits this investor",
-      "analysis": "Detailed 3-4 sentence market analysis covering fundamentals, technicals, and Nigerian economic factors affecting this stock",
+      "analysis": "Detailed 3-4 sentence market analysis covering fundamentals, technicals, and Nigerian economic factors affecting this stock. Include insights from latest financial reports if available.",
       "confidenceScore": 75-95,
       "riskLevel": "low|medium|high",
       "targetPrice": 25.50,

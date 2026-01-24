@@ -696,3 +696,197 @@ export type ICompanyFinancialData = {
   scrapeStatus: 'success' | 'failed' | 'pending' | 'not_found';
   scrapeError?: string;
 };
+
+// Sync Job Schema - tracks batch sync operations
+const syncJobSchema = new mongoose.Schema({
+  jobId: { type: String, required: true, unique: true },
+  source: { type: String, required: true, default: 'africanfinancials' },
+  status: { type: String, enum: ['pending', 'running', 'completed', 'failed', 'cancelled'], default: 'pending' },
+  startedAt: { type: Date },
+  completedAt: { type: Date },
+  scheduledFor: { type: Date },
+  totalSymbols: { type: Number, default: 0 },
+  processedSymbols: { type: Number, default: 0 },
+  successCount: { type: Number, default: 0 },
+  failureCount: { type: Number, default: 0 },
+  reportsFound: { type: Number, default: 0 },
+  batchSize: { type: Number, default: 20 },
+  currentBatch: { type: Number, default: 0 },
+  totalBatches: { type: Number, default: 0 },
+  symbolsToProcess: [{ type: String }],
+  processedSymbolsList: [{ type: String }],
+  errors: [{
+    symbol: { type: String },
+    error: { type: String },
+    timestamp: { type: Date, default: Date.now },
+  }],
+  metadata: {
+    triggeredBy: { type: String }, // 'scheduler', 'manual', 'api'
+    priority: { type: String, enum: ['low', 'normal', 'high'], default: 'normal' },
+    retryCount: { type: Number, default: 0 },
+    maxRetries: { type: Number, default: 3 },
+  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+syncJobSchema.index({ status: 1 });
+syncJobSchema.index({ source: 1 });
+syncJobSchema.index({ createdAt: -1 });
+syncJobSchema.index({ scheduledFor: 1, status: 1 });
+
+// Sync History Schema - tracks individual symbol sync results
+const syncHistorySchema = new mongoose.Schema({
+  jobId: { type: String, required: true, index: true },
+  symbol: { type: String, required: true },
+  source: { type: String, required: true, default: 'africanfinancials' },
+  status: { type: String, enum: ['success', 'failed', 'skipped'], required: true },
+  reportsFound: { type: Number, default: 0 },
+  reportsUpdated: { type: Number, default: 0 },
+  reportsCreated: { type: Number, default: 0 },
+  duration: { type: Number }, // milliseconds
+  error: { type: String },
+  highlights: {
+    latestReportYear: { type: Number },
+    latestReportType: { type: String },
+    hasFinancialHighlights: { type: Boolean },
+  },
+  syncedAt: { type: Date, default: Date.now },
+});
+
+syncHistorySchema.index({ symbol: 1, syncedAt: -1 });
+syncHistorySchema.index({ syncedAt: -1 });
+syncHistorySchema.index({ status: 1 });
+
+// Sync Schedule Schema - for configuring automated sync schedules
+const syncScheduleSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  source: { type: String, required: true, default: 'africanfinancials' },
+  isActive: { type: Boolean, default: true },
+  cronExpression: { type: String }, // e.g., "0 */3 * * *" for every 3 hours
+  intervalHours: { type: Number, default: 3 },
+  batchSize: { type: Number, default: 20 },
+  symbolFilter: {
+    sectors: [{ type: String }], // Only sync specific sectors
+    symbols: [{ type: String }], // Only sync specific symbols
+    excludeSymbols: [{ type: String }], // Exclude specific symbols
+  },
+  lastRunAt: { type: Date },
+  nextRunAt: { type: Date },
+  runCount: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+syncScheduleSchema.index({ isActive: 1, nextRunAt: 1 });
+
+// Data Source Registry Schema - for tracking multiple data sources
+const dataSourceSchema = new mongoose.Schema({
+  name: { type: String, required: true, unique: true },
+  displayName: { type: String, required: true },
+  baseUrl: { type: String, required: true },
+  type: { type: String, enum: ['scraper', 'api', 'rss'], required: true },
+  isActive: { type: Boolean, default: true },
+  rateLimit: {
+    requestsPerMinute: { type: Number, default: 10 },
+    requestsPerHour: { type: Number, default: 100 },
+  },
+  lastHealthCheck: { type: Date },
+  healthStatus: { type: String, enum: ['healthy', 'degraded', 'down', 'unknown'], default: 'unknown' },
+  supportedSymbols: [{ type: String }],
+  config: { type: mongoose.Schema.Types.Mixed }, // Source-specific configuration
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+export const SyncJob = mongoose.models.SyncJob || mongoose.model('SyncJob', syncJobSchema);
+export const SyncHistory = mongoose.models.SyncHistory || mongoose.model('SyncHistory', syncHistorySchema);
+export const SyncSchedule = mongoose.models.SyncSchedule || mongoose.model('SyncSchedule', syncScheduleSchema);
+export const DataSource = mongoose.models.DataSource || mongoose.model('DataSource', dataSourceSchema);
+
+export type ISyncJob = {
+  _id: mongoose.Types.ObjectId;
+  jobId: string;
+  source: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  startedAt?: Date;
+  completedAt?: Date;
+  scheduledFor?: Date;
+  totalSymbols: number;
+  processedSymbols: number;
+  successCount: number;
+  failureCount: number;
+  reportsFound: number;
+  batchSize: number;
+  currentBatch: number;
+  totalBatches: number;
+  symbolsToProcess: string[];
+  processedSymbolsList: string[];
+  errors: Array<{ symbol: string; error: string; timestamp: Date }>;
+  metadata: {
+    triggeredBy?: string;
+    priority: 'low' | 'normal' | 'high';
+    retryCount: number;
+    maxRetries: number;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type ISyncHistory = {
+  _id: mongoose.Types.ObjectId;
+  jobId: string;
+  symbol: string;
+  source: string;
+  status: 'success' | 'failed' | 'skipped';
+  reportsFound: number;
+  reportsUpdated: number;
+  reportsCreated: number;
+  duration?: number;
+  error?: string;
+  highlights?: {
+    latestReportYear?: number;
+    latestReportType?: string;
+    hasFinancialHighlights?: boolean;
+  };
+  syncedAt: Date;
+};
+
+export type ISyncSchedule = {
+  _id: mongoose.Types.ObjectId;
+  name: string;
+  source: string;
+  isActive: boolean;
+  cronExpression?: string;
+  intervalHours: number;
+  batchSize: number;
+  symbolFilter: {
+    sectors?: string[];
+    symbols?: string[];
+    excludeSymbols?: string[];
+  };
+  lastRunAt?: Date;
+  nextRunAt?: Date;
+  runCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type IDataSource = {
+  _id: mongoose.Types.ObjectId;
+  name: string;
+  displayName: string;
+  baseUrl: string;
+  type: 'scraper' | 'api' | 'rss';
+  isActive: boolean;
+  rateLimit: {
+    requestsPerMinute: number;
+    requestsPerHour: number;
+  };
+  lastHealthCheck?: Date;
+  healthStatus: 'healthy' | 'degraded' | 'down' | 'unknown';
+  supportedSymbols: string[];
+  config?: Record<string, any>;
+  createdAt: Date;
+  updatedAt: Date;
+};

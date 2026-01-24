@@ -1146,16 +1146,16 @@ export default function StockDetailPage() {
         </Suspense>
       </div>
 
-      {/* Financial Documents from African Financials */}
+      {/* Financial Documents */}
       <div className="mb-6">
         <Suspense fallback={<WidgetSkeleton title="Financial Documents" height={400} />}>
           <FinancialDocuments symbol={stock.symbol} companyName={stock.name} />
         </Suspense>
       </div>
 
-      {/* African Financials - Dividends & Reports */}
+      {/* Company Financials - Dividends & Reports */}
       <div className="mb-6">
-        <Suspense fallback={<WidgetSkeleton title="African Financials" height={400} />}>
+        <Suspense fallback={<WidgetSkeleton title="Company Financials" height={400} />}>
           <AfricanFinancialsData symbol={stock.symbol} companyName={stock.name} />
         </Suspense>
       </div>

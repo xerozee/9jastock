@@ -123,7 +123,7 @@ export default function AFSyncStatusCard() {
             <Database className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
           </div>
           <div>
-            <h3 className="font-semibold text-slate-900 dark:text-white">African Financials Sync</h3>
+            <h3 className="font-semibold text-slate-900 dark:text-white">Financial Data Sync</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400">Automated data aggregation</p>
           </div>
         </div>

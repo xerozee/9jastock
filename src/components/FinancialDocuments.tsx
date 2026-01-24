@@ -246,15 +246,10 @@ function FinancialDocuments({ symbol, companyName }: FinancialDocumentsProps) {
           >
             <RefreshCw size={18} className="text-gray-500" />
           </button>
-          <a
-            href={`https://africanfinancials.com/nigeria-listed-company-documents/`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400 hover:text-green-700"
-          >
+          <span className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            African Financials
-          </a>
+            Live Data
+          </span>
         </div>
       </div>
       
@@ -317,7 +312,7 @@ function FinancialDocuments({ symbol, companyName }: FinancialDocumentsProps) {
       
       <div className="px-4 py-3 bg-gray-50 dark:bg-slate-700/30 border-t border-gray-100 dark:border-slate-700">
         <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-          Data sourced from African Financials. Updated every 6 hours.
+          Updated every 6 hours
         </p>
       </div>
     </div>

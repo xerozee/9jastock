@@ -166,7 +166,7 @@ export default function AfricanFinancialsData({ symbol, companyName }: AfricanFi
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg dark:shadow-slate-900/50 border border-gray-100 dark:border-slate-700 p-6">
         <div className="flex items-center gap-2 mb-4">
           <Building2 className="w-5 h-5 text-emerald-600" />
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white">African Financials</h3>
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Company Financials</h3>
         </div>
         <div className="space-y-4">
           <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
@@ -183,7 +183,7 @@ export default function AfricanFinancialsData({ symbol, companyName }: AfricanFi
       <div>
         <p className="text-amber-800 dark:text-amber-300 font-medium">Not Found</p>
         <p className="text-amber-600 dark:text-amber-400 text-sm">
-          Data for {symbol} is not available on African Financials.
+          Financial data for {symbol} is not currently available.
         </p>
       </div>
     </div>
@@ -194,7 +194,7 @@ export default function AfricanFinancialsData({ symbol, companyName }: AfricanFi
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-slate-700 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/30 dark:to-green-900/20">
         <div className="flex items-center gap-2">
           <Building2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white">African Financials Data</h3>
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Company Financials</h3>
         </div>
         <div className="flex items-center gap-2">
           <button

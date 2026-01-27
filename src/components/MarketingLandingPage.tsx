@@ -12,6 +12,20 @@ import {
 import Logo3D from './Logo3D';
 import Link from 'next/link';
 
+interface PreviewStock {
+  symbol: string;
+  name: string;
+  price: number;
+  change: number;
+  changePercent: number;
+}
+
+const FALLBACK_STOCKS: PreviewStock[] = [
+  { symbol: 'DANGCEM', name: 'Dangote Cement', price: 290.50, change: 2.45, changePercent: 0.85 },
+  { symbol: 'GTCO', name: 'GTBank Holdings', price: 45.80, change: 1.23, changePercent: 2.76 },
+  { symbol: 'ZENITH', name: 'Zenith Bank', price: 38.90, change: -0.82, changePercent: -2.06 },
+];
+
 export default function MarketingLandingPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 });
   const [activeCard, setActiveCard] = useState(0);
@@ -19,7 +33,28 @@ export default function MarketingLandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [liveStocks, setLiveStocks] = useState<PreviewStock[]>(FALLBACK_STOCKS);
+  const [isLiveData, setIsLiveData] = useState(false);
   const visionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const fetchLiveStocks = async () => {
+      try {
+        const response = await fetch('/api/stocks/preview');
+        const data = await response.json();
+        if (data.stocks && data.stocks.length >= 3) {
+          setLiveStocks(data.stocks.slice(0, 3));
+          setIsLiveData(data.isLive);
+        }
+      } catch (error) {
+        console.error('Failed to fetch preview stocks:', error);
+      }
+    };
+    
+    fetchLiveStocks();
+    const interval = setInterval(fetchLiveStocks, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -105,11 +140,6 @@ export default function MarketingLandingPage() {
     },
   ];
 
-  const stockCards = [
-    { symbol: 'DANGCEM', name: 'Dangote Cement', price: 290.50, change: 2.45 },
-    { symbol: 'GTCO', name: 'GTBank Holdings', price: 45.80, change: 1.23 },
-    { symbol: 'ZENITH', name: 'Zenith Bank', price: 38.90, change: -0.82 },
-  ];
 
   const stats = [
     { value: '145+', label: 'NGX Stocks' },
@@ -316,7 +346,7 @@ export default function MarketingLandingPage() {
                   <div className="absolute inset-0 bg-gradient-to-tr from-[#008751]/20 to-[#FCD116]/10 rounded-3xl blur-3xl" />
                   
                   <div className="relative space-y-4">
-                    {stockCards.map((stock, i) => (
+                    {liveStocks.map((stock, i) => (
                       <div
                         key={stock.symbol}
                         className={`
@@ -327,11 +357,17 @@ export default function MarketingLandingPage() {
                           }
                         `}
                       >
+                        {isLiveData && (
+                          <div className="absolute -top-2 -right-2 flex items-center gap-1 px-2 py-0.5 bg-[#008751] rounded-full text-[10px] font-medium text-white">
+                            <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                            LIVE
+                          </div>
+                        )}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
                             <div className={`
                               w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-white text-sm
-                              ${stock.change >= 0 ? 'bg-gradient-to-br from-[#008751] to-[#00a863]' : 'bg-gradient-to-br from-red-500 to-rose-600'}
+                              ${stock.changePercent >= 0 ? 'bg-gradient-to-br from-[#008751] to-[#00a863]' : 'bg-gradient-to-br from-red-500 to-rose-600'}
                             `}>
                               {stock.symbol.slice(0, 2)}
                             </div>
@@ -341,10 +377,10 @@ export default function MarketingLandingPage() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="font-bold text-white text-lg">₦{stock.price.toFixed(2)}</div>
-                            <div className={`flex items-center gap-1 text-sm font-semibold ${stock.change >= 0 ? 'text-[#00a863]' : 'text-red-400'}`}>
-                              {stock.change >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                              {stock.change >= 0 ? '+' : ''}{stock.change}%
+                            <div className="font-bold text-white text-lg">₦{stock.price.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                            <div className={`flex items-center gap-1 text-sm font-semibold ${stock.changePercent >= 0 ? 'text-[#00a863]' : 'text-red-400'}`}>
+                              {stock.changePercent >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                              {stock.changePercent >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
                             </div>
                           </div>
                         </div>

@@ -80,6 +80,7 @@ function FinancialsContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [reportFilter, setReportFilter] = useState<ReportType>('all');
   const [yearFilter, setYearFilter] = useState<string>('all');
+  const [dateSort, setDateSort] = useState<'newest' | 'oldest'>('newest');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reportsPerPage, setReportsPerPage] = useState(25);
@@ -144,8 +145,14 @@ function FinancialsContent() {
       result = result.filter(d => d.year === parseInt(yearFilter));
     }
     
+    result.sort((a, b) => {
+      const dateA = a.publishedDate ? new Date(a.publishedDate).getTime() : (a.year * 10000);
+      const dateB = b.publishedDate ? new Date(b.publishedDate).getTime() : (b.year * 10000);
+      return dateSort === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+    
     return result;
-  }, [documents, searchQuery, reportFilter, yearFilter]);
+  }, [documents, searchQuery, reportFilter, yearFilter, dateSort]);
 
   const filteredCompanies = useMemo(() => {
     if (!searchQuery) return companies;
@@ -168,7 +175,7 @@ function FinancialsContent() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, reportFilter, yearFilter]);
+  }, [searchQuery, reportFilter, yearFilter, dateSort]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredDocuments.length / reportsPerPage);
@@ -308,6 +315,15 @@ function FinancialsContent() {
                   {years.map(year => (
                     <option key={year} value={year}>{year}</option>
                   ))}
+                </select>
+
+                <select
+                  value={dateSort}
+                  onChange={(e) => setDateSort(e.target.value as 'newest' | 'oldest')}
+                  className="px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
                 </select>
               </>
             )}

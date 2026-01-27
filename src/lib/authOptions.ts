@@ -84,6 +84,7 @@ export const authOptions: NextAuthOptions = {
             },
           });
         } else {
+          const trialEndDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
           await User.create({
             oauthId: account.providerAccountId,
             oauthProvider: account.provider,
@@ -95,6 +96,8 @@ export const authOptions: NextAuthOptions = {
             shareId: crypto.randomBytes(8).toString('hex'),
             referralCode: crypto.randomBytes(4).toString('hex').toUpperCase(),
             onboardingCompleted: false,
+            subscriptionStatus: 'trialing',
+            subscriptionCurrentPeriodEnd: trialEndDate,
           });
         }
       }
@@ -119,6 +122,7 @@ export const authOptions: NextAuthOptions = {
         if (dbUser) {
           token.userId = dbUser._id.toString();
           token.subscriptionStatus = dbUser.subscriptionStatus || 'free';
+          token.subscriptionCurrentPeriodEnd = dbUser.subscriptionCurrentPeriodEnd?.toISOString() || null;
           token.onboardingCompleted = dbUser.onboardingCompleted || false;
         }
       }
@@ -128,6 +132,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user && token.userId) {
         (session.user as any).id = token.userId;
         (session.user as any).subscriptionStatus = token.subscriptionStatus;
+        (session.user as any).subscriptionCurrentPeriodEnd = token.subscriptionCurrentPeriodEnd;
         (session.user as any).onboardingCompleted = token.onboardingCompleted;
       }
       return session;

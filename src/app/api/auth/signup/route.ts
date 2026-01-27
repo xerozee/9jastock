@@ -53,6 +53,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const trialEndDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
     const newUser = await User.create({
       email: email.toLowerCase(),
       password: hashedPassword,
@@ -62,6 +64,8 @@ export async function POST(request: NextRequest) {
       shareId: crypto.randomBytes(8).toString('hex'),
       referredBy: referredBy,
       onboardingCompleted: false,
+      subscriptionStatus: 'trialing',
+      subscriptionCurrentPeriodEnd: trialEndDate,
     });
 
     const sessionId = crypto.randomBytes(32).toString("hex");

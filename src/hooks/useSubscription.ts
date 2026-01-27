@@ -30,8 +30,16 @@ export function useSubscription(): UseSubscriptionReturn {
     }
 
     const status = (user as any).subscriptionStatus;
-    if (status === 'active' || status === 'trialing') {
+    const periodEnd = (user as any).subscriptionCurrentPeriodEnd;
+    
+    if (status === 'active') {
       setTier('premium');
+    } else if (status === 'trialing') {
+      if (periodEnd && new Date(periodEnd) > new Date()) {
+        setTier('premium');
+      } else {
+        setTier('guest');
+      }
     } else {
       setTier('guest');
     }

@@ -1,6 +1,7 @@
 import { connectToDatabase, AFCompanyData2 } from './mongodb';
 import { scrapeCompanyData } from './africanFinancialsBrowser';
 import { nigerianStocks } from './stockData';
+import { getAllCachedQuotes } from './tradingviewClient';
 import mongoose from 'mongoose';
 
 const SYMBOL_MAPPING: { [key: string]: string } = {
@@ -206,6 +207,23 @@ export async function syncSingleStock(symbol: string): Promise<{
   }
 }
 
+export function getAllAvailableSymbols(): string[] {
+  const symbolSet = new Set<string>();
+  
+  nigerianStocks.forEach(s => symbolSet.add(s.symbol));
+  
+  const cachedQuotes = getAllCachedQuotes();
+  if (cachedQuotes && cachedQuotes.size > 0) {
+    cachedQuotes.forEach((quote, symbol) => {
+      symbolSet.add(symbol);
+    });
+  }
+  
+  const allSymbols = Array.from(symbolSet).sort();
+  console.log(`[AF Sync] Discovered ${allSymbols.length} unique symbols (${nigerianStocks.length} hardcoded + ${cachedQuotes.size} from TradingView)`);
+  return allSymbols;
+}
+
 export async function runBatchSync(
   batchSize: number = 10,
   startIndex: number = 0,
@@ -213,7 +231,7 @@ export async function runBatchSync(
 ): Promise<{ completed: boolean; nextStartIndex: number }> {
   await connectToDatabase();
   
-  const allSymbols = nigerianStocks.map(s => s.symbol);
+  const allSymbols = getAllAvailableSymbols();
   const totalStocks = allSymbols.length;
   const totalBatches = Math.ceil(totalStocks / batchSize);
   const currentBatch = Math.floor(startIndex / batchSize) + 1;

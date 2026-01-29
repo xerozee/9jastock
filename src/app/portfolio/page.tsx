@@ -230,7 +230,7 @@ export default function PortfolioPage() {
       }
 
       if (response.ok) {
-        await fetchHoldings();
+        await Promise.all([fetchHoldings(), fetchStocksData(false)]);
         setShowAddModal(false);
         setNewHolding({
           symbol: "",
@@ -259,7 +259,7 @@ export default function PortfolioPage() {
       });
 
       if (response.ok) {
-        await fetchHoldings();
+        await Promise.all([fetchHoldings(), fetchStocksData(false)]);
       } else {
         const data = await response.json();
         console.error("Delete failed:", data.error);

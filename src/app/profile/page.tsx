@@ -12,7 +12,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useWatchlist } from '@/lib/watchlistContext';
 import Avatar from '@/components/Avatar';
-import ProfileXPosts from '@/components/ProfileXPosts';
 import NotificationSettings from '@/components/NotificationSettings';
 import PriceAlertManager from '@/components/PriceAlertManager';
 import PortfolioShareImage from '@/components/PortfolioShareImage';
@@ -648,19 +647,6 @@ export default function ProfilePage() {
               ].filter((v, i, a) => a.indexOf(v) === i)}
             />
 
-            <BlurredPremiumContent 
-              title="X Market Insights" 
-              description="Get real-time market sentiment from Nigerian traders on X"
-            >
-              <ProfileXPosts 
-                symbols={[
-                  ...(profile?.holdings?.map(h => h.symbol) || []),
-                  ...(profile?.portfolioItems?.map(p => p.symbol) || [])
-                ].filter((v, i, a) => a.indexOf(v) === i)}
-                title="News from X"
-                limit={6}
-              />
-            </BlurredPremiumContent>
           </div>
 
           <div className="space-y-6">

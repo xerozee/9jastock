@@ -9,7 +9,6 @@ import MarketHours from '@/components/MarketHours';
 import StockCard from '@/components/StockCard';
 import StockGridSkeleton from '@/components/StockGridSkeleton';
 import MarketingLandingPage from '@/components/MarketingLandingPage';
-import MarketBuzzX from '@/components/MarketBuzzX';
 import { useLiveStocks, formatLastUpdate } from '@/lib/useLiveStocks';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -267,12 +266,6 @@ export default function HomePage() {
               ))}
             </div>
           )}
-        </section>
-      </BlurredPremiumContent>
-
-      <BlurredPremiumContent title="Market Buzz" description="Get real-time social sentiment from Nigerian traders">
-        <section className="mb-8">
-          <MarketBuzzX />
         </section>
       </BlurredPremiumContent>
 

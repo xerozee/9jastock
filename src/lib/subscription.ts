@@ -92,11 +92,6 @@ export const PREMIUM_FEATURES = [
     description: 'Get notified instantly when stocks hit your target prices',
   },
   {
-    icon: '📱',
-    title: 'X/Twitter Market Buzz',
-    description: 'AI-powered sentiment analysis from Nigerian traders on social media',
-  },
-  {
     icon: '📰',
     title: 'Complete News Access',
     description: '30 days of market news from top Nigerian sources',
@@ -116,7 +111,6 @@ export const PREMIUM_FEATURES = [
 export const VALUE_PROPOSITIONS = [
   'Only NGX tracker with AI recommendations',
   'Real-time data from 145+ Nigerian stocks',
-  'X/Twitter sentiment analysis for Nigerian market',
   'No competitor in Nigeria offers this',
   'Built specifically for Nigerian investors',
 ];

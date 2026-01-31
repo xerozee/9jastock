@@ -49,19 +49,19 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
     - **Watchlist:** Browser localStorage-based watchlist.
     - **News & Blog:** Scraped market news from multiple Nigerian sources, updated every 10 minutes.
     - **AI Newsletter System:** GPT-4o-mini-powered newsletter generation and automated delivery.
-    - **Market Buzz Social Feed:** Real-time social media aggregation (TradingView, X/Twitter, Reddit) with AI sentiment analysis for Nigerian stocks. Includes official X/Twitter API integration.
+    - **Market Buzz Social Feed:** (TEMPORARILY DISABLED) Real-time social media aggregation feature is hidden from users pending future updates.
     - **Stock Recommendations Engine:** AI-powered suggestions based on user profile and investment goals.
     - **Freemium Gating System:** Users can sign up without payment and browse the app with limited access.
       - **Free User Experience (Authenticated but not subscribed):**
         - **Visible (unblurred):** Market Hours, Market Overview (market cap, volume, advancers/decliners, indices, market breadth)
-        - **Blurred with subscribe prompt:** Top Gainers, Top Losers, Most Active, X Market Buzz
+        - **Blurred with subscribe prompt:** Top Gainers, Top Losers, Most Active
         - **Profile access:** Referral section, investment profile, notifications work
         - **Component:** `BlurredPremiumContent.tsx` wraps premium sections with blur overlay and upgrade CTA. Uses `statusResolved` flag from `useSubscription` hook to prevent content flash during auth loading.
-        - **Profile Page:** X Market Insights section is gated with BlurredPremiumContent
+        - **Profile Page:** Investment profile and recommendations displayed
       - **Tier Limits (src/lib/subscription.ts):**
         - Guest: Limited preview only (5 stocks visible, no portfolio/watchlist, blurred premium sections)
         - Premium: Full access - 1min refresh, unlimited portfolio, unlimited watchlist, all features
-      - **Premium Features:** All 145+ stocks, AI Buy/Sell/Hold recommendations, portfolio tracking with live P&L, X/Twitter market buzz with sentiment analysis, price alerts, push notifications, 30-day news archive, advanced technical analysis, AI morning newsletter
+      - **Premium Features:** All 145+ stocks, AI Buy/Sell/Hold recommendations, portfolio tracking with live P&L, price alerts, push notifications, 30-day news archive, advanced technical analysis, AI morning newsletter
     - **Push Notifications:** Web Push API with VAPID authentication for price alerts, daily summaries, and breaking news.
     - **Stripe Subscription System:** Integration for managing free and premium tiers, including Stripe Checkout and webhook handling.
     - **Premium Visual Theme:** Gold/amber neon theme for premium users with glow effects, shimmer animations, and distinctive branding. Uses PremiumThemeContext and PremiumWrapper components (`src/contexts/PremiumThemeContext.tsx`, `src/components/PremiumWrapper.tsx`, `src/styles/premium.css`).

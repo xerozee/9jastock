@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { 
   TrendingUp, TrendingDown, BarChart3, Bell, Briefcase, LineChart, 
   Shield, Zap, Globe, ArrowRight, CheckCircle, ChevronRight, Sparkles, 
-  Smartphone, Play, Twitter, Brain, Crown, Download, PieChart, 
+  Smartphone, Play, Brain, Crown, Download, PieChart, 
   Newspaper, Target, Clock, MessageSquare, Star, CreditCard
 } from 'lucide-react';
 import Logo3D from './Logo3D';
@@ -46,12 +46,6 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
       title: 'Your Personal AI Advisor',
       description: 'Not sure what to buy? Our AI learns your goals and risk appetite, then suggests stocks that actually match your investment style.',
       gradient: 'from-purple-500 to-pink-600',
-    },
-    {
-      icon: Twitter,
-      title: 'What People Are Saying',
-      description: 'See what Nigerian traders are discussing on X in real-time. Our AI reads the mood so you understand market sentiment instantly.',
-      gradient: 'from-blue-500 to-indigo-600',
     },
     {
       icon: Bell,
@@ -314,22 +308,6 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                     </div>
                   </div>
                   
-                  <div className="absolute -top-4 -right-4 md:-top-6 md:-right-6 hidden sm:block">
-                    <div 
-                      className="bg-slate-800/90 backdrop-blur-xl rounded-xl md:rounded-2xl p-3 md:p-4 border border-slate-700/50 shadow-xl animate-float"
-                      style={{ animationDelay: '0s' }}
-                    >
-                      <div className="flex items-center gap-2 md:gap-3">
-                        <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-500/20 rounded-lg md:rounded-xl flex items-center justify-center">
-                          <Twitter size={14} className="text-blue-400" />
-                        </div>
-                        <div>
-                          <div className="text-[10px] md:text-xs text-slate-400">Market Sentiment</div>
-                          <div className="text-xs md:text-sm font-bold text-emerald-400">Bullish 📈</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                   
                   <div className="absolute -bottom-2 -left-2 md:-bottom-4 md:-left-4 hidden sm:block">
                     <div 

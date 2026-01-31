@@ -77,7 +77,6 @@ export default function PricingPage() {
     { icon: TrendingUp, title: 'Real-Time NGX Data', description: '145+ Nigerian stocks with live prices' },
     { icon: Brain, title: 'AI Recommendations', description: 'Buy/Sell/Hold signals for every stock' },
     { icon: Bell, title: 'Price Alerts', description: 'Push notifications for price targets' },
-    { icon: Sparkles, title: 'Market Buzz', description: 'Social sentiment from Nigerian traders' },
     { icon: LineChart, title: 'Technical Analysis', description: 'RSI, MACD, Moving Averages' },
     { icon: Newspaper, title: 'News Aggregation', description: 'Curated Nigerian financial news' },
     { icon: Mail, title: 'AI Newsletter', description: 'Daily market insights to your inbox' },

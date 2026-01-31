@@ -108,3 +108,31 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
 - **X (formerly Twitter) API v2:** For real-time social media aggregation.
 - **web-push:** npm package for handling push notifications.
 - **African Financials:** Source for Nigerian company financial documents (annual reports, interim reports, presentations).
+
+## Polymarket Trading Bot
+
+A separate utility available at `/polymarket-bot` for automated trading on Polymarket prediction markets.
+
+**Features:**
+- Connects to Polymarket CLOB API for real-time price monitoring and trading
+- Configurable buy/sell thresholds for automated swing trading
+- Dashboard with bot status, current price, position tracking, and trade history
+- Start/stop controls with manual check option
+- Security warning about localStorage credential storage
+
+**How it works:**
+1. Configure API credentials (API Key, Secret, Passphrase, Private Key)
+2. Enter the market Token ID from Polymarket
+3. Set buy threshold (price to buy at) and sell threshold (price to sell at)
+4. Set trade size (number of shares) and check interval
+5. Start the bot - it monitors prices and executes trades automatically
+
+**Files:**
+- `src/app/polymarket-bot/page.tsx` - Dashboard UI
+- `src/lib/polymarket-bot.ts` - Bot logic and state management
+- `src/app/api/polymarket/*` - API routes for bot control, price fetching, trading
+- `scripts/polymarket-bot-scheduler.ts` - Background scheduler (optional)
+
+**Dependencies:**
+- `@polymarket/clob-client` - Official Polymarket trading client
+- `ethers` - Ethereum wallet and signing

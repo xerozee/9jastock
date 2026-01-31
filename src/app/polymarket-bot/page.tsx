@@ -273,11 +273,11 @@ export default function PolymarketBotPage() {
           </div>
         </div>
 
-        {error && (
+        {(error || botState?.error) && (
           <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 mb-6">
             <div className="flex items-center gap-3">
               <XCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-              <p className="text-red-200">{error}</p>
+              <p className="text-red-200">{error || botState?.error}</p>
             </div>
           </div>
         )}
@@ -459,7 +459,7 @@ export default function PolymarketBotPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-slate-400 mb-1">Trade Size (USDC)</label>
+                  <label className="block text-sm text-slate-400 mb-1">Trade Size (Shares)</label>
                   <input
                     type="number"
                     step="1"
@@ -468,6 +468,7 @@ export default function PolymarketBotPage() {
                     onChange={(e) => handleConfigChange('tradeSize', parseInt(e.target.value) || 1)}
                     className="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-500"
                   />
+                  <p className="text-xs text-slate-500 mt-1">Number of outcome shares to trade</p>
                 </div>
                 <div>
                   <label className="block text-sm text-slate-400 mb-1">Check Interval (sec)</label>

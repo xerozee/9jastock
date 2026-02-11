@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const symbol = searchParams.get('symbol');
+    const symbols = searchParams.get('symbols');
     const year = searchParams.get('year');
     const limit = parseInt(searchParams.get('limit') || '50');
 
@@ -21,6 +22,11 @@ export async function GET(request: NextRequest) {
     
     if (symbol) {
       query.symbol = symbol.toUpperCase();
+    } else if (symbols) {
+      const symbolArray = symbols.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+      if (symbolArray.length > 0) {
+        query.symbol = { $in: symbolArray };
+      }
     }
     
     if (year) {

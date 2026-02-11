@@ -521,19 +521,24 @@ export const CompanyProfile = mongoose.models.CompanyProfile || mongoose.model('
 
 const dividendHistorySchema = new mongoose.Schema({
   symbol: { type: String, required: true },
+  companyName: { type: String },
+  period: { type: String },
   declarationDate: { type: Date },
   exDividendDate: { type: Date },
   recordDate: { type: Date },
   paymentDate: { type: Date },
+  agmDate: { type: Date },
   dividendAmount: { type: Number, required: true },
   dividendType: { type: String, enum: ['interim', 'final', 'special', 'bonus'], default: 'final' },
   currency: { type: String, default: 'NGN' },
   dividendYield: { type: Number },
+  bonusShares: { type: String },
   fiscalYear: { type: Number },
   fiscalQuarter: { type: Number },
   qualificationDate: { type: Date },
   closureStart: { type: Date },
   closureEnd: { type: Date },
+  eDividendRegistrationUrl: { type: String },
   source: { type: String },
   sourceUrl: { type: String },
   scrapedAt: { type: Date, default: Date.now },
@@ -584,19 +589,24 @@ export type ICompanyProfile = {
 export type IDividendHistory = {
   _id: mongoose.Types.ObjectId;
   symbol: string;
+  companyName?: string;
+  period?: string;
   declarationDate?: Date;
   exDividendDate?: Date;
   recordDate?: Date;
   paymentDate?: Date;
+  agmDate?: Date;
   dividendAmount: number;
   dividendType: 'interim' | 'final' | 'special' | 'bonus';
   currency: string;
   dividendYield?: number;
+  bonusShares?: string;
   fiscalYear?: number;
   fiscalQuarter?: number;
   qualificationDate?: Date;
   closureStart?: Date;
   closureEnd?: Date;
+  eDividendRegistrationUrl?: string;
   source?: string;
   sourceUrl?: string;
   scrapedAt: Date;

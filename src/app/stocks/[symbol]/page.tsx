@@ -14,6 +14,7 @@ const TradingViewWidget = lazy(() => import('@/components/TradingViewWidget'));
 const TradingViewTechnicalAnalysis = lazy(() => import('@/components/TradingViewTechnicalAnalysis'));
 const TradingViewFinancials = lazy(() => import('@/components/TradingViewFinancials'));
 const AfricanFinancialsData = lazy(() => import('@/components/AfricanFinancialsData'));
+import DividendSection from '@/components/DividendSection';
 
 function ChartSkeleton() {
   return (
@@ -953,6 +954,9 @@ export default function StockDetailPage() {
           />
         </div>
       </SectionCard>
+
+      {/* Dividend Information Section */}
+      <DividendSection symbol={symbol} />
 
       {/* Earnings Section */}
       {yahooData?.earnings && (yahooData.earnings.earningsHistory.length > 0 || yahooData.earnings.earningsTrend.length > 0) && (

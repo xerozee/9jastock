@@ -16,6 +16,9 @@ import { Stock, MarketSummary } from '@/types/stock';
 import { MARKET_INDEX_BASE_VALUES } from '@/lib/marketConfig';
 import { PremiumBadge } from '@/components/PremiumWrapper';
 import BlurredPremiumContent from '@/components/BlurredPremiumContent';
+import UpcomingDividendsWidget from '@/components/UpcomingDividendsWidget';
+import PortfolioSummaryWidget from '@/components/PortfolioSummaryWidget';
+import WatchlistMoversWidget from '@/components/WatchlistMoversWidget';
 
 function formatMarketCap(value: number): string {
   if (value >= 1e12) return `₦${(value / 1e12).toFixed(2)}T`;
@@ -268,6 +271,16 @@ export default function HomePage() {
           )}
         </section>
       </BlurredPremiumContent>
+
+      {isPremium && (
+        <section className="mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <PortfolioSummaryWidget />
+            <UpcomingDividendsWidget />
+            <WatchlistMoversWidget stocks={stocks as Stock[]} />
+          </div>
+        </section>
+      )}
 
     </div>
   );

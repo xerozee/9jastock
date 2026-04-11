@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { TrendingUp, BarChart3, Star, Menu, X, Briefcase, Newspaper, Moon, Sun, LogIn, LogOut, User, Crown, FileText } from 'lucide-react';
+import { TrendingUp, BarChart3, Star, Menu, X, Briefcase, Newspaper, Moon, Sun, LogIn, LogOut, User, Crown, FileText, Calendar } from 'lucide-react';
 import { useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -20,6 +20,7 @@ export default function Header() {
     { href: '/', label: 'Dashboard', icon: BarChart3 },
     { href: '/stocks', label: 'Stocks', icon: TrendingUp },
     { href: '/financials', label: 'Financials', icon: FileText },
+    { href: '/dividends', label: 'Dividends', icon: Calendar },
     { href: '/blog', label: 'News', icon: Newspaper },
     { href: '/portfolio', label: 'Portfolio', icon: Briefcase },
     { href: '/watchlist', label: 'Watchlist', icon: Star },

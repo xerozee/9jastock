@@ -46,7 +46,7 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
     - **Live Data:** Fetches and displays real-time stock data for over 145 NGX stocks.
     - **Authentication & Profile:** Comprehensive profile management, 5-step onboarding, and secure authentication.
     - **Portfolio Tracking:** MongoDB-backed system for tracking stock purchases, performance, and sharing.
-    - **Watchlist:** Browser localStorage-based watchlist.
+    - **Watchlist:** localStorage-based watchlist with database sync for premium users. Premium users' watchlists are automatically synced to MongoDB (`Watchlist` schema) for cross-device persistence. On login, DB and local watchlists are merged. Debounced sync (1s) on changes. API: `/api/watchlist` (GET/PUT).
     - **News & Blog:** Scraped market news from multiple Nigerian sources, updated every 10 minutes.
     - **AI Newsletter System:** GPT-4o-mini-powered newsletter generation and automated delivery.
     - **Market Buzz Social Feed:** (TEMPORARILY DISABLED) Real-time social media aggregation feature is hidden from users pending future updates.
@@ -66,6 +66,12 @@ The application is built with Next.js 16, featuring a modern 3D UI redesign with
     - **Stripe Subscription System:** Integration for managing free and premium tiers, including Stripe Checkout and webhook handling.
     - **Premium Visual Theme:** Gold/amber neon theme for premium users with glow effects, shimmer animations, and distinctive branding. Uses PremiumThemeContext and PremiumWrapper components (`src/contexts/PremiumThemeContext.tsx`, `src/components/PremiumWrapper.tsx`, `src/styles/premium.css`).
     - **Referral System:** Database-backed referral tracking with Referral, ReferralReward, and ReferralStats schemas in MongoDB. Tracks referrer/referred relationships, conversion status, and prepares for future reward implementation (bronze/silver/gold/platinum tiers). API endpoints at `/api/referral/stats` and `/api/referral/apply`.
+    - **Dividends Calendar (Apr 2026):** Dedicated `/dividends` route with premium-gated access showing all upcoming dividends sorted by date, filterable by sector, with countdown timers. `DividendsCalendar` component with stats cards, sortable table, search/filter.
+    - **Dashboard Widgets (Apr 2026):** Premium dashboard includes 3 widgets below main content: `PortfolioSummaryWidget` (total value + P&L), `UpcomingDividendsWidget` (next 5 dividends with countdown), `WatchlistMoversWidget` (biggest movers from watchlist).
+    - **Stock Comparison Tool (Apr 2026):** `/stocks/compare` route for side-by-side comparison of up to 4 stocks across 20+ metrics with best-value highlighting. Premium gated.
+    - **Stock Screener (Apr 2026):** `StockScreener` component with advanced filters (sector, P/E, dividend yield, volume, performance). Integrated into `/stocks` page as a "Screener" view toggle alongside the existing table view.
+    - **Stock Detail Page Tabs (Apr 2026):** Tab navigation (Overview/Technical/Financials/Dividends) on stock detail pages to organize content and reduce scrolling. Chart always visible, content sections grouped by tab.
+    - **Navigation Updates (Apr 2026):** "Dividends" link added to Header.tsx with Calendar icon. "Compare Stocks" CTA added to stocks page hero.
     - **In-Depth Financial Analysis (Jan 2026):** Comprehensive stock analysis tools for institutional-grade investors:
       - **TradingView Technical Analysis Widget:** Embedded widget showing oscillators, moving averages, and Buy/Sell/Neutral summary (`src/components/TradingViewTechnicalAnalysis.tsx`)
       - **TradingView Financials Widget:** Embedded widget displaying revenue, earnings, balance sheet, and cash flow data (`src/components/TradingViewFinancials.tsx`)

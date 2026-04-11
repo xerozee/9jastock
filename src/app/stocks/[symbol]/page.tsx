@@ -261,6 +261,15 @@ function RiskMeter({ value, label }: { value: number | null; label: string }) {
   );
 }
 
+type TabKey = 'overview' | 'technical' | 'financials' | 'dividends';
+
+const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+  { key: 'overview', label: 'Overview', icon: Building2 },
+  { key: 'technical', label: 'Technical', icon: Activity },
+  { key: 'financials', label: 'Financials', icon: FileText },
+  { key: 'dividends', label: 'Dividends', icon: DollarSign },
+];
+
 export default function StockDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -273,6 +282,7 @@ export default function StockDetailPage() {
   const staticStock = getStockBySymbol(symbol);
   const stock = liveStock || staticStock;
   
+  const [activeTab, setActiveTab] = useState<TabKey>('overview');
   const [yahooData, setYahooData] = useState<YahooFinanceData | null>(null);
   const [yahooLoading, setYahooLoading] = useState(true);
   
@@ -461,14 +471,40 @@ export default function StockDetailPage() {
         </div>
       </div>
 
-      {/* Live Chart - Lazy loaded for performance */}
+      {/* Tab Navigation */}
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 mb-6 overflow-hidden">
+        <div className="flex overflow-x-auto">
+          {TABS.map(tab => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                  isActive
+                    ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/10'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600'
+                }`}
+              >
+                <Icon size={16} />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Live Chart - Always visible */}
       <div className="mb-6">
         <Suspense fallback={<ChartSkeleton />}>
           <TradingViewWidget symbol={stock.symbol} height={500} />
         </Suspense>
       </div>
 
-      {/* Technical Analysis Summary */}
+      {/* ============ OVERVIEW TAB ============ */}
+      {activeTab === 'overview' && (
+        <>
       <div className="mb-6">
         <TechnicalAnalysisSummary
           recommendation={extendedStock.recommendAll}
@@ -485,14 +521,6 @@ export default function StockDetailPage() {
         />
       </div>
 
-      {/* TradingView Technical Analysis Widget */}
-      <div className="mb-6">
-        <Suspense fallback={<WidgetSkeleton title="Technical Analysis" height={450} />}>
-          <TradingViewTechnicalAnalysis symbol={stock.symbol} height={450} />
-        </Suspense>
-      </div>
-
-      {/* Company Overview Section - TradingView Primary */}
       <SectionCard title="Company Overview" icon={Building2} iconColor="text-blue-600">
         {yahooData?.companyProfile?.description ? (
           <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
@@ -563,7 +591,6 @@ export default function StockDetailPage() {
         </div>
       </SectionCard>
 
-      {/* Analyst Ratings Section */}
       <SectionCard title="Analyst Ratings & Price Targets" icon={Target} iconColor="text-purple-600">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
@@ -576,7 +603,6 @@ export default function StockDetailPage() {
                 Overall Rating: {extendedStock.recommendAll?.toFixed(2) || 'N/A'}
               </p>
             </div>
-            
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600 dark:text-gray-400">Moving Averages</span>
@@ -591,7 +617,6 @@ export default function StockDetailPage() {
                 </span>
               </div>
             </div>
-            
             {(extendedStock.buySignals || extendedStock.sellSignals || extendedStock.neutralSignals) && (
               <div className="mt-4 pt-4 border-t dark:border-slate-700">
                 <div className="flex justify-around text-center">
@@ -611,7 +636,6 @@ export default function StockDetailPage() {
               </div>
             )}
           </div>
-          
           <div>
             <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Analyst Consensus</h3>
             {yahooData?.analystRatings ? (
@@ -621,7 +645,6 @@ export default function StockDetailPage() {
                   hold={yahooData.analystRatings.totalHold}
                   sell={yahooData.analystRatings.totalSell}
                 />
-                
                 {yahooData.analystRatings.numberOfAnalystOpinions > 0 && (
                   <div className="grid grid-cols-2 gap-4 mt-4">
                     <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
@@ -655,15 +678,81 @@ export default function StockDetailPage() {
         </div>
       </SectionCard>
 
-      {/* Technical Analysis Grid */}
+      <SectionCard title="Performance" icon={LineChart} iconColor="text-blue-600">
+        <div className="space-y-4">
+          <PerformanceBar label="1 Week" value={extendedStock.perfWeek} />
+          <PerformanceBar label="1 Month" value={extendedStock.perfMonth} />
+          <PerformanceBar label="3 Months" value={extendedStock.perf3Month} />
+          <PerformanceBar label="6 Months" value={extendedStock.perf6Month} />
+          <PerformanceBar label="YTD" value={extendedStock.perfYTD} />
+          <PerformanceBar label="1 Year" value={extendedStock.perfYear} />
+          <PerformanceBar label="5 Years" value={extendedStock.perf5Year} />
+          <PerformanceBar label="All Time" value={extendedStock.perfAllTime} />
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Key Statistics" icon={Info} iconColor="text-gray-600">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard label="Market Cap" value={extendedStock.marketCap ? formatLargeNumber(extendedStock.marketCap) : yahooData?.keyStats?.marketCap ? formatYahooLargeNumber(yahooData.keyStats.marketCap) : 'N/A'} />
+          <StatCard label="Shares Outstanding" value={extendedStock.sharesOutstanding ? formatLargeNumber(extendedStock.sharesOutstanding) : yahooData?.keyStats?.sharesOutstanding ? formatYahooLargeNumber(yahooData.keyStats.sharesOutstanding) : 'N/A'} icon={Users} />
+          <StatCard label="50-Day Average" value={yahooData?.keyStats?.fiftyDayAverage ? formatCurrency(yahooData.keyStats.fiftyDayAverage) : 'N/A'} />
+          <StatCard label="200-Day Average" value={yahooData?.keyStats?.twoHundredDayAverage ? formatCurrency(yahooData.keyStats.twoHundredDayAverage) : 'N/A'} />
+          <StatCard label="52-Week High" value={extendedStock.high52Week ? formatCurrency(extendedStock.high52Week) : yahooData?.keyStats?.fiftyTwoWeekHigh ? formatCurrency(yahooData.keyStats.fiftyTwoWeekHigh) : 'N/A'} />
+          <StatCard label="52-Week Low" value={extendedStock.low52Week ? formatCurrency(extendedStock.low52Week) : yahooData?.keyStats?.fiftyTwoWeekLow ? formatCurrency(yahooData.keyStats.fiftyTwoWeekLow) : 'N/A'} />
+          {yahooData?.keyStats?.lastSplitDate && (
+            <StatCard label="Last Split" value={yahooData.keyStats.lastSplitDate} subValue={yahooData.keyStats.lastSplitFactor || ''} />
+          )}
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Volume Analysis" icon={BarChart3} iconColor="text-cyan-600">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <StatCard label="Today's Volume" value={formatVolume(stock.volume)} />
+          <StatCard label="Avg Vol (10d)" value={formatVolume(extendedStock.avgVolume10d || yahooData?.keyStats?.averageVolume10days || 0)} />
+          <StatCard label="Avg Vol (30d)" value={formatVolume(extendedStock.avgVolume30d || 0)} />
+          <StatCard label="Avg Vol (90d)" value={formatVolume(extendedStock.avgVolume90d || yahooData?.keyStats?.averageVolume || 0)} />
+          <StatCard 
+            label="Relative Volume" 
+            value={extendedStock.relativeVolume?.toFixed(2) || 'N/A'} 
+            subValue={extendedStock.relativeVolume && extendedStock.relativeVolume > 1 ? 'Above average' : 'Below average'}
+            trend={extendedStock.relativeVolume && extendedStock.relativeVolume > 1 ? 'up' : 'down'}
+          />
+        </div>
+      </SectionCard>
+        </>
+      )}
+
+      {/* ============ TECHNICAL TAB ============ */}
+      {activeTab === 'technical' && (
+        <>
+      <div className="mb-6">
+        <TechnicalAnalysisSummary
+          recommendation={extendedStock.recommendAll}
+          rsi={extendedStock.rsi}
+          macd={extendedStock.macd}
+          macdSignal={extendedStock.macdSignal}
+          sma20={extendedStock.sma20}
+          sma50={extendedStock.sma50}
+          sma200={extendedStock.sma200}
+          ema20={extendedStock.ema20}
+          ema50={extendedStock.ema50}
+          ema200={extendedStock.ema200}
+          currentPrice={liveStock?.price || stock.price}
+        />
+      </div>
+
+      <div className="mb-6">
+        <Suspense fallback={<WidgetSkeleton title="Technical Analysis" height={450} />}>
+          <TradingViewTechnicalAnalysis symbol={stock.symbol} height={450} />
+        </Suspense>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Technical Indicators */}
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-6">
           <div className="flex items-center gap-2 mb-4">
             <Activity className="text-blue-600" size={24} />
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Technical Indicators</h2>
           </div>
-          
           <div className="space-y-4">
             <TechnicalGauge 
               label="RSI (14)" 
@@ -672,7 +761,6 @@ export default function StockDetailPage() {
               max={100} 
               zones={{ oversold: 30, overbought: 70 }}
             />
-            
             <div className="grid grid-cols-2 gap-4">
               <div className="p-3 bg-gray-50 dark:bg-slate-700 rounded-lg">
                 <p className="text-xs text-gray-500">RSI Status</p>
@@ -683,7 +771,6 @@ export default function StockDetailPage() {
                 <p className="font-semibold dark:text-white">{extendedStock.stochK?.toFixed(2) || 'N/A'}</p>
               </div>
             </div>
-
             <div className="pt-4 border-t dark:border-slate-700">
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">MACD</h3>
               <div className="grid grid-cols-3 gap-2 text-center">
@@ -705,33 +792,23 @@ export default function StockDetailPage() {
                 </div>
               </div>
             </div>
-            
             <div className="pt-4 border-t dark:border-slate-700">
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Moving Averages</h3>
               <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">SMA 20</span>
-                  <span className="font-medium dark:text-white">{extendedStock.sma20 ? formatCurrency(extendedStock.sma20) : 'N/A'}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">SMA 50</span>
-                  <span className="font-medium dark:text-white">{extendedStock.sma50 ? formatCurrency(extendedStock.sma50) : 'N/A'}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">SMA 200</span>
-                  <span className="font-medium dark:text-white">{extendedStock.sma200 ? formatCurrency(extendedStock.sma200) : 'N/A'}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">EMA 20</span>
-                  <span className="font-medium dark:text-white">{extendedStock.ema20 ? formatCurrency(extendedStock.ema20) : 'N/A'}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">EMA 50</span>
-                  <span className="font-medium dark:text-white">{extendedStock.ema50 ? formatCurrency(extendedStock.ema50) : 'N/A'}</span>
-                </div>
+                {[
+                  { label: 'SMA 20', val: extendedStock.sma20 },
+                  { label: 'SMA 50', val: extendedStock.sma50 },
+                  { label: 'SMA 200', val: extendedStock.sma200 },
+                  { label: 'EMA 20', val: extendedStock.ema20 },
+                  { label: 'EMA 50', val: extendedStock.ema50 },
+                ].map(ma => (
+                  <div key={ma.label} className="flex justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">{ma.label}</span>
+                    <span className="font-medium dark:text-white">{ma.val ? formatCurrency(ma.val) : 'N/A'}</span>
+                  </div>
+                ))}
               </div>
             </div>
-            
             <div className="pt-4 border-t dark:border-slate-700">
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Other Indicators</h3>
               <div className="space-y-2">
@@ -748,13 +825,11 @@ export default function StockDetailPage() {
           </div>
         </div>
 
-        {/* Bollinger Bands & Volatility */}
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-6">
           <div className="flex items-center gap-2 mb-4">
             <BarChart3 className="text-orange-600" size={24} />
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Volatility & Risk</h2>
           </div>
-          
           <div className="space-y-6">
             <div>
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Bollinger Bands</h3>
@@ -773,7 +848,6 @@ export default function StockDetailPage() {
                 </div>
               </div>
             </div>
-            
             <div className="pt-4 border-t dark:border-slate-700">
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Volatility Metrics</h3>
               <div className="space-y-3">
@@ -791,7 +865,6 @@ export default function StockDetailPage() {
                 </div>
               </div>
             </div>
-            
             {yahooData?.riskMetrics && (yahooData.riskMetrics.overallRisk || yahooData.riskMetrics.auditRisk) && (
               <div className="pt-4 border-t dark:border-slate-700">
                 <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Governance Risk</h3>
@@ -806,22 +879,12 @@ export default function StockDetailPage() {
           </div>
         </div>
       </div>
+        </>
+      )}
 
-      {/* Performance Section */}
-      <SectionCard title="Performance" icon={LineChart} iconColor="text-blue-600">
-        <div className="space-y-4">
-          <PerformanceBar label="1 Week" value={extendedStock.perfWeek} />
-          <PerformanceBar label="1 Month" value={extendedStock.perfMonth} />
-          <PerformanceBar label="3 Months" value={extendedStock.perf3Month} />
-          <PerformanceBar label="6 Months" value={extendedStock.perf6Month} />
-          <PerformanceBar label="YTD" value={extendedStock.perfYTD} />
-          <PerformanceBar label="1 Year" value={extendedStock.perfYear} />
-          <PerformanceBar label="5 Years" value={extendedStock.perf5Year} />
-          <PerformanceBar label="All Time" value={extendedStock.perfAllTime} />
-        </div>
-      </SectionCard>
-
-      {/* Financial Data */}
+      {/* ============ FINANCIALS TAB ============ */}
+      {activeTab === 'financials' && (
+        <>
       <SectionCard title="Income Statement (TTM)" icon={FileText} iconColor="text-emerald-600">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard label="Total Revenue" value={extendedStock.revenue ? formatLargeNumber(extendedStock.revenue) : 'N/A'} icon={DollarSign} />
@@ -833,7 +896,6 @@ export default function StockDetailPage() {
           <StatCard label="EPS (Diluted)" value={extendedStock.epsDiluted ? formatCurrency(extendedStock.epsDiluted) : 'N/A'} />
           <StatCard label="Revenue/Share" value={extendedStock.revenuePerShare ? formatCurrency(extendedStock.revenuePerShare) : 'N/A'} />
         </div>
-        
         <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-6 mb-3">Margins</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard 
@@ -859,7 +921,6 @@ export default function StockDetailPage() {
         </div>
       </SectionCard>
 
-      {/* Balance Sheet & Valuation */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <SectionCard title="Balance Sheet" icon={Building2} iconColor="text-slate-600">
           <div className="grid grid-cols-2 gap-4">
@@ -870,28 +931,14 @@ export default function StockDetailPage() {
             <StatCard label="Book Value/Share" value={extendedStock.bookValue ? formatCurrency(extendedStock.bookValue) : 'N/A'} />
             <StatCard label="Tangible Book/Share" value={extendedStock.tangibleBookValue ? formatCurrency(extendedStock.tangibleBookValue) : 'N/A'} />
           </div>
-          
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-4 mb-3">Liquidity Ratios</h3>
           <div className="grid grid-cols-2 gap-4">
-            <StatCard 
-              label="Debt/Equity" 
-              value={extendedStock.debtToEquity?.toFixed(2) || 'N/A'}
-              trend={extendedStock.debtToEquity && extendedStock.debtToEquity < 1 ? 'up' : 'down'}
-            />
-            <StatCard 
-              label="Current Ratio" 
-              value={extendedStock.currentRatio?.toFixed(2) || 'N/A'}
-              trend={extendedStock.currentRatio && extendedStock.currentRatio > 1.5 ? 'up' : 'neutral'}
-            />
-            <StatCard 
-              label="Quick Ratio" 
-              value={extendedStock.quickRatio?.toFixed(2) || 'N/A'}
-              trend={extendedStock.quickRatio && extendedStock.quickRatio > 1 ? 'up' : 'neutral'}
-            />
+            <StatCard label="Debt/Equity" value={extendedStock.debtToEquity?.toFixed(2) || 'N/A'} trend={extendedStock.debtToEquity && extendedStock.debtToEquity < 1 ? 'up' : 'down'} />
+            <StatCard label="Current Ratio" value={extendedStock.currentRatio?.toFixed(2) || 'N/A'} trend={extendedStock.currentRatio && extendedStock.currentRatio > 1.5 ? 'up' : 'neutral'} />
+            <StatCard label="Quick Ratio" value={extendedStock.quickRatio?.toFixed(2) || 'N/A'} trend={extendedStock.quickRatio && extendedStock.quickRatio > 1 ? 'up' : 'neutral'} />
             <StatCard label="Float Shares" value={extendedStock.floatShares ? formatLargeNumber(extendedStock.floatShares) : 'N/A'} />
           </div>
         </SectionCard>
-
         <SectionCard title="Valuation" icon={Scale} iconColor="text-amber-600">
           <div className="grid grid-cols-2 gap-4">
             <StatCard label="Market Cap" value={extendedStock.marketCap ? formatLargeNumber(extendedStock.marketCap) : 'N/A'} icon={DollarSign} />
@@ -906,59 +953,24 @@ export default function StockDetailPage() {
         </SectionCard>
       </div>
 
-      {/* Cash Flow */}
       <SectionCard title="Cash Flow" icon={Wallet} iconColor="text-cyan-600">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard 
-            label="Free Cash Flow" 
-            value={extendedStock.freeCashFlow ? formatLargeNumber(extendedStock.freeCashFlow) : yahooData?.financialRatios?.freeCashflow ? formatYahooLargeNumber(yahooData.financialRatios.freeCashflow) : 'N/A'} 
-            trend={extendedStock.freeCashFlow && extendedStock.freeCashFlow > 0 ? 'up' : 'down'}
-          />
-          <StatCard 
-            label="Operating Cash Flow" 
-            value={yahooData?.financialRatios?.operatingCashflow ? formatYahooLargeNumber(yahooData.financialRatios.operatingCashflow) : 'N/A'} 
-          />
-          <StatCard 
-            label="Cash Per Share" 
-            value={extendedStock.cashPerShare ? formatCurrency(extendedStock.cashPerShare) : 'N/A'} 
-          />
-          <StatCard 
-            label="Total Cash Position" 
-            value={extendedStock.totalCash ? formatLargeNumber(extendedStock.totalCash) : 'N/A'} 
-          />
+          <StatCard label="Free Cash Flow" value={extendedStock.freeCashFlow ? formatLargeNumber(extendedStock.freeCashFlow) : yahooData?.financialRatios?.freeCashflow ? formatYahooLargeNumber(yahooData.financialRatios.freeCashflow) : 'N/A'} trend={extendedStock.freeCashFlow && extendedStock.freeCashFlow > 0 ? 'up' : 'down'} />
+          <StatCard label="Operating Cash Flow" value={yahooData?.financialRatios?.operatingCashflow ? formatYahooLargeNumber(yahooData.financialRatios.operatingCashflow) : 'N/A'} />
+          <StatCard label="Cash Per Share" value={extendedStock.cashPerShare ? formatCurrency(extendedStock.cashPerShare) : 'N/A'} />
+          <StatCard label="Total Cash Position" value={extendedStock.totalCash ? formatLargeNumber(extendedStock.totalCash) : 'N/A'} />
         </div>
       </SectionCard>
 
-      {/* Profitability & Returns */}
       <SectionCard title="Profitability & Returns" icon={TrendingUp} iconColor="text-green-600">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard 
-            label="Return on Equity" 
-            value={extendedStock.roe ? `${extendedStock.roe.toFixed(2)}%` : 'N/A'}
-            trend={extendedStock.roe && extendedStock.roe > 15 ? 'up' : 'neutral'}
-          />
-          <StatCard 
-            label="Return on Assets" 
-            value={extendedStock.roa ? `${extendedStock.roa.toFixed(2)}%` : 'N/A'}
-            trend={extendedStock.roa && extendedStock.roa > 5 ? 'up' : 'neutral'}
-          />
-          <StatCard 
-            label="Return on Capital" 
-            value={extendedStock.returnOnCapital ? `${(extendedStock.returnOnCapital * 100).toFixed(2)}%` : 'N/A'}
-            trend={extendedStock.returnOnCapital && extendedStock.returnOnCapital > 0.1 ? 'up' : 'neutral'}
-          />
-          <StatCard 
-            label="Dividend Yield" 
-            value={extendedStock.dividendYield ? `${extendedStock.dividendYield.toFixed(2)}%` : 'N/A'}
-            trend={extendedStock.dividendYield && extendedStock.dividendYield > 3 ? 'up' : 'neutral'}
-          />
+          <StatCard label="Return on Equity" value={extendedStock.roe ? `${extendedStock.roe.toFixed(2)}%` : 'N/A'} trend={extendedStock.roe && extendedStock.roe > 15 ? 'up' : 'neutral'} />
+          <StatCard label="Return on Assets" value={extendedStock.roa ? `${extendedStock.roa.toFixed(2)}%` : 'N/A'} trend={extendedStock.roa && extendedStock.roa > 5 ? 'up' : 'neutral'} />
+          <StatCard label="Return on Capital" value={extendedStock.returnOnCapital ? `${(extendedStock.returnOnCapital * 100).toFixed(2)}%` : 'N/A'} trend={extendedStock.returnOnCapital && extendedStock.returnOnCapital > 0.1 ? 'up' : 'neutral'} />
+          <StatCard label="Dividend Yield" value={extendedStock.dividendYield ? `${extendedStock.dividendYield.toFixed(2)}%` : 'N/A'} trend={extendedStock.dividendYield && extendedStock.dividendYield > 3 ? 'up' : 'neutral'} />
         </div>
       </SectionCard>
 
-      {/* Dividend Information Section */}
-      <DividendSection symbol={symbol} />
-
-      {/* Earnings Section */}
       {yahooData?.earnings && (yahooData.earnings.earningsHistory.length > 0 || yahooData.earnings.earningsTrend.length > 0) && (
         <SectionCard title="Earnings" icon={FileText} iconColor="text-indigo-600">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -983,7 +995,6 @@ export default function StockDetailPage() {
                 </div>
               </div>
             )}
-            
             {yahooData.earnings.earningsTrend.length > 0 && (
               <div>
                 <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Earnings Estimates</h3>
@@ -1017,28 +1028,14 @@ export default function StockDetailPage() {
         </SectionCard>
       )}
 
-      {/* Institutional Holdings Section */}
       {yahooData?.institutionalHoldings && yahooData.institutionalHoldings.topHolders.length > 0 && (
         <SectionCard title="Institutional Holdings" icon={Briefcase} iconColor="text-teal-600">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <StatCard 
-              label="Institutions Held" 
-              value={formatYahooPercent(yahooData.institutionalHoldings.institutionPercentHeld)} 
-            />
-            <StatCard 
-              label="Insiders Held" 
-              value={formatYahooPercent(yahooData.institutionalHoldings.insidersPercentHeld)} 
-            />
-            <StatCard 
-              label="# of Institutions" 
-              value={yahooData.institutionalHoldings.institutionsCount || 0} 
-            />
-            <StatCard 
-              label="Float Held" 
-              value={formatYahooPercent(yahooData.institutionalHoldings.institutionsFloatPercentHeld)} 
-            />
+            <StatCard label="Institutions Held" value={formatYahooPercent(yahooData.institutionalHoldings.institutionPercentHeld)} />
+            <StatCard label="Insiders Held" value={formatYahooPercent(yahooData.institutionalHoldings.insidersPercentHeld)} />
+            <StatCard label="# of Institutions" value={yahooData.institutionalHoldings.institutionsCount || 0} />
+            <StatCard label="Float Held" value={formatYahooPercent(yahooData.institutionalHoldings.institutionsFloatPercentHeld)} />
           </div>
-          
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Top Institutional Holders</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -1065,60 +1062,23 @@ export default function StockDetailPage() {
         </SectionCard>
       )}
 
-      {/* Comprehensive Financial Ratios */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Valuation Ratios */}
-        <SectionCard title="Valuation Metrics" icon={Scale} iconColor="text-orange-600">
-          <div className="grid grid-cols-2 gap-4">
-            <StatCard label="P/E Ratio (TTM)" value={extendedStock.pe?.toFixed(2) || yahooData?.financialRatios?.trailingPE?.toFixed(2) || 'N/A'} icon={Percent} />
-            <StatCard label="Forward P/E" value={yahooData?.financialRatios?.forwardPE?.toFixed(2) || 'N/A'} />
-            <StatCard label="PEG Ratio" value={yahooData?.financialRatios?.pegRatio?.toFixed(2) || 'N/A'} />
-            <StatCard label="Price/Book" value={extendedStock.priceToBook?.toFixed(2) || yahooData?.financialRatios?.priceToBook?.toFixed(2) || 'N/A'} />
-            <StatCard label="Price/Sales" value={extendedStock.priceToSales?.toFixed(2) || yahooData?.financialRatios?.priceToSales?.toFixed(2) || 'N/A'} />
-            <StatCard label="EV/Revenue" value={yahooData?.financialRatios?.enterpriseToRevenue?.toFixed(2) || 'N/A'} />
-            <StatCard label="EV/EBITDA" value={yahooData?.financialRatios?.enterpriseToEbitda?.toFixed(2) || 'N/A'} />
-            <StatCard label="Book Value" value={yahooData?.financialRatios?.bookValue ? formatCurrency(yahooData.financialRatios.bookValue) : 'N/A'} />
-          </div>
-        </SectionCard>
-
-        {/* Profitability */}
-        <SectionCard title="Profitability & Margins" icon={Wallet} iconColor="text-green-600">
-          <div className="grid grid-cols-2 gap-4">
-            <StatCard label="EPS (TTM)" value={extendedStock.eps ? formatCurrency(extendedStock.eps) : 'N/A'} icon={DollarSign} />
-            <StatCard label="EPS Diluted" value={extendedStock.epsDiluted ? formatCurrency(extendedStock.epsDiluted) : 'N/A'} />
-            <StatCard 
-              label="Profit Margin" 
-              value={formatYahooPercent(yahooData?.financialRatios?.profitMargins)} 
-              trend={yahooData?.financialRatios?.profitMargins && yahooData.financialRatios.profitMargins > 0 ? 'up' : 'neutral'}
-            />
-            <StatCard 
-              label="Gross Margin" 
-              value={formatYahooPercent(yahooData?.financialRatios?.grossMargins)} 
-            />
-            <StatCard 
-              label="Operating Margin" 
-              value={formatYahooPercent(yahooData?.financialRatios?.operatingMargins)} 
-            />
-            <StatCard 
-              label="ROE" 
-              value={extendedStock.roe ? `${extendedStock.roe.toFixed(2)}%` : formatYahooPercent(yahooData?.financialRatios?.returnOnEquity)} 
-              trend={extendedStock.roe && extendedStock.roe > 0 ? 'up' : 'neutral'}
-            />
-            <StatCard 
-              label="ROA" 
-              value={extendedStock.roa ? `${extendedStock.roa.toFixed(2)}%` : formatYahooPercent(yahooData?.financialRatios?.returnOnAssets)} 
-              trend={extendedStock.roa && extendedStock.roa > 0 ? 'up' : 'neutral'}
-            />
-            <StatCard 
-              label="Revenue Growth" 
-              value={formatYahooPercent(yahooData?.financialRatios?.revenueGrowth)} 
-              trend={yahooData?.financialRatios?.revenueGrowth && yahooData.financialRatios.revenueGrowth > 0 ? 'up' : 'down'}
-            />
-          </div>
-        </SectionCard>
+      <div className="mb-6">
+        <Suspense fallback={<WidgetSkeleton title="Financial Data" height={600} />}>
+          <TradingViewFinancials symbol={stock.symbol} height={600} />
+        </Suspense>
       </div>
 
-      {/* Dividends Section */}
+      <div className="mb-6">
+        <Suspense fallback={<WidgetSkeleton title="Company Financials" height={400} />}>
+          <AfricanFinancialsData symbol={stock.symbol} companyName={stock.name} />
+        </Suspense>
+      </div>
+        </>
+      )}
+
+      {/* ============ DIVIDENDS TAB ============ */}
+      {activeTab === 'dividends' && (
+        <>
       <SectionCard title="Dividends & Shareholder Returns" icon={DollarSign} iconColor="text-green-600">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard label="Dividend" value={extendedStock.dividend ? formatCurrency(extendedStock.dividend) : 'N/A'} />
@@ -1128,78 +1088,15 @@ export default function StockDetailPage() {
         </div>
       </SectionCard>
 
-      {/* Financials */}
-      <SectionCard title="Financial Statements" icon={BarChart2} iconColor="text-indigo-600">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard label="Revenue" value={extendedStock.revenue ? formatLargeNumber(extendedStock.revenue) : 'N/A'} />
-          <StatCard label="Gross Profit" value={extendedStock.grossProfit ? formatLargeNumber(extendedStock.grossProfit) : 'N/A'} />
-          <StatCard label="Net Income" value={extendedStock.netIncome ? formatLargeNumber(extendedStock.netIncome) : 'N/A'} />
-          <StatCard label="EBITDA" value={extendedStock.ebitda ? formatLargeNumber(extendedStock.ebitda) : 'N/A'} />
-          <StatCard label="Free Cash Flow" value={yahooData?.financialRatios?.freeCashflow ? formatYahooLargeNumber(yahooData.financialRatios.freeCashflow) : 'N/A'} />
-          <StatCard label="Operating Cash Flow" value={yahooData?.financialRatios?.operatingCashflow ? formatYahooLargeNumber(yahooData.financialRatios.operatingCashflow) : 'N/A'} />
-          <StatCard label="Revenue/Share" value={yahooData?.financialRatios?.revenuePerShare ? formatCurrency(yahooData.financialRatios.revenuePerShare) : 'N/A'} />
-          <StatCard label="Cash/Share" value={yahooData?.financialRatios?.totalCashPerShare ? formatCurrency(yahooData.financialRatios.totalCashPerShare) : 'N/A'} />
-        </div>
-      </SectionCard>
+      <DividendSection symbol={symbol} />
 
-      {/* TradingView Financials Widget */}
-      <div className="mb-6">
-        <Suspense fallback={<WidgetSkeleton title="Financial Data" height={600} />}>
-          <TradingViewFinancials symbol={stock.symbol} height={600} />
-        </Suspense>
-      </div>
-
-      {/* Company Financials - Dividends & Reports (consolidated - includes all documents) */}
       <div className="mb-6">
         <Suspense fallback={<WidgetSkeleton title="Company Financials" height={400} />}>
           <AfricanFinancialsData symbol={stock.symbol} companyName={stock.name} />
         </Suspense>
       </div>
-
-      {/* Balance Sheet */}
-      <SectionCard title="Balance Sheet & Liquidity" icon={Building2} iconColor="text-teal-600">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard label="Total Assets" value={extendedStock.totalAssets ? formatLargeNumber(extendedStock.totalAssets) : 'N/A'} />
-          <StatCard label="Total Debt" value={extendedStock.totalDebt ? formatLargeNumber(extendedStock.totalDebt) : 'N/A'} />
-          <StatCard label="Total Cash" value={extendedStock.totalCash ? formatLargeNumber(extendedStock.totalCash) : 'N/A'} />
-          <StatCard label="Enterprise Value" value={yahooData?.keyStats?.enterpriseValue ? formatYahooLargeNumber(yahooData.keyStats.enterpriseValue) : 'N/A'} />
-          <StatCard label="Debt/Equity" value={extendedStock.debtToEquity?.toFixed(2) || yahooData?.financialRatios?.debtToEquity?.toFixed(2) || 'N/A'} />
-          <StatCard label="Current Ratio" value={extendedStock.currentRatio?.toFixed(2) || yahooData?.financialRatios?.currentRatio?.toFixed(2) || 'N/A'} />
-          <StatCard label="Quick Ratio" value={extendedStock.quickRatio?.toFixed(2) || yahooData?.financialRatios?.quickRatio?.toFixed(2) || 'N/A'} />
-          <StatCard label="Float Shares" value={extendedStock.floatShares ? formatLargeNumber(extendedStock.floatShares) : yahooData?.keyStats?.floatShares ? formatYahooLargeNumber(yahooData.keyStats.floatShares) : 'N/A'} />
-        </div>
-      </SectionCard>
-
-      {/* Volume Analysis */}
-      <SectionCard title="Volume Analysis" icon={BarChart3} iconColor="text-cyan-600">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <StatCard label="Today's Volume" value={formatVolume(stock.volume)} />
-          <StatCard label="Avg Vol (10d)" value={formatVolume(extendedStock.avgVolume10d || yahooData?.keyStats?.averageVolume10days || 0)} />
-          <StatCard label="Avg Vol (30d)" value={formatVolume(extendedStock.avgVolume30d || 0)} />
-          <StatCard label="Avg Vol (90d)" value={formatVolume(extendedStock.avgVolume90d || yahooData?.keyStats?.averageVolume || 0)} />
-          <StatCard 
-            label="Relative Volume" 
-            value={extendedStock.relativeVolume?.toFixed(2) || 'N/A'} 
-            subValue={extendedStock.relativeVolume && extendedStock.relativeVolume > 1 ? 'Above average' : 'Below average'}
-            trend={extendedStock.relativeVolume && extendedStock.relativeVolume > 1 ? 'up' : 'down'}
-          />
-        </div>
-      </SectionCard>
-
-      {/* Key Statistics */}
-      <SectionCard title="Key Statistics" icon={Info} iconColor="text-gray-600">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard label="Market Cap" value={extendedStock.marketCap ? formatLargeNumber(extendedStock.marketCap) : yahooData?.keyStats?.marketCap ? formatYahooLargeNumber(yahooData.keyStats.marketCap) : 'N/A'} />
-          <StatCard label="Shares Outstanding" value={extendedStock.sharesOutstanding ? formatLargeNumber(extendedStock.sharesOutstanding) : yahooData?.keyStats?.sharesOutstanding ? formatYahooLargeNumber(yahooData.keyStats.sharesOutstanding) : 'N/A'} icon={Users} />
-          <StatCard label="50-Day Average" value={yahooData?.keyStats?.fiftyDayAverage ? formatCurrency(yahooData.keyStats.fiftyDayAverage) : 'N/A'} />
-          <StatCard label="200-Day Average" value={yahooData?.keyStats?.twoHundredDayAverage ? formatCurrency(yahooData.keyStats.twoHundredDayAverage) : 'N/A'} />
-          <StatCard label="52-Week High" value={extendedStock.high52Week ? formatCurrency(extendedStock.high52Week) : yahooData?.keyStats?.fiftyTwoWeekHigh ? formatCurrency(yahooData.keyStats.fiftyTwoWeekHigh) : 'N/A'} />
-          <StatCard label="52-Week Low" value={extendedStock.low52Week ? formatCurrency(extendedStock.low52Week) : yahooData?.keyStats?.fiftyTwoWeekLow ? formatCurrency(yahooData.keyStats.fiftyTwoWeekLow) : 'N/A'} />
-          {yahooData?.keyStats?.lastSplitDate && (
-            <StatCard label="Last Split" value={yahooData.keyStats.lastSplitDate} subValue={yahooData.keyStats.lastSplitFactor || ''} />
-          )}
-        </div>
-      </SectionCard>
+        </>
+      )}
 
       {/* Data Refresh Status */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6">

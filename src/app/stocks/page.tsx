@@ -2,8 +2,10 @@
 
 import { useState, useMemo, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Search, Filter, ArrowUpDown, RefreshCw, Wifi, TrendingUp, Clock, WifiOff } from 'lucide-react';
+import Link from 'next/link';
+import { Search, Filter, ArrowUpDown, RefreshCw, Wifi, TrendingUp, Clock, WifiOff, GitCompare } from 'lucide-react';
 import StockTable from '@/components/StockTable';
+import StockScreener from '@/components/StockScreener';
 import AuthGuard from '@/components/AuthGuard';
 import PremiumGate from '@/components/PremiumGate';
 import { nigerianStocks, getAllSectors } from '@/lib/stockData';
@@ -21,6 +23,7 @@ function StocksContent() {
   const initialSort = (searchParams.get('sort') as SortOption) || 'name';
   const { limits, isPremium } = useSubscription();
 
+  const [viewMode, setViewMode] = useState<'table' | 'screener'>('table');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSector, setSelectedSector] = useState('all');
   const [sortBy, setSortBy] = useState<SortOption>(initialSort);
@@ -169,17 +172,45 @@ function StocksContent() {
               </div>
             )}
           </div>
-          <button
-            onClick={fetchLiveStocks}
-            disabled={isLoading}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
-          >
-            <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
-            <span>Refresh</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <div className="flex bg-gray-100 dark:bg-slate-700 rounded-lg p-0.5">
+              <button
+                onClick={() => setViewMode('table')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  viewMode === 'table'
+                    ? 'bg-white dark:bg-slate-600 text-gray-900 dark:text-white shadow-sm'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'
+                }`}
+              >
+                Table
+              </button>
+              <button
+                onClick={() => setViewMode('screener')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  viewMode === 'screener'
+                    ? 'bg-white dark:bg-slate-600 text-gray-900 dark:text-white shadow-sm'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'
+                }`}
+              >
+                Screener
+              </button>
+            </div>
+            <button
+              onClick={fetchLiveStocks}
+              disabled={isLoading}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+            >
+              <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
+              <span>Refresh</span>
+            </button>
+          </div>
         </div>
       </div>
 
+      {viewMode === 'screener' ? (
+        <StockScreener stocks={stocks as Stock[]} />
+      ) : (
+        <>
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 p-4 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
@@ -275,6 +306,8 @@ function StocksContent() {
           />
         </div>
       )}
+        </>
+      )}
     </>
   );
 }
@@ -291,7 +324,16 @@ export default function StocksPage() {
                 <TrendingUp size={16} />
                 <span>NGX Listed Stocks</span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">All Stocks</h1>
+              <div className="flex items-center justify-between">
+                <h1 className="text-3xl md:text-4xl font-bold mb-2">All Stocks</h1>
+                <Link
+                  href="/stocks/compare"
+                  className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl text-sm font-medium transition-colors"
+                >
+                  <GitCompare size={16} />
+                  Compare Stocks
+                </Link>
+              </div>
               <p className="text-green-100 dark:text-slate-300 text-lg">
                 Browse and filter all 145+ stocks listed on the Nigerian Stock Exchange with live prices
               </p>

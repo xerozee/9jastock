@@ -423,6 +423,16 @@ const referralStatsSchema = new mongoose.Schema({
 referralStatsSchema.index({ tier: 1 });
 referralStatsSchema.index({ totalReferrals: -1 });
 
+const watchlistSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+  symbols: [{ type: String }],
+  updatedAt: { type: Date, default: Date.now },
+});
+
+watchlistSchema.index({ userId: 1 }, { unique: true });
+
+export const Watchlist = mongoose.models.Watchlist || mongoose.model('Watchlist', watchlistSchema);
+
 export const Referral = mongoose.models.Referral || mongoose.model('Referral', referralSchema);
 export const ReferralReward = mongoose.models.ReferralReward || mongoose.model('ReferralReward', referralRewardSchema);
 export const ReferralStats = mongoose.models.ReferralStats || mongoose.model('ReferralStats', referralStatsSchema);
